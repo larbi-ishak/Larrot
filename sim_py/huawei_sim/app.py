@@ -7,7 +7,7 @@ from .core.state import SimState
 from .core.envelopes import apigw_error
 from .persistence import save_state, load_state
 from .middleware import gateway_middleware
-from .services import iam, ecs, evs, vpc, ims, cbr, obs, rds
+from .services import iam, ecs, evs, vpc, ims, cbr, obs, rds, dns, kms
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("huawei_sim")
@@ -33,6 +33,8 @@ def create_app() -> FastAPI:
     app.include_router(ims.router)
     app.include_router(cbr.router)
     app.include_router(rds.router)
+    app.include_router(dns.router)
+    app.include_router(kms.router)
 
     # Middleware (outermost first: rate limit → signature → logging)
     app.middleware("http")(gateway_middleware)
@@ -55,7 +57,7 @@ def create_app() -> FastAPI:
     @app.get("/health", include_in_schema=False)
     async def health():
         return {"status": "ok", "version": "1.0.0",
-                "services": ["iam", "ecs", "evs", "vpc", "eip", "ims", "cbr", "rds", "obs"]}
+                "services": ["iam", "ecs", "evs", "vpc", "eip", "ims", "cbr", "rds", "dns", "kms", "obs"]}
 
     # Metrics
     @app.get("/metrics", include_in_schema=False)
