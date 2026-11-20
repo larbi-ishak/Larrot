@@ -1,4 +1,4 @@
-"""BSS — Billing Service: orders, resources, balances."""
+"""BSS: Billing Service: orders, resources, balances."""
 from fastapi import APIRouter, Request
 from ..core.jobs import new_id, now_millis
 router = APIRouter()

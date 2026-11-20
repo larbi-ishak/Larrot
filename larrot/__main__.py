@@ -1,4 +1,4 @@
-"""Entry point — starts both REST (8200) and OBS (8201) servers."""
+"""Entry point: starts both REST (8200) and OBS (8201) servers."""
 
 import os
 import sys

@@ -1,4 +1,4 @@
-"""Infrastructure tests — OBS, persistence, signed requests, concurrency, admin."""
+"""Infrastructure tests: OBS, persistence, signed requests, concurrency, admin."""
 import logging
 import threading
 
@@ -25,7 +25,7 @@ def obs():
 
 
 # ---------------------------------------------------------------------------
-# OBS — S3-compatible API (separate app, like the real cloud's port 8201)
+# OBS: S3-compatible API (separate app, like the real cloud's port 8201)
 # ---------------------------------------------------------------------------
 
 class TestObsBuckets:
@@ -204,7 +204,7 @@ class TestPersistence:
 
         assert c1.post("/admin/save").status_code == 200
 
-        # Fresh app instance — state is empty until loaded
+        # Fresh app instance: state is empty until loaded
         c2 = TestClient(create_app())
         assert c2.get(f"/v1/{PID}/cloudservers/{sid}").status_code == 404
 

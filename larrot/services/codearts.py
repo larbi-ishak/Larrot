@@ -1,4 +1,4 @@
-"""CodeArts — code repositories (CodeHub), pipelines, build tasks.
+"""CodeArts: code repositories (CodeHub), pipelines, build tasks.
 
 Real routes: POST /v2/projects/repositories (repos), POST /v2/{project_id}/pipelines
 (pipelines). Build jobs use a simplified /v2/{pid}/builds.
@@ -97,7 +97,7 @@ async def list_pipelines(request: Request, pid: str):
 
 @router.post("/v2/{pid}/pipelines/{pipeline_id}/run")
 async def run_pipeline(request: Request, pid: str, pipeline_id: str):
-    """Run a pipeline — goes RUNNING → SUCCESS via the async job engine."""
+    """Run a pipeline: goes RUNNING → SUCCESS via the async job engine."""
     s = request.app.state.sim
     p = getattr(s, "codearts_pipelines", {}).get(pipeline_id)
     if not p or p["project_id"] != pid:

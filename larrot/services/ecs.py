@@ -1,4 +1,4 @@
-"""ECS — cloud server lifecycle, attach/detach, state guards, jobs."""
+"""ECS: cloud server lifecycle, attach/detach, state guards, jobs."""
 
 import asyncio
 from fastapi import APIRouter, Request, Response
@@ -26,7 +26,7 @@ def _status_matches(filter, status):
 
 
 def _server_list_json(state, pid, server):
-    """Serialize for LIST views — hcs profile removes flavor + AZ (sparse)."""
+    """Serialize for LIST views: hcs profile removes flavor + AZ (sparse)."""
     import json
     v = dict(server)
     if state.profile_of(pid) == Profile.HCS:
@@ -108,7 +108,7 @@ def _build_server(state, pid, spec, suffix=None):
 
 
 def resolve_device(server, volume_bootable, requested):
-    """The Ecs.0005 rules — pure function (EMPIRICAL_SPEC §2.6)."""
+    """The Ecs.0005 rules: pure function (EMPIRICAL_SPEC §2.6)."""
     used = [v["device"] for v in server["os-extended-volumes:volumes_attached"]]
     if requested:
         if requested.startswith("/dev/sd"):
@@ -441,7 +441,7 @@ async def nova_list_detail(request: Request, pid: str):
 
 
 # ---------------------------------------------------------------------------
-# attach / detach volume — the Ecs.0005 rules
+# attach / detach volume: the Ecs.0005 rules
 # ---------------------------------------------------------------------------
 
 @router.post("/v1/{pid}/cloudservers/{server_id}/attachvolume")

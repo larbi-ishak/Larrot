@@ -1,4 +1,4 @@
-"""CES — Cloud Eye Service: metrics, alarms."""
+"""CES: Cloud Eye Service: metrics, alarms."""
 from fastapi import APIRouter, Request, Response
 from ..core.jobs import new_id, now_millis
 router = APIRouter()

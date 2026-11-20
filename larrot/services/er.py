@@ -1,4 +1,4 @@
-"""ER (Enterprise Router) — hub-and-spoke VPC routing.
+"""ER (Enterprise Router): hub-and-spoke VPC routing.
 
 Real routes: POST /v3/{project_id}/enterprise-router/instances, and
 /v3/{project_id}/enterprise-router/instances/{er_id}/attachments (vpc attachments).

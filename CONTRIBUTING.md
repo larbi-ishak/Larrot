@@ -35,7 +35,7 @@ larrot/
    from .services import <name>
    app.include_router(<name>.router)
    ```
-3. Add endpoints — use the existing services as patterns
+3. Add endpoints: use the existing services as patterns
 4. Add tests to `tools/smoke.py`
 5. Run the smoke suite: `python3 tools/smoke.py`
 
@@ -48,7 +48,7 @@ larrot/
 
 ## Error envelopes
 
-Each service family has its own error body shape — this is intentional:
+Each service family has its own error body shape: this is intentional:
 
 | Service | Shape |
 |---|---|
@@ -58,7 +58,7 @@ Each service family has its own error body shape — this is intentional:
 | APIGW | `{"error_msg", "error_code", "request_id"}` (flat) |
 | OBS | XML `<Error><Code>…` |
 
-Use the helpers in `core/envelopes.py` — never hand-roll an error body.
+Use the helpers in `core/envelopes.py`: never hand-roll an error body.
 
 ## Testing
 

@@ -1,4 +1,4 @@
-"""DataArts Studio — connections, jobs, scripts (data governance + ETL).
+"""DataArts Studio: connections, jobs, scripts (data governance + ETL).
 
 Real routes: /v2/{project_id}/connections (factory connections), jobs, scripts.
 """
@@ -97,7 +97,7 @@ async def list_jobs(request: Request, pid: str):
 
 @router.post("/v2/{pid}/jobs/{job_name}/run")
 async def run_job(request: Request, pid: str, job_name: str):
-    """Start a job — goes RUNNING → SUCCEEDED via the async job engine."""
+    """Start a job: goes RUNNING → SUCCEEDED via the async job engine."""
     s = request.app.state.sim
     job = next((j for j in getattr(s, "dataarts_jobs", {}).values()
                 if j["name"] == job_name and j["project_id"] == pid), None)

@@ -1,4 +1,4 @@
-# Larrot 🦜 — Architecture & Code Guide
+# Larrot 🦜: Architecture & Code Guide
 
 (Formerly known as `huawei-sim`.)
 
@@ -11,11 +11,11 @@ this way), `DEVLOG.md` (the build journal).
 
 ## 1. What this is
 
-A **local, API-level simulator of Huawei Cloud** — a set of HTTP services that
+A **local, API-level simulator of Huawei Cloud**: a set of HTTP services that
 reproduce the REST APIs of the international site for **IAM, ECS, EVS, VPC/EIP,
 IMS, OBS, and the async Jobs model**, written in Rust (axum + tokio).
 
-The defining design property: it is **not a mock**. It is a stateful simulator —
+The defining design property: it is **not a mock**. It is a stateful simulator:
 every resource is a row plus a lifecycle state machine in one shared in-memory
 store, and every API mutates or reads that same store. That is what makes the
 cross-API correlations real: creating a server allocates a port/IP and a root
@@ -24,8 +24,8 @@ complete before a server leaves `BUILD`; stopping a stopped server is rejected
 with the real error code.
 
 Fidelity targets, in priority order:
-1. `EMPIRICAL_SPEC.md` — observed real-cloud behavior wins everywhere.
-2. `API_DOCS_RESEARCH.md` — documented shapes where we have no observation.
+1. `EMPIRICAL_SPEC.md`: observed real-cloud behavior wins everywhere.
+2. `API_DOCS_RESEARCH.md`: documented shapes where we have no observation.
 3. Anything unobserved and undocumented is a flagged placeholder (see `DECISIONS.md`).
 
 ## 2. The big picture
@@ -56,9 +56,9 @@ Fidelity targets, in priority order:
 ```
 
 Two listeners, one process (`crates/gateway/src/main.rs`):
-- **`:8200` REST services** — everything except OBS. One port so clients need a
+- **`:8200` REST services**: everything except OBS. One port so clients need a
   single `Region` override.
-- **`:8201` OBS** — a separate endpoint, exactly like the real cloud (OBS lives on
+- **`:8201` OBS**: a separate endpoint, exactly like the real cloud (OBS lives on
   `obs.<region>.myhuaweicloud.com`, not the service endpoints). It also avoids
   route conflicts: OBS's path space (`/bucket/key`) would swallow REST paths.
 
@@ -67,25 +67,25 @@ Two listeners, one process (`crates/gateway/src/main.rs`):
 Implemented in `gateway_mw` (`crates/gateway/src/main.rs`), applied as a layer over
 the merged routers:
 
-1. **Rate limit** (`common/src/ratelimit.rs`) — a per-AK sliding window. When an
+1. **Rate limit** (`common/src/ratelimit.rs`): a per-AK sliding window. When an
    AK exceeds `SIM_RATE_LIMIT` requests / 10s it is blocked for the cooldown
    (default 30s) and every request in that window gets the flat
-   `APIGW.0301` 401 body with the observed message — or `APIGW.0308`/429 in the
+   `APIGW.0301` 401 body with the observed message: or `APIGW.0308`/429 in the
    alternative mode. This is the outermost layer because the API Gateway is the
    outermost layer in the real cloud.
-2. **Signature verification** (`common/src/signing.rs`) — recomputes the
+2. **Signature verification** (`common/src/signing.rs`): recomputes the
    SDK-HMAC-SHA256 signature from the actual request (method, canonical URI with
    the signing trailing-slash, sorted RFC-3986 query, canonical headers, payload
-   hash) and compares. **Accept-and-check**: the result is logged, never enforced —
+   hash) and compares. **Accept-and-check**: the result is logged, never enforced:
    the sim's job is client compatibility, not security. This caught three real
    bugs during development.
-3. **Logging** — method/URI/verdict + `X-Project-Id`.
-4. **Router dispatch** — per-service routers merged in `main.rs`; unknown paths
+3. **Logging**: method/URI/verdict + `X-Project-Id`.
+4. **Router dispatch**: per-service routers merged in `main.rs`; unknown paths
    hit the `APIGW.0101` fallback (`crates/gateway/src/lib.rs`).
 
 OBS has its own pipeline (`crates/obs/src/lib.rs`, `obs_normalize`): resolve the
-bucket from the Host header (virtual-host style) or the path (path-style — SDKs
-fall back to this for IP endpoints), then verify the **OBS v2 signature** — a
+bucket from the Host header (virtual-host style) or the path (path-style: SDKs
+fall back to this for IP endpoints), then verify the **OBS v2 signature**: a
 completely different algorithm (HMAC-SHA1, `VERB\nMD5\nType\nDate\nx-obs-*\nresource`),
 where `Date` goes empty when `x-obs-date` is present and list params
 (`prefix`/`max-keys`/`marker`) are **not** part of the canonical resource.
@@ -97,19 +97,19 @@ where `Date` goes empty when `x-obs-date` is present and list params
 
 | Store | Key | Contents |
 |---|---|---|
-| `servers` | server id | `Server` — full ECS object incl. `OS-EXT-STS:*`, `os-extended-volumes:*` |
-| `volumes` | volume id | `Volume` — Cinder-style (`bootable` is a **string**), sparse/detail serializers |
-| `snapshots` | snapshot id | `Snapshot` — custom + Cinder shapes |
-| `ports` | port id | `Port` — Neutron shape; created at server create (IP allocation) |
+| `servers` | server id | `Server`: full ECS object incl. `OS-EXT-STS:*`, `os-extended-volumes:*` |
+| `volumes` | volume id | `Volume`: Cinder-style (`bootable` is a **string**), sparse/detail serializers |
+| `snapshots` | snapshot id | `Snapshot`: custom + Cinder shapes |
+| `ports` | port id | `Port`: Neutron shape; created at server create (IP allocation) |
 | `vpcs` / `subnets` | id | seeded defaults per project + API-created |
-| `eips` | eip id | `Eip` — minimal (allocate) and full (GET/PUT) serializers |
+| `eips` | eip id | `Eip`: minimal (allocate) and full (GET/PUT) serializers |
 | `security_groups` | sg id | `SecurityGroup` with embedded rules (4 auto-created) |
-| `images` | image id | `Image` — Glance shape + lifecycle + `reset_agent` flag |
+| `images` | image id | `Image`: Glance shape + lifecycle + `reset_agent` flag |
 | `obs_buckets` / `obs_objects` / `obs_uploads` | name / `"{bucket}/{key}"` / upload id | OBS store |
 | `jobs` | `JobEngine` | async job table |
 | `limiter` | `RateLimiter` | per-AK throttle state |
 
-Every resource carries a hidden `project_id` (skipped in serialization) — that is
+Every resource carries a hidden `project_id` (skipped in serialization): that is
 what makes **project isolation** a real invariant: a server is invisible (404) from
 another project's `{pid}`.
 
@@ -125,18 +125,18 @@ another project's `{pid}`.
 
 ## 5. The async job engine
 
-`common/src/jobs.rs` — the mechanism behind "every mutating op returns `job_id`":
+`common/src/jobs.rs`: the mechanism behind "every mutating op returns `job_id`":
 
 - `submit(job_type, entities, effect)` inserts a `RUNNING` job and spawns a task
-  that sleeps a **jittered 1–3s**, then runs `effect(job_id)`.
+  that sleeps a **jittered 1-3s**, then runs `effect(job_id)`.
 - The **effect is an async closure** that mutates the shared state (servers flip to
   `ACTIVE`, volumes to `in-use`, …) and returns `Ok(())` or
-  `Err((error_code, fail_reason))` — which is how failed jobs surface exactly like
+  `Err((error_code, fail_reason))`: which is how failed jobs surface exactly like
   the real ShowJob `FAIL` rows.
 - The effect receives its own job id so it can patch `entities` (e.g. flip
   sub-jobs to `SUCCESS` when the parent completes).
 - `GET /v1/{pid}/jobs/{job_id}` (ECS) and `GET /v1/cloudimages/job/{job_id}` (IMS)
-  read the same table — one engine, per-service flavors.
+  read the same table: one engine, per-service flavors.
 
 Because effects mutate the same `Arc<DashMap>`s the API reads, **polling clients
 observe real intermediate states**: a server is `BUILD` while its job runs, a
@@ -144,7 +144,7 @@ volume is `attaching` mid-attach.
 
 ## 6. Quirk profiles
 
-`common/src/profile.rs` — an enum `Public | Hcs`, resolved **per region**
+`common/src/profile.rs`: an enum `Public | Hcs`, resolved **per region**
 (`SimState::profile_of(pid)`): the seed assigns tr-west-1 → `hcs` and
 ap-southeast-1 → `public`; `--profile`/`SIM_PROFILE` only sets the default for
 regions without an explicit assignment. This mirrors the spec's core finding:
@@ -158,7 +158,7 @@ Handlers query the profile at the point of behavior, e.g.:
 - flavors v1: served vs **404**
 - whole-image creation: allowed vs **requires STOPPED**
 
-## 7. Error envelopes — per service, not global
+## 7. Error envelopes: per service, not global
 
 Huawei Cloud does not use one error shape. `common/src/envelope.rs` builds each
 family, and the integration tests pin them:
@@ -194,7 +194,7 @@ sim/crates/
 │                  • create (v1.1 postpaid / v1 prepaid, dry_run, count naming -0000)
 │                  • delete (delete_volume × delete_on_termination interaction)
 │                  • batch os-stop/os-start/reboot with STATE GUARDS (D13)
-│                  • attach/detach volume — resolve_device() holds the Ecs.0005
+│                  • attach/detach volume: resolve_device() holds the Ecs.0005
 │                    rules (vda requires bootable, sd→vd conversion, collisions,
 │                    auto-assign) as a pure, unit-tested function
 │                  • block_device / os-volume_attachments listings (exact doc shapes)
@@ -219,13 +219,13 @@ sim/crates/
 ```
 
 Supporting code outside the crates:
-- `sim/tools/smoke.py` — the 119-check harness. It **signs requests itself**
+- `sim/tools/smoke.py`: the 119-check harness. It **signs requests itself**
   (both SDK-HMAC-SHA256 and OBS v2) and walks every flow, including all the
   quirk reproductions. `--rate` runs the throttle test against a low-limit server.
-- `sim/replay/` — Phase-7 replays using the **official `@huaweicloud` npm SDKs**
+- `sim/replay/`: Phase-7 replays using the **official `@huaweicloud` npm SDKs**
   (inventory / lifecycle / provisioning), the closest thing to "the real scripts
   run unchanged".
-- `sim/run.sh`, `sim/Dockerfile`, `docker-compose.yml` — run/package.
+- `sim/run.sh`, `sim/Dockerfile`, `docker-compose.yml`: run/package.
 
 ## 9. Testing architecture
 
@@ -241,10 +241,10 @@ Four layers, each catching a different class of bug (they caught real ones):
 ## 10. Configuration & seed
 
 Environment variables (`SIM_PROFILE`, `SIM_PORT`/`SIM_OBS_PORT`, `SIM_AK`/`SIM_SK`,
-`SIM_RATE_LIMIT`, `SIM_RATE_COOLDOWN_MS`, `SIM_RATE_MODE`) — see `sim/README.md`.
+`SIM_RATE_LIMIT`, `SIM_RATE_COOLDOWN_MS`, `SIM_RATE_MODE`): see `sim/README.md`.
 The seed mimics the lab: account `sim-lab`, two projects (ap-southeast-1/public,
 tr-west-1/hcs) with default VPC/subnet, two images (one with, one without the
-reset-password agent — the Ecs.0100 switch), per-region flavors.
+reset-password agent: the Ecs.0100 switch), per-region flavors.
 
 ## 11. The invariant map (what correlates with what)
 

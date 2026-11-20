@@ -1,4 +1,4 @@
-"""Pagination and filter tests — offset/marker/limit combinations, list filtering."""
+"""Pagination and filter tests: offset/marker/limit combinations, list filtering."""
 import pytest
 from fastapi.testclient import TestClient
 from larrot.app import create_app
@@ -178,7 +178,7 @@ class TestCrossProjectIsolation:
         r = client.get(f"/v1/{PID}/cloudservers/detail?limit=100")
         assert any(s["id"] == sid for s in r.json()["servers"])
 
-        # Check in the other project — should NOT be there
+        # Check in the other project: should NOT be there
         r = client.get(f"/v1/{HCS_PID}/cloudservers/detail?limit=100")
         assert not any(s["id"] == sid for s in r.json()["servers"])
 

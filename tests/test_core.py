@@ -21,7 +21,7 @@ from larrot.core.state import SimState
 
 class TestSdkSigning:
     def test_roundtrip(self):
-        """Sign a request, then verify it — must round-trip."""
+        """Sign a request, then verify it: must round-trip."""
         sk = "test-sk"
         headers = sign_sdk_request("GET", "/v1/pid/vpcs", "limit=2",
                                     "example.com", b"", "TESTAK", sk)

@@ -1,4 +1,4 @@
-"""DSC (Data Security Center) — assets, scan tasks, risk items.
+"""DSC (Data Security Center): assets, scan tasks, risk items.
 
 Real route is GET /v1/{project_id}/assets on the DSC endpoint; namespaced here
 under /v1/{pid}/dsc/assets to avoid colliding with VOD's asset routes.
@@ -51,7 +51,7 @@ async def delete_asset(request: Request, pid: str, asset_id: str):
 
 @router.post("/v1/{pid}/dsc/scans")
 async def create_scan(request: Request, pid: str):
-    """Scan an asset for sensitive data — discovers seeded risk items."""
+    """Scan an asset for sensitive data: discovers seeded risk items."""
     s = request.app.state.sim
     if not hasattr(s, "dsc_risks"):
         s.dsc_risks = {}

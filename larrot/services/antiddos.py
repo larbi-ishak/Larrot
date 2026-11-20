@@ -1,4 +1,4 @@
-"""Anti-DDoS — protection policies and status."""
+"""Anti-DDoS: protection policies and status."""
 from fastapi import APIRouter, Request
 from ..core.jobs import new_id, now_millis
 router = APIRouter()

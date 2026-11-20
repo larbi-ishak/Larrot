@@ -1,4 +1,4 @@
-"""CDN — domains, origins, cache rules, purge/preheat, statistics.
+"""CDN: domains, origins, cache rules, purge/preheat, statistics.
 
 Real routes: POST /v1/domains, GET /v1/domains, DELETE /v1/domains/{domain_id},
 POST /v1.0/purgecache, POST /v1.0/preheating, GET /v1.0/historytasks.
@@ -92,7 +92,7 @@ async def delete_domain(request: Request, domain_id: str):
 
 @router.post("/v1.0/purgecache")
 async def purge_cache(request: Request):
-    """URL purge — returns a task id (real CDN: task completes async)."""
+    """URL purge: returns a task id (real CDN: task completes async)."""
     s = request.app.state.sim
     if not hasattr(s, "cdn_tasks"):
         s.cdn_tasks = {}
@@ -123,7 +123,7 @@ async def purge_cache(request: Request):
 
 @router.post("/v1.0/preheating")
 async def preheat(request: Request):
-    """URL preheat — pushes content to edge nodes."""
+    """URL preheat: pushes content to edge nodes."""
     s = request.app.state.sim
     if not hasattr(s, "cdn_tasks"):
         s.cdn_tasks = {}
@@ -167,7 +167,7 @@ async def list_history_tasks(request: Request):
 
 @router.get("/v1.0/statistics")
 async def cdn_statistics(request: Request):
-    """Domain statistics — bandwidth, traffic, requests (synthetic)."""
+    """Domain statistics: bandwidth, traffic, requests (synthetic)."""
     s = request.app.state.sim
     domains = list(getattr(s, "cdn_domains", {}).values())
     return {

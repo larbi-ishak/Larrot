@@ -1,4 +1,4 @@
-"""OMS (Object Storage Migration) — bulk migration tasks into OBS.
+"""OMS (Object Storage Migration): bulk migration tasks into OBS.
 
 Real route: POST /v2/{project_id}/tasks. Tasks go MIGRATING → SUCCESS via the
 async job engine, with a migrated-record count.

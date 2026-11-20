@@ -1,4 +1,4 @@
-"""DES (Data Express) — physical bulk data transfer (Teleport/disk).
+"""DES (Data Express): physical bulk data transfer (Teleport/disk).
 
 Real route: POST /v1/{project_id}/tasks on the DES endpoint; namespaced here
 under /v1/{pid}/des/tasks to avoid a collision with future bare /v1/{pid}/tasks.

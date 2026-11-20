@@ -1,7 +1,7 @@
 # SDK Integration Examples
 
 How to wire real Huawei Cloud SDKs against the simulator. The only change is the
-endpoint URL — everything else stays identical to production code.
+endpoint URL: everything else stays identical to production code.
 
 ## Python SDK
 
@@ -35,7 +35,7 @@ client = EcsClient.newBuilder() \
     .withEndpoint("http://127.0.0.1:8200") \
     .build()
 
-# List servers — identical to production code
+# List servers: identical to production code
 request = ListServersDetailsRequest().with_limit(10)
 response = client.list_servers_details(request)
 print(f"Found {response.count} servers")
@@ -149,7 +149,7 @@ try:
 except ClientRequestException as e:
     assert e.error_code == "Ecs.0005"
     assert e.error_msg == "device is illegal"
-    # This is the CORRECT behavior — the simulator matches production
+    # This is the CORRECT behavior: the simulator matches production
 
 # The workaround: create a BOOTABLE "carrier" volume from the gold image
 carrier_resp = evs_client.create_volume(CreateVolumeRequest().with_body(

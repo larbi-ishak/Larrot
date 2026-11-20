@@ -1,4 +1,4 @@
-"""CCE — Cloud Container Engine: clusters, nodes."""
+"""CCE: Cloud Container Engine: clusters, nodes."""
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse

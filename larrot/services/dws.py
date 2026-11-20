@@ -1,4 +1,4 @@
-"""DWS (GaussDB DWS) — data warehouse clusters, snapshots, resize.
+"""DWS (GaussDB DWS): data warehouse clusters, snapshots, resize.
 
 Real route: POST /v1.0/{project_id}/clusters on the DWS endpoint. Registered
 under BOTH /v1.0/{pid}/clusters and /v1.0/{pid}/dws/clusters (the real cloud

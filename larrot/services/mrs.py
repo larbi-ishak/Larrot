@@ -1,4 +1,4 @@
-"""MRS (MapReduce Service) — Hadoop/Spark/Hive clusters.
+"""MRS (MapReduce Service): Hadoop/Spark/Hive clusters.
 
 Real route: POST /v1.1/{project_id}/cluster_infos. Clusters go STARTING → RUNNING
 via the async job engine.
@@ -108,7 +108,7 @@ async def submit_job(request: Request, pid: str, cluster_id: str):
 
 @router.post("/v1.1/{pid}/cluster_infos/{cluster_id}/resize")
 async def scale_cluster(request: Request, pid: str, cluster_id: str):
-    """Scale core nodes (grow only — shrink is a separate real API)."""
+    """Scale core nodes (grow only: shrink is a separate real API)."""
     s = request.app.state.sim
     c = getattr(s, "mrs_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:

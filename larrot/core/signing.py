@@ -1,4 +1,4 @@
-"""SDK-HMAC-SHA256 and OBS v2 signing — verification (server) and signing (client).
+"""SDK-HMAC-SHA256 and OBS v2 signing: verification (server) and signing (client).
 
 Two signing universes (EMPIRICAL_SPEC §1.4):
 - REST services: SDK-HMAC-SHA256 (HMAC-SHA256, canonical request)
@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 ALGORITHM = "SDK-HMAC-SHA256"
 EMPTY_PAYLOAD_HASH = hashlib.sha256(b"").hexdigest()
 
-# OBS v2 signed sub-resources (API_DOCS_RESEARCH §1.2) — list params NOT included
+# OBS v2 signed sub-resources (API_DOCS_RESEARCH §1.2): list params NOT included
 OBS_SIGNED_SUBRESOURCES = {
     "acl", "delete", "lifecycle", "location", "logging", "notification",
     "partNumber", "policy", "requestPayment", "torrent", "uploadId", "uploads",
@@ -26,7 +26,7 @@ OBS_SIGNED_SUBRESOURCES = {
 
 @dataclass
 class SignatureCheck:
-    """Result of a signature verification (informational — accept-and-check)."""
+    """Result of a signature verification (informational: accept-and-check)."""
     ak: str = ""
     valid: bool = False
     reason: str = ""
@@ -34,7 +34,7 @@ class SignatureCheck:
 
 
 # ---------------------------------------------------------------------------
-# SDK-HMAC-SHA256 — server-side verification
+# SDK-HMAC-SHA256: server-side verification
 # ---------------------------------------------------------------------------
 
 def _canonical_uri(path: str) -> str:
@@ -133,14 +133,14 @@ def verify_sdk_hmac_sha256(
 
 
 # ---------------------------------------------------------------------------
-# SDK-HMAC-SHA256 — client-side signing (for hcli)
+# SDK-HMAC-SHA256: client-side signing (for hcli)
 # ---------------------------------------------------------------------------
 
 def sign_sdk_request(
     method: str, path: str, query: str | None,
     host: str, body: bytes, ak: str, sk: str,
 ) -> dict[str, str]:
-    """Sign a REST request — returns the headers to add."""
+    """Sign a REST request: returns the headers to add."""
     date = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     payload_hash = hashlib.sha256(body).hexdigest() if body else EMPTY_PAYLOAD_HASH
 
@@ -169,7 +169,7 @@ def sign_sdk_request(
 
 
 # ---------------------------------------------------------------------------
-# OBS v2 — server-side verification
+# OBS v2: server-side verification
 # ---------------------------------------------------------------------------
 
 def _obs_canonical_resource(bucket: str | None, path: str, query: str | None) -> str:
@@ -237,14 +237,14 @@ def verify_obs_v2(
 
 
 # ---------------------------------------------------------------------------
-# OBS v2 — client-side signing
+# OBS v2: client-side signing
 # ---------------------------------------------------------------------------
 
 def sign_obs_request(
     method: str, bucket: str, key: str, query: str | None,
     host: str, body: bytes, content_type: str, ak: str, sk: str,
 ) -> dict[str, str]:
-    """Sign an OBS request — returns the headers to add."""
+    """Sign an OBS request: returns the headers to add."""
     date = time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime())
 
     resource = f"/{bucket}" if bucket else "/"

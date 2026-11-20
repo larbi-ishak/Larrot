@@ -1,4 +1,4 @@
-"""CSS (Cloud Search Service) — Elasticsearch clusters and indices.
+"""CSS (Cloud Search Service): Elasticsearch clusters and indices.
 
 Real route is POST /v1.0/{project_id}/clusters on the CSS endpoint; this sim
 uses /v1.0/{pid}/css/clusters because single-port DWS owns the bare path.

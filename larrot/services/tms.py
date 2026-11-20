@@ -1,4 +1,4 @@
-"""TMS — Tag Management Service: resource tags."""
+"""TMS: Tag Management Service: resource tags."""
 from fastapi import APIRouter, Request
 from ..core.jobs import new_id, now_millis
 router = APIRouter()

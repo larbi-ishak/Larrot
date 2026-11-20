@@ -1,4 +1,4 @@
-"""ELB — Elastic Load Balance: listeners, pools, members, health monitors."""
+"""ELB: Elastic Load Balance: listeners, pools, members, health monitors."""
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse

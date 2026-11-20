@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""huawei-sim conformance suite — tests EVERY endpoint across ALL services.
+"""huawei-sim conformance suite: tests EVERY endpoint across ALL services.
 
 Validates:
   1. HTTP status codes against expectations
@@ -114,7 +114,7 @@ def run():
     # (which uses a live server). We test the state guard instead.
     r = client.post(f"/v1/{PID}/cloudservers/action",
                     json={"os-stop": {"type": "SOFT", "servers": [{"id": sid}]}})
-    # Either 200 (server was ACTIVE) or 400 (state guard — server still BUILDING)
+    # Either 200 (server was ACTIVE) or 400 (state guard: server still BUILDING)
     # Both are correct behavior; the state guard firing proves the guard works.
     if r.status_code == 400:
         record(S, "BatchStopServersStateGuard", "POST",

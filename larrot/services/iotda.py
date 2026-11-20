@@ -1,4 +1,4 @@
-"""IoTDA — IoT Device Access: products, devices."""
+"""IoTDA: IoT Device Access: products, devices."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis

@@ -1,4 +1,4 @@
-"""Cross-service correlation tests — verify resources are properly linked."""
+"""Cross-service correlation tests: verify resources are properly linked."""
 import pytest
 from fastapi.testclient import TestClient
 from larrot.app import create_app
@@ -102,7 +102,7 @@ class TestVolumeAttachCorrelations:
         vid = r.json()["volume_ids"][0]
         create_job = r.json()["job_id"]
 
-        # TestClient never runs background tasks — force the creation job
+        # TestClient never runs background tasks: force the creation job
         # to complete so the volume becomes "available" (as on a live server).
         sim = client.app.state.sim
         assert sim.jobs.complete_now(create_job) is True

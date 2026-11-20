@@ -1,4 +1,4 @@
-"""IEF (Intelligent EdgeFabric) — edge nodes, deployments, batches.
+"""IEF (Intelligent EdgeFabric): edge nodes, deployments, batches.
 
 Real routes: GET/POST /v2/{project_id}/edgemgr/nodes,
 POST /v2/{project_id}/edgemgr/deployments.

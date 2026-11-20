@@ -1,4 +1,4 @@
-"""larrot — the Larrot CLI. Table output by default, --json for raw, --wait for async."""
+"""larrot: the Larrot CLI. Table output by default, --json for raw, --wait for async."""
 
 import argparse
 import hashlib
@@ -70,7 +70,7 @@ class Client:
             job = self.get(f"/v1/{self.pid()}/jobs/{job_id}")
             if job["status"] in ("SUCCESS", "FAIL"):
                 if job["status"] == "FAIL":
-                    raise RuntimeError(f"Job FAILED: {job.get('error_code')} — {job.get('fail_reason')}")
+                    raise RuntimeError(f"Job FAILED: {job.get('error_code')}: {job.get('fail_reason')}")
                 return job
         raise RuntimeError(f"Job {job_id} timed out")
 
@@ -125,7 +125,7 @@ def table(headers, rows, title=""):
 
 def main():
     p = argparse.ArgumentParser(prog="larrot",
-                                description="Larrot — repeats Huawei Cloud. Perfectly.")
+                                description="Larrot: repeats Huawei Cloud. Perfectly.")
     p.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
     p.add_argument("--obs-endpoint", default=DEFAULT_OBS)
     p.add_argument("--ak", default=DEFAULT_AK)

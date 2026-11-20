@@ -1,4 +1,4 @@
-"""LTS — Log Tank Service: log groups, streams."""
+"""LTS: Log Tank Service: log groups, streams."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis

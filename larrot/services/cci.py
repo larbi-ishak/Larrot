@@ -1,4 +1,4 @@
-"""CCI (Cloud Container Instance) — serverless containers: namespaces, pods.
+"""CCI (Cloud Container Instance): serverless containers: namespaces, pods.
 
 The real CCI API is Kubernetes-style (/apis/...); this sim exposes a simplified
 REST surface under /v1/{pid}/cci/. Pods go Pending → Running via the async

@@ -4,7 +4,7 @@
 
 **Larrot repeats Huawei Cloud. Perfectly.**
 
-*A local Huawei Cloud API simulator — like LocalStack, but for Huawei Cloud.*
+*A local Huawei Cloud API simulator: like LocalStack, but for Huawei Cloud.*
 
 [![CI](https://github.com/larbi-ishak/Larrot/actions/workflows/ci.yml/badge.svg)](../../actions)
 
@@ -12,15 +12,15 @@
 
 ---
 
-Larrot is a parrot. Larrot listens to Huawei Cloud and repeats it — every endpoint,
+Larrot is a parrot. Larrot listens to Huawei Cloud and repeats it: every endpoint,
 every error envelope, every async job, every quirk we observed in production.
 *Yes, even `Ecs.0005 "device is illegal"`.*
 
 **Can your SDK tell the difference? That's the point.**
 
 It runs the REST APIs of Huawei Cloud's international site (`*.myhuaweicloud.com`)
-on your machine: 59 services — IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, OBS, CCE,
-ModelArts + MaaS, and 50 more — on ports 8200/8201.
+on your machine: 59 services: IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, OBS, CCE,
+ModelArts + MaaS, and 50 more: on ports 8200/8201.
 
 ## Quick start
 
@@ -72,11 +72,12 @@ client = EcsClient.newBuilder() \
     .build()
 ```
 
-Your existing scripts run **unchanged** — just change the endpoint.
+Your existing scripts run **unchanged**: just change the endpoint.
 
 ## Services
 
-**59 distinct Huawei Cloud services** across 71 router modules:
+**59 distinct Huawei Cloud services** across 71 router modules.
+Full catalog grouped by category: **[CATALOG.md](CATALOG.md)**
 
 | Service | Port | What it covers |
 |---|---|---|
@@ -106,13 +107,13 @@ Your existing scripts run **unchanged** — just change the endpoint.
 
 ## What makes it different from a mock
 
-- **State machines with preconditions** — can't stop a stopped server, can't snapshot an
+- **State machines with preconditions**: can't stop a stopped server, can't snapshot an
   in-use volume, can't detach a system disk
-- **Async job model** — every mutation returns `job_id`, completes after 1–3s, clients poll
-- **Per-region quirk profiles** — tr-west-1 (HCS) behaves differently from ap-southeast-1
-- **Exact error codes** — `Ecs.0005 "device is illegal"`, `APIGW.0301`, `SecurityGroupRuleExists`
-- **Rate limiting** — rapid calls → 401 `APIGW.0301`, 30s backoff clears it
-- **Signature verification** — recomputes SDK-HMAC-SHA256 and OBS v2 signatures (accept-and-check)
+- **Async job model**: every mutation returns `job_id`, completes after 1-3s, clients poll
+- **Per-region quirk profiles**: tr-west-1 (HCS) behaves differently from ap-southeast-1
+- **Exact error codes**: `Ecs.0005 "device is illegal"`, `APIGW.0301`, `SecurityGroupRuleExists`
+- **Rate limiting**: rapid calls → 401 `APIGW.0301`, 30s backoff clears it
+- **Signature verification**: recomputes SDK-HMAC-SHA256 and OBS v2 signatures (accept-and-check)
 
 ## Configuration
 
@@ -139,7 +140,7 @@ python3 -m pytest tests/      # unit tests
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE)
+Apache 2.0: see [LICENSE](LICENSE)
 
 ## Contributing
 

@@ -1,4 +1,4 @@
-"""FunctionGraph — serverless function management and invocation."""
+"""FunctionGraph: serverless function management and invocation."""
 
 import time
 from fastapi import APIRouter, Request, Response
@@ -77,7 +77,7 @@ async def delete_function(request: Request, pid: str, func_id: str):
 
 @router.post("/v2/{pid}/fg/functions/{func_id}/invocations")
 async def invoke_function(request: Request, pid: str, func_id: str):
-    """Invoke a function — simulates execution and returns a result."""
+    """Invoke a function: simulates execution and returns a result."""
     state = request.app.state.sim
     f = getattr(state, "fg_functions", {}).get(func_id)
     if not f or f["project_id"] != pid:

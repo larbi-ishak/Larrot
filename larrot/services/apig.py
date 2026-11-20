@@ -1,4 +1,4 @@
-"""APIG — API Gateway: custom APIs, groups."""
+"""APIG: API Gateway: custom APIs, groups."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis

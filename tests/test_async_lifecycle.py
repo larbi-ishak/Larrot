@@ -1,4 +1,4 @@
-"""Async lifecycle tests — verify job completion drives state transitions.
+"""Async lifecycle tests: verify job completion drives state transitions.
 
 Uses the JobEngine test hooks (complete_now / complete_all) to simulate the
 async job engine completing, as it would on a live server after 1-3s delay.

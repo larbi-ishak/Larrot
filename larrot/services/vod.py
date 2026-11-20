@@ -1,4 +1,4 @@
-"""VOD (Video on Demand) — media assets, transcode templates, categories.
+"""VOD (Video on Demand): media assets, transcode templates, categories.
 
 Real routes: POST /v1/{project_id}/assets (media assets),
 POST /v1/{project_id}/transcode-templates, POST /v1/{project_id}/categories.
@@ -65,7 +65,7 @@ async def show_asset(request: Request, pid: str, asset_id: str):
 
 @router.post("/v1/{pid}/assets/{asset_id}/upload")
 async def upload_asset(request: Request, pid: str, asset_id: str):
-    """Simulate uploading media — asset goes EMPTY → PUBLISHED via a job."""
+    """Simulate uploading media: asset goes EMPTY → PUBLISHED via a job."""
     s = request.app.state.sim
     a = getattr(s, "vod_assets", {}).get(asset_id)
     if not a or a["project_id"] != pid:

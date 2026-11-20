@@ -1,4 +1,4 @@
-"""AOM — Application Operations Management: apps, components, alarms."""
+"""AOM: Application Operations Management: apps, components, alarms."""
 from fastapi import APIRouter, Request
 from ..core.jobs import new_id, now_millis
 router = APIRouter()

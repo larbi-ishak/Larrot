@@ -1,4 +1,4 @@
-"""SMS (Server Migration Service) — source servers, migration tasks, templates.
+"""SMS (Server Migration Service): source servers, migration tasks, templates.
 
 Real routes: POST /v3/{project_id}/sources, POST /v3/{project_id}/tasks.
 Migration tasks go MIGRATING → SUCCESS via the async job engine, with a

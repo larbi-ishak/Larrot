@@ -1,4 +1,4 @@
-"""State persistence — save/load the full simulator state to/from JSON."""
+"""State persistence: save/load the full simulator state to/from JSON."""
 
 import json
 import os

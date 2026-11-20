@@ -1,4 +1,4 @@
-"""CFW (Cloud Firewall) — VPC-boundary firewalls, rules, hit records.
+"""CFW (Cloud Firewall): VPC-boundary firewalls, rules, hit records.
 
 Real route: POST /v1/{project_id}/firewalls on the CFW endpoint.
 """

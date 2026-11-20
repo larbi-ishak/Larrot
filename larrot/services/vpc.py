@@ -1,4 +1,4 @@
-"""VPC — vpcs, subnets, EIPs, ports, security groups."""
+"""VPC: vpcs, subnets, EIPs, ports, security groups."""
 
 import time
 from fastapi import APIRouter, Request, Response

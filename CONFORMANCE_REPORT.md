@@ -43,7 +43,7 @@ by the dedicated `--rate` test).
 
 ## Coverage per service (this run)
 
-## IAM — 3/3
+## IAM: 3/3
 
 | Result | Method | Endpoint / model | Expected | Got | Notes |
 |---|---|---|---|---|---|
@@ -51,7 +51,7 @@ by the dedicated `--rate` test).
 | ✅ | `GET` | `KeystoneListAuthProjects` | 200 | 200 |  |
 | ✅ | `POST` | `KeystoneCreateUserTokenByPassword` | 201 + X-Subject-Token + catalog | 201 + hdr=yes |  |
 
-## ECS — 26/26
+## ECS: 26/26
 
 | Result | Method | Endpoint / model | Expected | Got | Notes |
 |---|---|---|---|---|---|
@@ -82,7 +82,7 @@ by the dedicated `--rate` test).
 | ✅ | `GET` | `ShowServerResetPwdFlag` | 200 | 200 |  |
 | ✅ | `PUT` | `ResetServerPassword` | 200 | 200 |  |
 
-## EVS — 18/18
+## EVS: 18/18
 
 | Result | Method | Endpoint / model | Expected | Got | Notes |
 |---|---|---|---|---|---|
@@ -105,7 +105,7 @@ by the dedicated `--rate` test).
 | ✅ | `GET` | `ShowSnapshot (404)` | 404 | 404 |  |
 | ✅ | `POST` | `RollbackSnapshot (404)` | 404 | 404 |  |
 
-## VPC — 21/21
+## VPC: 21/21
 
 | Result | Method | Endpoint / model | Expected | Got | Notes |
 |---|---|---|---|---|---|
@@ -131,7 +131,7 @@ by the dedicated `--rate` test).
 | ✅ | `SHAPE` | `SecurityGroupRule vs SDK` | must-have present | ok | SDK wire-key coverage: 12/12 |
 | ✅ | `GET` | `ShowSecurityGroupRule` | 200 | 200 |  |
 
-## IMS — 14/14
+## IMS: 14/14
 
 | Result | Method | Endpoint / model | Expected | Got | Notes |
 |---|---|---|---|---|---|
@@ -150,7 +150,7 @@ by the dedicated `--rate` test).
 | ✅ | `GET` | `ShowJobProgress` | 200 | 200 |  |
 | ✅ | `SHAPE` | `JobProgressEntities vs SDK` | must-have present | ok | SDK wire-key coverage: 4/7 |
 
-## OBS — 17/17
+## OBS: 17/17
 
 | Result | Method | Endpoint / model | Expected | Got | Notes |
 |---|---|---|---|---|---|
@@ -172,7 +172,7 @@ by the dedicated `--rate` test).
 | ✅ | `POST` | `CompleteMultipartUpload` | 200 | 200 |  |
 | ✅ | `DELETE` | `DeleteObject mp` | 204 | 204 |  |
 
-## CBR — 21/21
+## CBR: 21/21
 
 | Result | Method | Endpoint / model | Expected | Got | Notes |
 |---|---|---|---|---|---|

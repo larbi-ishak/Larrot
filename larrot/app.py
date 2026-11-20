@@ -1,4 +1,4 @@
-"""FastAPI app factory — assembles all services with middleware."""
+"""FastAPI app factory: assembles all services with middleware."""
 
 import logging
 from fastapi import FastAPI
@@ -29,7 +29,7 @@ def create_app() -> FastAPI:
     """Create the REST app (port 8200)."""
     app = FastAPI(
         title="Larrot",
-        description="Larrot repeats Huawei Cloud. Perfectly. — a local Huawei Cloud API simulator (like LocalStack, but for Huawei Cloud)",
+        description="Larrot repeats Huawei Cloud. Perfectly. A local Huawei Cloud API simulator (like LocalStack, but for Huawei Cloud)",
         version="1.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
@@ -175,7 +175,7 @@ def create_app() -> FastAPI:
 
 
 def create_obs_app() -> FastAPI:
-    """Create the OBS app (port 8201) — separate endpoint, like the real cloud."""
+    """Create the OBS app (port 8201): separate endpoint, like the real cloud."""
     app = FastAPI(title="Larrot OBS", version="1.0.0", docs_url=None, redoc_url=None)
     state = SimState()
     app.state.sim = state

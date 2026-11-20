@@ -1,4 +1,4 @@
-"""DIS (Data Ingestion Service) — streams, partitions, apps, checkpoints.
+"""DIS (Data Ingestion Service): streams, partitions, apps, checkpoints.
 
 Real route: POST /v2/{project_id}/streams.
 """

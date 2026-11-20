@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""huawei-sim NEGATIVE testing suite — tests EVERY service with wrong requests.
+"""huawei-sim NEGATIVE testing suite: tests EVERY service with wrong requests.
 
 For each service, tests:
   1. Missing required fields → 400
@@ -147,7 +147,7 @@ def run():
                  expect_status=404, expect_code="Common.0011")
 
     # =======================================================================
-    # ECS Attach/Detach — Ecs.0005 rules
+    # ECS Attach/Detach: Ecs.0005 rules
     # =======================================================================
     print("\n=== ECS ATTACH/DETACH NEGATIVE TESTS ===")
     # Create a volume (non-bootable)
@@ -504,7 +504,7 @@ def run():
           f"status={r.status_code}")
 
     # =======================================================================
-    # NEW SERVICES (v2 expansion — 20 services + MaaS)
+    # NEW SERVICES (v2 expansion: 20 services + MaaS)
     # =======================================================================
     print("\n=== NEW SERVICES NEGATIVE TESTS ===")
     # HSS

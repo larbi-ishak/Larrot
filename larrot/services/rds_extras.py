@@ -1,4 +1,4 @@
-"""RDS Enhancements — backups, parameters, read replicas, accounts, databases, logs, failover."""
+"""RDS Enhancements: backups, parameters, read replicas, accounts, databases, logs, failover."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis

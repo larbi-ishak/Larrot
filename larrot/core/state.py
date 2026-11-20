@@ -7,7 +7,7 @@ from .ratelimit import RateLimiter
 
 
 class SimState:
-    """Single source of truth — every service reads and mutates this."""
+    """Single source of truth: every service reads and mutates this."""
 
     def __init__(self):
         self.profile_default = Profile.parse(os.environ.get("SIM_PROFILE", "public"))

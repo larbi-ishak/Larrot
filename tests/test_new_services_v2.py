@@ -15,7 +15,7 @@ def client():
 
 
 # ---------------------------------------------------------------------------
-# HSS — hosts correlate with ECS servers
+# HSS: hosts correlate with ECS servers
 # ---------------------------------------------------------------------------
 
 class TestHss:
@@ -64,7 +64,7 @@ class TestHss:
         r = client.get(f"/v5/{PID}/alarm-events")
         assert r.json()["total"] >= 1
 
-        # Vulns are found per host — create one first (cross-service: ECS)
+        # Vulns are found per host: create one first (cross-service: ECS)
         client.post(f"/v1.1/{PID}/cloudservers",
                     json={"server": {"imageRef": IMAGE, "flavorRef": FLAVOR,
                                       "name": "vuln-host"}})
@@ -300,7 +300,7 @@ class TestMrs:
 
 
 # ---------------------------------------------------------------------------
-# SMS — source state machine gates task creation
+# SMS: source state machine gates task creation
 # ---------------------------------------------------------------------------
 
 class TestSms:
@@ -394,7 +394,7 @@ class TestDc:
 
 
 # ---------------------------------------------------------------------------
-# ER — attachments validate the VPC exists
+# ER: attachments validate the VPC exists
 # ---------------------------------------------------------------------------
 
 class TestEr:
@@ -545,7 +545,7 @@ class TestDataArts:
 
 
 # ---------------------------------------------------------------------------
-# OMS — destination bucket must exist (cross-service: OBS)
+# OMS: destination bucket must exist (cross-service: OBS)
 # ---------------------------------------------------------------------------
 
 class TestOms:
@@ -822,7 +822,7 @@ class TestCfw:
                         json={"action": "maybe"})
         assert r.status_code == 400
 
-        # Record hits — count increments
+        # Record hits: count increments
         r = client.post(f"/v1/{PID}/firewalls/{fid}/hit-records",
                         json={"rule_id": rule_id})
         assert r.json()["hit_count"] == 1
@@ -965,7 +965,7 @@ class TestIef:
 
 
 # ---------------------------------------------------------------------------
-# ModelArts — model registry, services, fine-tuning
+# ModelArts: model registry, services, fine-tuning
 # ---------------------------------------------------------------------------
 
 class TestModelArts:
@@ -1032,7 +1032,7 @@ class TestModelArts:
 
 
 # ---------------------------------------------------------------------------
-# MaaS — OpenAI-compatible endpoints
+# MaaS: OpenAI-compatible endpoints
 # ---------------------------------------------------------------------------
 
 class TestMaas:

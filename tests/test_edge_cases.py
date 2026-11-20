@@ -1,4 +1,4 @@
-"""Edge case tests — boundary values, unicode, special characters, type mismatches."""
+"""Edge case tests: boundary values, unicode, special characters, type mismatches."""
 import pytest
 from fastapi.testclient import TestClient
 from larrot.app import create_app
@@ -17,7 +17,7 @@ class TestBoundaryValues:
     """Test boundary values for numeric fields."""
 
     def test_volume_size_min_boundary(self, client):
-        """Size 10 is the minimum — should succeed."""
+        """Size 10 is the minimum: should succeed."""
         r = client.post(f"/v2.1/{PID}/cloudvolumes",
                         json={"volume": {"size": 10, "name": "min-vol"}})
         assert r.status_code == 202
@@ -41,7 +41,7 @@ class TestBoundaryValues:
         assert r.status_code == 400
 
     def test_volume_size_max(self, client):
-        """Size 32768 is the max — should succeed."""
+        """Size 32768 is the max: should succeed."""
         r = client.post(f"/v2.1/{PID}/cloudvolumes",
                         json={"volume": {"size": 32768, "name": "max-vol"}})
         assert r.status_code == 202

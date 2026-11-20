@@ -1,4 +1,4 @@
-"""WAF — Web Application Firewall: domains, policies, rules."""
+"""WAF: Web Application Firewall: domains, policies, rules."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis

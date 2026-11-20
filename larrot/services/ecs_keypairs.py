@@ -1,4 +1,4 @@
-"""ECS Key Pairs — SSH key pair management."""
+"""ECS Key Pairs: SSH key pair management."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis

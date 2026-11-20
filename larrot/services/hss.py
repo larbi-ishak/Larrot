@@ -1,4 +1,4 @@
-"""HSS (Host Security Service) — hosts, protection policies, alarms, vulnerabilities.
+"""HSS (Host Security Service): hosts, protection policies, alarms, vulnerabilities.
 
 Real routes: GET /v5/{project_id}/hosts, /v5/{project_id}/policy, /v5/{project_id}/alarm-events.
 Hosts are discovered from ECS servers (cross-service correlation: every ECS in the
@@ -128,7 +128,7 @@ async def list_vulnerabilities(request: Request, pid: str):
 
 @router.post("/v5/{pid}/vulnerabilities/scan")
 async def scan_vulnerabilities(request: Request, pid: str):
-    """Trigger a scan — creates a scan task that finds seeded vulns."""
+    """Trigger a scan: creates a scan task that finds seeded vulns."""
     s = request.app.state.sim
     if not hasattr(s, "hss_vulns"):
         s.hss_vulns = {}

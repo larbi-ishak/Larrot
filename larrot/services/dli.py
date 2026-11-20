@@ -1,4 +1,4 @@
-"""DLI — Data Lake Insight: SQL jobs, databases, tables."""
+"""DLI: Data Lake Insight: SQL jobs, databases, tables."""
 from fastapi import APIRouter, Request
 from ..core.jobs import new_id, now_millis
 router = APIRouter()

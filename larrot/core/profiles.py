@@ -1,4 +1,4 @@
-"""Quirk profiles — per-region behavioral dialects (EMPIRICAL_SPEC §7)."""
+"""Quirk profiles: per-region behavioral dialects (EMPIRICAL_SPEC §7)."""
 
 import enum
 

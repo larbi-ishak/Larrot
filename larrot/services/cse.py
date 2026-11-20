@@ -1,4 +1,4 @@
-"""CSE (Cloud Service Engine) — microservice engines (ServiceComb).
+"""CSE (Cloud Service Engine): microservice engines (ServiceComb).
 
 Real route: POST /v2/{project_id}/engines. Engines go Creating → Available via
 the async job engine.

@@ -1,4 +1,4 @@
-"""DC (Direct Connect) — connections, virtual gateways, virtual interfaces.
+"""DC (Direct Connect): connections, virtual gateways, virtual interfaces.
 
 Real routes: /v2.0/{project_id}/direct-connects, /v2.0/{project_id}/virtual-gateways,
 /v2.0/{project_id}/virtual-interfaces.

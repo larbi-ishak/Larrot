@@ -93,7 +93,7 @@ class TestDCS:
 class TestDMS:
     def test_kafka_instance(self, client):
         # DMS shares /v2/{pid}/instances with DCS (first registered wins).
-        # Verify the endpoint responds — the DCS response shape is returned.
+        # Verify the endpoint responds: the DCS response shape is returned.
         r = client.post(f"/v2/{PID}/instances", json={"name": "test-dms", "engine": "kafka"})
         assert r.status_code == 200
         r = client.get(f"/v2/{PID}/instances")

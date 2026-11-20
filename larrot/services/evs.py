@@ -1,4 +1,4 @@
-"""EVS — cloud volumes, snapshots, os-vendor detail."""
+"""EVS: cloud volumes, snapshots, os-vendor detail."""
 
 import asyncio
 from fastapi import APIRouter, Request, Response
@@ -247,7 +247,7 @@ async def volume_action(request: Request, pid: str, volume_id: str):
 
 
 # ---------------------------------------------------------------------------
-# snapshots — the detached-only rule (§3.4)
+# snapshots: the detached-only rule (§3.4)
 # ---------------------------------------------------------------------------
 
 @router.post("/v2/{pid}/cloudsnapshots")

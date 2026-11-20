@@ -1,4 +1,4 @@
-"""DNS — zone and recordset management."""
+"""DNS: zone and recordset management."""
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse

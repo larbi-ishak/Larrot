@@ -1,4 +1,4 @@
-"""OBS — S3-compatible object storage, v2-signed, on its own port."""
+"""OBS: S3-compatible object storage, v2-signed, on its own port."""
 
 import hashlib
 import re

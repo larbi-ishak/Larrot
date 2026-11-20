@@ -1,4 +1,4 @@
-"""ServiceStage — environments, applications, components (app hosting).
+"""ServiceStage: environments, applications, components (app hosting).
 
 Real routes: POST /v2/{project_id}/cas/environments, /v2/{project_id}/cas/applications,
 /v2/{project_id}/cas/applications/{app_id}/components.

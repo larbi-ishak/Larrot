@@ -1,4 +1,4 @@
-"""Async job engine — every mutating op returns job_id, completes after jittered delay."""
+"""Async job engine: every mutating op returns job_id, completes after jittered delay."""
 
 import asyncio
 import inspect
@@ -9,12 +9,12 @@ from typing import Any, Callable, Coroutine
 
 
 def new_id() -> str:
-    """Hyphenated UUID v4 — resource IDs."""
+    """Hyphenated UUID v4: resource IDs."""
     return str(uuid.uuid4())
 
 
 def new_job_id() -> str:
-    """32-char hex — job IDs (real ones look like ff80808288d41e1b018990260955686a)."""
+    """32-char hex: job IDs (real ones look like ff80808288d41e1b018990260955686a)."""
     return uuid.uuid4().hex
 
 
@@ -38,7 +38,7 @@ class Job:
     end_time: str | None = None
     error_code: str | None = None
     fail_reason: str | None = None
-    effect: Callable | None = None  # internal — never serialized
+    effect: Callable | None = None  # internal: never serialized
 
     def to_json(self) -> dict:
         return {
@@ -54,7 +54,7 @@ class Job:
 
 
 class JobEngine:
-    """Shared async job engine — submit effects that mutate state after a delay."""
+    """Shared async job engine: submit effects that mutate state after a delay."""
 
     def __init__(self, delay_range: tuple[float, float] = (1.0, 3.0)):
         self.jobs: dict[str, Job] = {}
@@ -99,7 +99,7 @@ class JobEngine:
             job.error_code, job.fail_reason = result
 
     def complete_now(self, job_id: str) -> bool:
-        """Force-complete a RUNNING job synchronously — test hook.
+        """Force-complete a RUNNING job synchronously: test hook.
 
         TestClient (and other in-process clients) never run the background
         asyncio task, so jobs stay RUNNING forever. This runs the effect
@@ -115,7 +115,7 @@ class JobEngine:
         return True
 
     def complete_all(self) -> int:
-        """Force-complete every RUNNING job — test hook (sync context only)."""
+        """Force-complete every RUNNING job: test hook (sync context only)."""
         n = 0
         for job_id in list(self.jobs):
             if self.jobs[job_id].status == "RUNNING":
@@ -133,7 +133,7 @@ class JobEngine:
 
 
 def mark_sub_jobs_success(job: Job):
-    """Flip entities.sub_jobs[*] to SUCCESS — the real ShowJob behavior."""
+    """Flip entities.sub_jobs[*] to SUCCESS: the real ShowJob behavior."""
     subs = job.entities.get("sub_jobs", [])
     for sj in subs:
         sj["status"] = "SUCCESS"

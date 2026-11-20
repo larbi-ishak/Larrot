@@ -1,8 +1,8 @@
-"""ModelArts — ML development: notebooks, training jobs, model management,
+"""ModelArts: ML development: notebooks, training jobs, model management,
 inference services, fine-tuning, and MaaS (Model-as-a-Service).
 
 MaaS exposes OpenAI-compatible endpoints (GET /v1/models, POST /v1/chat/completions,
-POST /v1/embeddings) plus API-key management — mirroring ModelArts Studio.
+POST /v1/embeddings) plus API-key management: mirroring ModelArts Studio.
 """
 import hashlib
 import time
@@ -278,7 +278,7 @@ async def list_fine_tuning_jobs(request: Request, pid: str):
 
 
 # ---------------------------------------------------------------------------
-# MaaS — OpenAI-compatible inference (account-level, no project in path)
+# MaaS: OpenAI-compatible inference (account-level, no project in path)
 # ---------------------------------------------------------------------------
 
 @router.get("/v1/models")
@@ -374,7 +374,7 @@ async def create_api_key(request: Request, pid: str):
         "status": "active", "project_id": pid, "created_at": now_millis(),
     }
     return {"key_id": kid, "name": name, "key": secret,
-            "note": "store this key now — it is not retrievable later"}
+            "note": "store this key now: it is not retrievable later"}
 
 
 @router.get("/v1/{pid}/maas/keys")

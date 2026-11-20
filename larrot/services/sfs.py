@@ -1,4 +1,4 @@
-"""SFS — Scalable File System (shares, access rules)."""
+"""SFS: Scalable File System (shares, access rules)."""
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse

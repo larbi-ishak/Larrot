@@ -1,4 +1,4 @@
-"""KMS — key management service."""
+"""KMS: key management service."""
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
@@ -69,7 +69,7 @@ async def schedule_key_deletion(request: Request, pid: str, key_id: str = None):
 
 @router.post("/v1/{pid}/kms/encrypt-data")
 async def encrypt_data(request: Request, pid: str):
-    """Encrypt data with a key — returns a fake cipher text blob."""
+    """Encrypt data with a key: returns a fake cipher text blob."""
     state = request.app.state.sim
     body = await request.json()
     key_id = body.get("key_id")
@@ -83,7 +83,7 @@ async def encrypt_data(request: Request, pid: str):
 
 @router.post("/v1/{pid}/kms/decrypt-data")
 async def decrypt_data(request: Request, pid: str):
-    """Decrypt data — reverses the fake encryption."""
+    """Decrypt data: reverses the fake encryption."""
     state = request.app.state.sim
     body = await request.json()
     key_id = body.get("key_id")

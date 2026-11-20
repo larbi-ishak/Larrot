@@ -1,4 +1,4 @@
-"""CBR — vaults, policies, checkpoints (on-demand backup), backups, restore."""
+"""CBR: vaults, policies, checkpoints (on-demand backup), backups, restore."""
 
 import asyncio
 from fastapi import APIRouter, Request, Response
@@ -217,7 +217,7 @@ async def delete_policy(request: Request, pid: str, policy_id: str):
 
 
 # ---------------------------------------------------------------------------
-# checkpoints (on-demand backup) — the §3.4 CBR path
+# checkpoints (on-demand backup): the §3.4 CBR path
 # ---------------------------------------------------------------------------
 
 @router.post("/v3/{pid}/checkpoints")

@@ -1,4 +1,4 @@
-"""NAT Gateway — gateways, SNAT rules, DNAT rules."""
+"""NAT Gateway: gateways, SNAT rules, DNAT rules."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis

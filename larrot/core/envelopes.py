@@ -1,6 +1,6 @@
 """Per-service error body envelopes (API_DOCS_RESEARCH §8).
 
-Huawei Cloud does NOT use one global error shape — each service family has its own.
+Huawei Cloud does NOT use one global error shape: each service family has its own.
 """
 
 from .jobs import new_request_id
@@ -20,7 +20,7 @@ def evs_error(code: str, message: str) -> dict:
 
 
 def vpc_error(code: str, message: str) -> dict:
-    """VPC/EIP v1: flat {"code", "message"} — NOT error_code/error_msg."""
+    """VPC/EIP v1: flat {"code", "message"}: NOT error_code/error_msg."""
     return {"code": code, "message": message}
 
 

@@ -1,4 +1,4 @@
-"""IAM — Keystone APIs (projects, tokens)."""
+"""IAM: Keystone APIs (projects, tokens)."""
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
