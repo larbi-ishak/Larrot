@@ -3,11 +3,12 @@
 import hashlib
 import re
 import time
-from fastapi import APIRouter, Request, Response
-from fastapi.responses import PlainTextResponse
-from ..core.jobs import new_id, now_millis
-from ..middleware import obs_middleware
 from xml.sax.saxutils import escape
+
+from fastapi import APIRouter, Request
+from fastapi.responses import PlainTextResponse
+
+from ..core.jobs import new_id, now_millis
 
 router = APIRouter()
 
@@ -129,7 +130,6 @@ async def _bucket_handler(state, request, bucket, method, query):
         return PlainTextResponse("", status_code=200 if bucket in state.obs_buckets else 404)
 
     if method == "POST" and "delete" in query:
-        import base64
         raw = await request.body()
         text = raw.decode(errors="replace")
         keys = re.findall(r"<Key>([^<]+)</Key>", text)

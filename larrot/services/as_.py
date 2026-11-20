@@ -1,7 +1,9 @@
 """AS: Auto Scaling: groups, configurations, policies."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
+
 router = APIRouter()
 
 @router.post("/v1/{pid}/scaling_group")

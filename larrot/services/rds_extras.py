@@ -1,6 +1,7 @@
 """RDS Enhancements: backups, parameters, read replicas, accounts, databases, logs, failover."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()
@@ -89,7 +90,7 @@ async def list_parameters(request: Request, pid: str, instance_id: str):
 
 @router.put("/v3/{pid}/instances/{instance_id}/parameters")
 async def update_parameters(request: Request, pid: str, instance_id: str):
-    body = await request.json()
+    await request.json()
     return {"job_id": new_id(), "restart_required": False}
 
 
@@ -245,7 +246,6 @@ async def switchover(request: Request, pid: str, instance_id: str):
 
 @router.post("/v3/{pid}/instances/{instance_id}/action")
 async def instance_action(request: Request, pid: str, instance_id: str):
-    s = request.app.state.sim
     body = await request.json()
     if "resize" in body:
         return {"job_id": new_id(), "action": "resize_flavor"}

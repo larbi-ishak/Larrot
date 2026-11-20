@@ -2,8 +2,9 @@
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.envelopes import apigw_error
-from ..core.jobs import new_request_id, new_id, now_millis
+from ..core.jobs import new_id, now_millis
 
 router = APIRouter()
 
@@ -388,7 +389,7 @@ async def list_group_users(request: Request, group_id: str):
 
 
 @router.get("/v3/users/{user_id}/groups")
-async def list_user_groups(request: Request, user_id: str):
+async def list_user_groups_for_user(request: Request, user_id: str):
     state = request.app.state.sim
     if user_id not in getattr(state, "iam_users", {}):
         return JSONResponse(apigw_error("IAM.0002", "user not found"), status_code=404)

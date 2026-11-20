@@ -1,6 +1,5 @@
 """Web console: live resource browser, chaos panel, job stats (vanilla JS, no deps)."""
 
-from .core.jobs import now_millis
 
 
 def console_html(state) -> str:

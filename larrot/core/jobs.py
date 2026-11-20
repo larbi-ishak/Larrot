@@ -4,8 +4,10 @@ import asyncio
 import inspect
 import random
 import uuid
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
-from typing import Any, Callable, Coroutine
+from datetime import UTC
+from typing import Any
 
 
 def new_id() -> str:
@@ -24,8 +26,8 @@ def new_request_id() -> str:
 
 def now_millis() -> str:
     """RFC 3339 with milliseconds, UTC."""
-    from datetime import datetime, timezone
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    from datetime import datetime
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
 @dataclass

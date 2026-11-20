@@ -1,6 +1,8 @@
 """AOM: Application Operations Management: apps, components, alarms."""
 from fastapi import APIRouter, Request
-from ..core.jobs import new_id, now_millis
+
+from ..core.jobs import new_id
+
 router = APIRouter()
 
 @router.post("/v1/{pid}/aom/apps")

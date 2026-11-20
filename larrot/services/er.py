@@ -5,6 +5,7 @@ Real routes: POST /v3/{project_id}/enterprise-router/instances, and
 """
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()

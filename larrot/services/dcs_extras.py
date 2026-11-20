@@ -1,6 +1,7 @@
 """DCS Enhancements: backup, parameters, restart, analysis, capacity."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()
@@ -61,7 +62,7 @@ async def list_dcs_parameters(request: Request, pid: str, instance_id: str):
 
 @router.put("/v2/{pid}/instances/{instance_id}/parameters")
 async def update_dcs_parameters(request: Request, pid: str, instance_id: str):
-    body = await request.json()
+    await request.json()
     return {"job_id": new_id(), "restart_required": False}
 
 

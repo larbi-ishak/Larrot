@@ -4,6 +4,7 @@ Real route: POST /v1/{project_id}/firewalls on the CFW endpoint.
 """
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()

@@ -1,7 +1,9 @@
 """BMS: Bare Metal Server: instances, flavors."""
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
+
 router = APIRouter()
 
 @router.get("/v1/{pid}/baremetalservers/detail")
@@ -97,7 +99,3 @@ async def bms_nics(request: Request, pid: str, server_id: str):
                        "ip_address": srv.get("ip", "192.168.0.2")}]}
 
 
-@router.get("/v1/{pid}/baremetalservers/flavors")
-async def bms_flavors(request: Request, pid: str):
-    return {"flavors": [{"id": "physical.s2.medium", "name": "physical.s2.medium"},
-                          {"id": "physical.h2.large", "name": "physical.h2.large"}]}

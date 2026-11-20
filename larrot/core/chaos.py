@@ -8,7 +8,6 @@ Two modes:
 Rules match by service keyword (convenience) or raw path substring.
 """
 
-import asyncio
 import random
 import time
 from dataclasses import dataclass, field

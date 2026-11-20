@@ -47,6 +47,16 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP"]
+# E701/E702: the one-liner guard style (if not hasattr(s, x): s.x = {}) is
+# deliberate and used consistently across all services
+# E501: long lines are embedded HTML/XML strings (dashboard, console, OBS)
+ignore = ["E701", "E702", "E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# generated reports and embedded HTML tolerate everything
+"larrot/dashboard.py" = ["E501"]
+"larrot/console.py" = ["E501"]
+"larrot/services/obs.py" = ["E501"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()
@@ -14,7 +15,7 @@ def _lb_json(lb):
         "provisioning_status": lb.get("provisioning_status", "ACTIVE"),
         "vip_subnet_id": lb.get("vip_subnet_id", ""),
         "vpc_id": lb.get("vpc_id", ""),
-        "listeners": [{"id": l["id"]} for l in lb.get("listeners", [])],
+        "listeners": [{"id": listener["id"]} for listener in lb.get("listeners", [])],
         "pools": [{"id": p["id"]} for p in lb.get("pools", [])],
         "ip_address": lb.get("ip_address", ""),
         "created_at": lb["created_at"], "updated_at": lb["updated_at"],
@@ -22,15 +23,15 @@ def _lb_json(lb):
     }
 
 
-def _listener_json(l):
+def _listener_json(listener):
     return {
-        "id": l["id"], "name": l["name"], "description": l.get("description", ""),
-        "protocol": l["protocol"], "protocol_port": l["protocol_port"],
-        "loadbalancer_id": l["loadbalancer_id"],
+        "id": listener["id"], "name": listener["name"], "description": listener.get("description", ""),
+        "protocol": listener["protocol"], "protocol_port": listener["protocol_port"],
+        "loadbalancer_id": listener["loadbalancer_id"],
         "operating_status": "ONLINE", "provisioning_status": "ACTIVE",
-        "default_pool_id": l.get("default_pool_id"),
-        "connection_limit": l.get("connection_limit", -1),
-        "created_at": l["created_at"], "updated_at": l["updated_at"],
+        "default_pool_id": listener.get("default_pool_id"),
+        "connection_limit": listener.get("connection_limit", -1),
+        "created_at": listener["created_at"], "updated_at": listener["updated_at"],
     }
 
 
@@ -145,8 +146,8 @@ async def list_listeners(request: Request, pid: str):
     state = request.app.state.sim
     if not hasattr(state, "elb_listeners"):
         state.elb_listeners = {}
-    listeners = [l for l in state.elb_listeners.values() if l["project_id"] == pid]
-    return {"listeners": [_listener_json(l) for l in listeners], "count": len(listeners)}
+    listeners = [x for x in state.elb_listeners.values() if x["project_id"] == pid]
+    return {"listeners": [_listener_json(listener) for listener in listeners], "count": len(listeners)}
 
 
 @router.delete("/v2/{pid}/elb/listeners/{listener_id}")
@@ -157,7 +158,7 @@ async def delete_listener(request: Request, pid: str, listener_id: str):
     listener = state.elb_listeners.pop(listener_id)
     lb = getattr(state, "elb_loadbalancers", {}).get(listener["loadbalancer_id"])
     if lb:
-        lb["listeners"] = [l for l in lb["listeners"] if l["id"] != listener_id]
+        lb["listeners"] = [x for x in lb["listeners"] if x["id"] != listener_id]
     return Response(status_code=204)
 
 
@@ -228,10 +229,10 @@ async def list_members(request: Request, pid: str, pool_id: str):
 @router.get("/v2/{pid}/elb/listeners/{listener_id}")
 async def show_listener(request: Request, pid: str, listener_id: str):
     state = request.app.state.sim
-    l = getattr(state, "elb_listeners", {}).get(listener_id)
-    if not l or l.get("project_id") != pid:
+    listener = getattr(state, "elb_listeners", {}).get(listener_id)
+    if not listener or listener.get("project_id") != pid:
         return JSONResponse({"error_msg": "Listener not found", "error_code": "ELB.0102"}, status_code=404)
-    return {"listener": _listener_json(l)}
+    return {"listener": _listener_json(listener)}
 
 
 @router.delete("/v2/{pid}/elb/pools/{pool_id}")

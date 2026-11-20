@@ -1,7 +1,8 @@
 """KMS: key management service."""
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()
@@ -126,7 +127,8 @@ async def disable_key(request: Request, pid: str):
 
 @router.post("/v1/{pid}/kms/gen-random")
 async def gen_random(request: Request, pid: str):
-    import base64, os as _os
+    import base64
+    import os as _os
     body = await request.json()
     length = body.get("random_data_length", 64)
     if not isinstance(length, int) or not (16 <= length <= 8192):

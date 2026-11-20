@@ -1,14 +1,13 @@
 """larrot: the Larrot CLI. Table output by default, --json for raw, --wait for async."""
 
 import argparse
-import hashlib
-import hmac
 import json
 import sys
 import time
-import urllib.request
 import urllib.error
-from .core.signing import sign_sdk_request, sign_obs_request
+import urllib.request
+
+from .core.signing import sign_obs_request, sign_sdk_request
 
 DEFAULT_ENDPOINT = "http://127.0.0.1:8200"
 DEFAULT_OBS = "http://127.0.0.1:8201"

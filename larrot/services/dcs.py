@@ -1,7 +1,9 @@
 """DCS: Distributed Cache Service: Redis/Memcached instances."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
+
 router = APIRouter()
 
 @router.post("/v2/{pid}/instances")

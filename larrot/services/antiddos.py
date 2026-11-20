@@ -1,11 +1,13 @@
 """Anti-DDoS: protection policies and status."""
 from fastapi import APIRouter, Request
-from ..core.jobs import new_id, now_millis
+
+from ..core.jobs import new_id
+
 router = APIRouter()
 
 @router.post("/v1/{pid}/antiddos/default")
 async def set_default_config(request: Request, pid: str):
-    body = await request.json()
+    await request.json()
     return {"task_id": new_id(), "success": True}
 
 @router.get("/v1/{pid}/antiddos/default")

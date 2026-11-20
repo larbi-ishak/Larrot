@@ -1,8 +1,8 @@
 """EVS: cloud volumes, snapshots, os-vendor detail."""
 
-import asyncio
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.envelopes import evs_error
 from ..core.jobs import new_id, now_millis
 from ..core.profiles import Profile
@@ -310,7 +310,7 @@ async def list_snapshots(request: Request, pid: str):
 
 
 @router.get("/v2/{pid}/cloudsnapshots")
-async def list_snapshots(request: Request, pid: str):
+async def list_snapshots_v2(request: Request, pid: str):
     state = request.app.state.sim
     snaps = [x for x in state.snapshots.values() if x["project_id"] == pid]
     return {"snapshots": [_snap_json(x) for x in snaps], "count": len(snaps)}

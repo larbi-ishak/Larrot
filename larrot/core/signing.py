@@ -5,12 +5,11 @@ Two signing universes (EMPIRICAL_SPEC §1.4):
 - OBS: v2 HMAC-SHA1 (different StringToSign, unsigned list params)
 """
 
+import base64
 import hashlib
 import hmac
-import base64
 import time
-import urllib.parse
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 ALGORITHM = "SDK-HMAC-SHA256"
 EMPTY_PAYLOAD_HASH = hashlib.sha256(b"").hexdigest()

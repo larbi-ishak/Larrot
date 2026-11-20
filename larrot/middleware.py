@@ -2,10 +2,11 @@
 
 import asyncio
 import logging
+
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
+
 from .core.signing import verify_sdk_hmac_sha256
-from .core.envelopes import apigw_error
 
 logger = logging.getLogger("larrot")
 

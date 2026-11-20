@@ -5,6 +5,7 @@ POST /v1/{project_id}/transcode-templates, POST /v1/{project_id}/categories.
 """
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()

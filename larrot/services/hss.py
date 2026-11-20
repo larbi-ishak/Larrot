@@ -4,8 +4,9 @@ Real routes: GET /v5/{project_id}/hosts, /v5/{project_id}/policy, /v5/{project_i
 Hosts are discovered from ECS servers (cross-service correlation: every ECS in the
 project appears as an HSS host with its agent status).
 """
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()

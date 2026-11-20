@@ -1,8 +1,8 @@
 """CBR: vaults, policies, checkpoints (on-demand backup), backups, restore."""
 
-import asyncio
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.envelopes import cbr_error
 from ..core.jobs import new_id, now_millis
 

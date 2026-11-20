@@ -5,6 +5,7 @@ under /v1/{pid}/dsc/assets to avoid colliding with VOD's asset routes.
 """
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()

@@ -1,6 +1,7 @@
 """ECS Quotas, Metadata, NICs, Console, Resize, OS Change."""
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse, PlainTextResponse
+
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()
@@ -172,7 +173,6 @@ async def resize_server(request: Request, pid: str, server_id: str):
             srv["updated"] = now_millis()
         return None
 
-    import asyncio
     job_id = await s.jobs.submit("resizeServer", {"server_id": server_id}, effect)
     return {"job_id": job_id}
 

@@ -1,6 +1,7 @@
 """Shared simulator state + seed data (the 'lab account')."""
 
 import os
+
 from .jobs import JobEngine, new_id, now_millis
 from .profiles import Profile
 from .ratelimit import RateLimiter

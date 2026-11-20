@@ -4,7 +4,7 @@ SIM_HOST controls the bind address: 127.0.0.1 (default, local-only) or
 0.0.0.0 (all interfaces - required inside Docker, use with care)."""
 
 import os
-import sys
+
 import uvicorn
 
 

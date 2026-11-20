@@ -1,24 +1,85 @@
 """FastAPI app factory: assembles all services with middleware."""
 
 import logging
+
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
-from .core.state import SimState
+
 from .core.envelopes import apigw_error
-from .persistence import save_state, load_state
+from .core.state import SimState
 from .dashboard import dashboard_html
 from .middleware import gateway_middleware
+from .persistence import load_state, save_state
 from .services import (
-    iam, ecs, evs, vpc, ims, cbr, obs, rds, dns, kms, elb, sfs, cce, functiongraph,
-    bms, as_, smn, ces, lts, dcs, dms, dds, waf, tms, eps, apig, swr, modelarts,
-    iotda, gaussdb, aom, dli, antiddos, bss,
-    nat, peering, acl, routes, vpn,
-    ecs_keypairs, ecs_server_groups, ecs_extras, batch, hpc,
-    rds_extras, geminidb, ddm, dbss, dcs_extras,
-    hss, cdn, dws, css, mrs, sms, dc, er,
-    dis, dataarts, oms, des,
-    codearts, servicestage, cse, cci,
-    cfw, dsc, vod, ief,
+    acl,
+    antiddos,
+    aom,
+    apig,
+    as_,
+    batch,
+    bms,
+    bss,
+    cbr,
+    cce,
+    cci,
+    cdn,
+    ces,
+    cfw,
+    codearts,
+    cse,
+    css,
+    dataarts,
+    dbss,
+    dc,
+    dcs,
+    dcs_extras,
+    ddm,
+    dds,
+    des,
+    dis,
+    dli,
+    dms,
+    dns,
+    dsc,
+    dws,
+    ecs,
+    ecs_extras,
+    ecs_keypairs,
+    ecs_server_groups,
+    elb,
+    eps,
+    er,
+    evs,
+    functiongraph,
+    gaussdb,
+    geminidb,
+    hpc,
+    hss,
+    iam,
+    ief,
+    ims,
+    iotda,
+    kms,
+    lts,
+    modelarts,
+    mrs,
+    nat,
+    obs,
+    oms,
+    peering,
+    rds,
+    rds_extras,
+    routes,
+    servicestage,
+    sfs,
+    smn,
+    sms,
+    swr,
+    tms,
+    vod,
+    vpc,
+    vpn,
+    waf,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -136,6 +197,7 @@ def create_app() -> FastAPI:
 
     # Web dashboard + console
     from fastapi.responses import HTMLResponse
+
     from .console import console_html
 
     @app.get("/", include_in_schema=False, response_class=HTMLResponse)

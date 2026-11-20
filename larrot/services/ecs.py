@@ -1,10 +1,12 @@
 """ECS: cloud server lifecycle, attach/detach, state guards, jobs."""
 
 import asyncio
+
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
-from ..core.envelopes import ecs_error, apigw_error
-from ..core.jobs import new_id, new_job_id, now_millis, mark_sub_jobs_success
+
+from ..core.envelopes import apigw_error, ecs_error
+from ..core.jobs import mark_sub_jobs_success, new_id, new_job_id, now_millis
 from ..core.profiles import Profile
 
 router = APIRouter()
@@ -27,7 +29,6 @@ def _status_matches(filter, status):
 
 def _server_list_json(state, pid, server):
     """Serialize for LIST views: hcs profile removes flavor + AZ (sparse)."""
-    import json
     v = dict(server)
     if state.profile_of(pid) == Profile.HCS:
         v.pop("flavor", None)

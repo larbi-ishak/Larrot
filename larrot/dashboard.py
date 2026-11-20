@@ -1,8 +1,5 @@
 """Enhanced web dashboard with real-time updates and resource browsing."""
 
-from fastapi import Request
-from fastapi.responses import HTMLResponse
-import json
 
 
 def dashboard_html(state) -> str:
