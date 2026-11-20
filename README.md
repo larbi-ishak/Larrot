@@ -61,17 +61,33 @@ Your existing scripts run **unchanged** — just change the endpoint.
 
 ## Services
 
+**59 distinct Huawei Cloud services** across 71 router modules:
+
 | Service | Port | What it covers |
 |---|---|---|
 | IAM | 8200 | Projects, tokens |
 | ECS | 8200 | Servers: lifecycle, attach/detach, state guards, batch ops, flavors |
 | EVS | 8200 | Volumes: CRUD, snapshots (detached-only), os-vendor detail, extend |
-| VPC | 8200 | VPCs, subnets, ports |
+| VPC | 8200 | VPCs, subnets, ports, peering, network ACLs, route tables |
 | EIP | 8200 | Allocate/bind/unbind/release, bandwidths (v2.0) |
 | IMS | 8200 | Images: 3 registration routes, Glance v2, whole images |
 | CBR | 8200 | Vaults, policies, checkpoints (on-demand backup), backups, restore |
-| RDS | 8200 | Database instances, flavors |
+| RDS | 8200 | Database instances, flavors, backups, params, replicas, users, logs |
 | OBS | 8201 | Buckets, objects, multipart upload, ListObjects XML |
+| ELB / NAT / VPN / DNS | 8200 | Load balancers, NAT gateways, VPN gateways, zones + recordsets |
+| CCE / CCI / SWR | 8200 | Kubernetes clusters, serverless pods, container registry |
+| DWS / CSS / MRS | 8200 | Data warehouse, Elasticsearch clusters, Hadoop/Spark clusters |
+| RDS-family | 8200 | DDS, GaussDB, GeminiDB, DDM, DBSS |
+| DCS / DMS / DIS | 8200 | Redis, Kafka/RocketMQ, streaming ingestion |
+| ModelArts + MaaS | 8200 | Notebooks, training, model registry, inference services, fine-tuning, OpenAI-compatible chat/embeddings |
+| HSS / CFW / DSC / WAF / Anti-DDoS / KMS | 8200 | Host security, cloud firewall, data security, WAF, DDoS, keys |
+| CDN | 8200 | Domains, origins, purge/preheat, statistics |
+| SMS / OMS / DES | 8200 | Server migration, OBS migration, physical data transfer |
+| DC / ER | 8200 | Direct Connect, Enterprise Router (attachments, route tables) |
+| CodeArts / ServiceStage / CSE | 8200 | Repos, pipelines, builds; environments/apps/components; microservice engines |
+| VOD / IEF | 8200 | Media assets + transcode, edge nodes + deployments |
+| DataArts / DLI / AOM / CES / LTS / SMN | 8200 | Data governance, SQL jobs, ops, monitoring, logs, notifications |
+| BMS / AS / SFS / TMS / EPS / APIG / IoTDA / BSS | 8200 | Bare metal, auto scaling, file shares, tags, enterprise projects, API gateway, IoT, billing |
 
 ## What makes it different from a mock
 

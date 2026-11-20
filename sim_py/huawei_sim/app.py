@@ -15,6 +15,10 @@ from .services import (
     nat, peering, acl, routes, vpn,
     ecs_keypairs, ecs_server_groups, ecs_extras, batch, hpc,
     rds_extras, geminidb, ddm, dbss, dcs_extras,
+    hss, cdn, dws, css, mrs, sms, dc, er,
+    dis, dataarts, oms, des,
+    codearts, servicestage, cse, cci,
+    cfw, dsc, vod, ief,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -82,6 +86,26 @@ def create_app() -> FastAPI:
     app.include_router(ddm.router)
     app.include_router(dbss.router)
     app.include_router(dcs_extras.router)
+    app.include_router(hss.router)
+    app.include_router(cdn.router)
+    app.include_router(dws.router)
+    app.include_router(css.router)
+    app.include_router(mrs.router)
+    app.include_router(sms.router)
+    app.include_router(dc.router)
+    app.include_router(er.router)
+    app.include_router(dis.router)
+    app.include_router(dataarts.router)
+    app.include_router(oms.router)
+    app.include_router(des.router)
+    app.include_router(codearts.router)
+    app.include_router(servicestage.router)
+    app.include_router(cse.router)
+    app.include_router(cci.router)
+    app.include_router(cfw.router)
+    app.include_router(dsc.router)
+    app.include_router(vod.router)
+    app.include_router(ief.router)
 
     # Middleware (outermost first: rate limit → signature → logging)
     app.middleware("http")(gateway_middleware)
@@ -106,7 +130,8 @@ def create_app() -> FastAPI:
     @app.get("/health", include_in_schema=False)
     async def health():
         return {"status": "ok", "version": "1.0.0",
-                "services": ["iam", "ecs", "evs", "vpc", "eip", "ims", "cbr", "rds", "dns", "kms", "elb", "sfs", "cce", "functiongraph", "bms", "as", "smn", "ces", "lts", "dcs", "dms", "dds", "waf", "tms", "eps", "apig", "swr", "modelarts", "iotda", "gaussdb", "aom", "dli", "antiddos", "bss", "nat", "peering", "acl", "routes", "vpn", "ecs_keypairs", "ecs_server_groups", "ecs_extras", "batch", "hpc", "rds_extras", "geminidb", "ddm", "dbss", "dcs_extras", "obs"]}
+                "services": ["iam", "ecs", "evs", "vpc", "eip", "ims", "cbr", "rds", "dns", "kms", "elb", "sfs", "cce", "functiongraph", "bms", "as", "smn", "ces", "lts", "dcs", "dms", "dds", "waf", "tms", "eps", "apig", "swr", "modelarts", "iotda", "gaussdb", "aom", "dli", "antiddos", "bss", "nat", "peering", "acl", "routes", "vpn", "ecs_keypairs", "ecs_server_groups", "ecs_extras", "batch", "hpc", "rds_extras", "geminidb", "ddm", "dbss", "dcs_extras", "obs",
+                             "hss", "cdn", "dws", "css", "mrs", "sms", "dc", "er", "dis", "dataarts", "oms", "des", "codearts", "servicestage", "cse", "cci", "cfw", "dsc", "vod", "ief", "maas"]}
 
     # Metrics
     @app.get("/metrics", include_in_schema=False)
