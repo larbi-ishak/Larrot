@@ -1,4 +1,4 @@
-"""APIGW.0301 rate-limit emulation (see docs)1.3)."""
+"""APIGW.0301 rate-limit emulation (EMPIRICAL_SPEC §1.3)."""
 
 import os
 import time

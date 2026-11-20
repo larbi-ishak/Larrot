@@ -38,6 +38,7 @@ jobs:
           cp docs/ARCHITECTURES.md      docs/architectures.md
           cp docs/EXAMPLES.md           docs/examples.md
           cp docs/PROGRESS.md           docs/progress.md
+          cp docs/EMPIRICAL_SPEC.md     docs/empirical-spec.md
           cp docs/API_DOCS_RESEARCH.md  docs/api-docs-research.md
           # fix repo-root relative links to resolve inside the site
           sed -i -e 's|CATALOG\.md|catalog.md|g' \
@@ -48,6 +49,7 @@ jobs:
                   -e 's|docs/ARCHITECTURES\.md|architectures.md|g' \
                   -e 's|docs/EXAMPLES\.md|examples.md|g' \
                   -e 's|docs/PROGRESS\.md|progress.md|g' \
+                  -e 's|docs/EMPIRICAL_SPEC\.md|empirical-spec.md|g' \
                   -e 's|docs/API_DOCS_RESEARCH\.md|api-docs-research.md|g' \
                   -e 's|\.\./COVERAGE\.md|coverage.md|g' \
                   -e 's|\.\./ROADMAP\.md|progress.md|g' \

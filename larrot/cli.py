@@ -124,7 +124,7 @@ def table(headers, rows, title=""):
 
 def main():
     p = argparse.ArgumentParser(prog="larrot",
-                                description="Larrot CLI")
+                                description="Larrot: repeats Huawei Cloud.")
     p.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
     p.add_argument("--obs-endpoint", default=DEFAULT_OBS)
     p.add_argument("--ak", default=DEFAULT_AK)

@@ -10,7 +10,7 @@ Larrot emulates **API behavior**, not infrastructure. No VMs run, no
 packets flow. The fidelity target is what an SDK client sees: routes,
 request validation, response shapes, error envelopes, async job
 semantics, and the production quirks in
-production quirks.
+[docs/EMPIRICAL_SPEC.md](docs/EMPIRICAL_SPEC.md).
 
 ## Layers
 
