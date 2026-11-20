@@ -14,7 +14,7 @@ def main():
     obs_port = int(os.environ.get("SIM_OBS_PORT", "8201"))
     host = os.environ.get("SIM_HOST", "127.0.0.1")
 
-    print("Larrot - repeats Huawei Cloud")
+    print("Larrot - local Huawei Cloud API simulator")
     print(f"  REST: http://{host}:{port}  (59 services)")
     print(f"  OBS:  http://{host}:{obs_port}  (object storage)")
     print(f"  Dashboard: http://{host}:{port}/")

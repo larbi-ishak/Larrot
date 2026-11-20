@@ -1,5 +1,5 @@
 site_name: Larrot
-site_description: Larrot repeats Huawei Cloud. A local Huawei Cloud API simulator - LocalStack, but for Huawei Cloud.
+site_description: A local Huawei Cloud API simulator - LocalStack, but for Huawei Cloud.
 site_url: https://larbi-ishak.github.io/Larrot/
 repo_url: https://github.com/larbi-ishak/Larrot
 repo_name: larbi-ishak/Larrot
@@ -41,6 +41,5 @@ nav:
   - Coverage: coverage.md
   - Conformance: conformance.md
   - Progress: progress.md
-  - Empirical spec: empirical-spec.md
   - API research: api-docs-research.md
   - Contributing: contributing.md

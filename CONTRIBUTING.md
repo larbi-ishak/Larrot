@@ -1,4 +1,4 @@
-# Contributing to Larrot 🦜
+# Contributing to Larrot
 
 Thank you for your interest in contributing! This document covers the basics.
 

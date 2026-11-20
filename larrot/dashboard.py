@@ -168,7 +168,7 @@ def dashboard_html(state) -> str:
 </div>
 
 <footer>
-  Larrot &middot; repeats Huawei Cloud &middot;
+  Larrot &middot; local Huawei Cloud API simulator &middot;
   <a href="/console">console</a> &middot;
   <a href="https://github.com/larbi-ishak/Larrot">GitHub</a> &middot; Apache 2.0 &middot;
   not affiliated with Huawei Technologies

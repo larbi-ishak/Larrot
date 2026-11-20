@@ -124,7 +124,7 @@ for obj in resp.body.contents:
 
 ## The Ecs.0005 quirk (the /dev/vda rule)
 
-This is the empirically-observed behavior change (~Oct-Nov 2026) that the simulator
+This is the observed behavior change (~Oct-Nov 2026) that the simulator
 reproduces exactly:
 
 ```python

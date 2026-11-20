@@ -1,9 +1,7 @@
 # Huawei Cloud API Reference Research: findings from official docs
 
 Compiled 2026-11-19 from `support.huaweicloud.com` (intl/en-us) official API references.
-Companion to `EMPIRICAL_SPEC.md`: that file is what the real cloud *actually does* (observed);
 this file is what the official docs say the APIs *are* (endpoints, shapes, algorithms).
-Where the two conflict, EMPIRICAL_SPEC.md wins for simulator behavior.
 
 Sources are cited per section. All endpoints are the international site (`*.myhuaweicloud.com`):
 the unified core the simulator reproduces.
@@ -74,7 +72,7 @@ StringToSign =
 ```
 
 - **Date**: RFC 1123 GMT (`Mon, 28 Sep 1970 06:00:00 GMT`). If >15 min from server time → 403.
-  ISO-8601 dates are rejected (matches EMPIRICAL_SPEC §1.4).
+  ISO-8601 dates are rejected (matches §1.4).
 - **CanonicalizedResource sub-resources**: the EXACT signed list from the docs:
   `CDNNotifyConfiguration, acl, append, attname, backtosource, cors, customdomain, delete,
   deletebucket, directcoldaccess, encryption, inventory, length, lifecycle, location, logging,
@@ -86,7 +84,7 @@ StringToSign =
   x-image-process, x-image-save-bucket, x-image-save-object, x-obs-security-token, object-lock,
   retention`.
   **`prefix`, `max-keys`, `marker`, `delimiter` are NOT in the list** → list parameters are NOT
-  part of the canonical resource (confirms EMPIRICAL_SPEC §1.4).
+  part of the canonical resource (confirms §1.4).
 - Multiple values of the same sub-resource key: only the first is used for signing.
 - Auth failure → **403** with error code `SignatureDoesNotMatch`.
 - Bucket addressing: virtual-host style (`bucket.obs.<region>.myhuaweicloud.com`); with a custom
@@ -150,7 +148,7 @@ Token validity: **24 h**. Status codes: 201 (201/200 per doc examples), 400, 401
 ### 2.4 Endpoints
 Global: `iam.myhuaweicloud.com`; per-region: `iam.<region>.myhuaweicloud.com`.
 HCS-style regions resolve via the **cn-north-4** IAM endpoint with GlobalCredentials
-(EMPIRICAL_SPEC §1.2: keep this behavior in the `hcs` quirk profile).
+(§1.2: keep this behavior in the `hcs` quirk profile).
 
 ---
 
@@ -226,7 +224,7 @@ Server object (observed doc example: field-for-field target for serde models):
 - Status enum: `ACTIVE, BUILD, ERROR, HARD_REBOOT, MIGRATING, REBOOT, REBUILD, RESIZE,
   REVERT_RESIZE, SHUTOFF, VERIFY_RESIZE, DELETED, SHELVED, SHELVED_OFFLOADED, UNKNOWN`.
 - `addresses` is keyed by **network/VPC id** (real cloud keys it by VPC *name* in some regions:
-  EMPIRICAL_SPEC §2.8; encode per profile). `OS-EXT-IPS:type` = `fixed` | `floating`.
+  §2.8; encode per profile). `OS-EXT-IPS:type` = `fixed` | `floating`.
 
 ### 3.2 Create
 - `POST /v1.1/{pid}/cloudservers` (pay-per-use) and `POST /v1/{pid}/cloudservers` (adds
@@ -287,7 +285,7 @@ Server object (observed doc example: field-for-field target for serde models):
 
 ### 3.7 Flavors
 - `GET /v1/{pid}/cloudservers/flavors` (ListFlavors + extended info): **this is the endpoint that
-  is NOT served in HCS regions** (EMPIRICAL_SPEC §2.2); probe via createServers `dry_run` instead.
+  is NOT served in HCS regions** (§2.2); probe via createServers `dry_run` instead.
 - Nova: `GET /v2.1/{pid}/flavors/detail`.
 
 ---
@@ -341,7 +339,7 @@ bssParam?: {chargingMode: "postPaid"|"prePaid", isAutoPay, isAutoRenew, periodTy
                                                 {"href": "https://…/{pid}/volumes/{id}", "rel": "bookmark"} ],
                   "name": "hallo5" } ] }
 ```
-**This is exactly the sparse shape the HCS region (tr-west-1) serves** (EMPIRICAL_SPEC §3.1):
+**This is exactly the sparse shape the HCS region (tr-west-1) serves** (§3.1):
 the `public` profile should serve the full shape here, the `hcs` profile serves DiskSummary and
 forces clients through the `self` link (os-vendor-volumes/{id}) for details.
 Query params: `marker, name, status, limit (default 1000), availability_zone, sort_key
@@ -376,7 +374,7 @@ Full Cinder-style object: the detail source in HCS regions:
     "wwn": " 688860300000d136fa16f48f05992360" } }
 ```
 ⚠️ `bootable` is a **string** (`"false"`/`"true"`), not a boolean: Cinder legacy. Attachments
-entries carry `{server_id, device}` (EMPIRICAL_SPEC §3.5).
+entries carry `{server_id, device}` (§3.5).
 
 ### 4.4 Snapshots
 - `POST /v2/{pid}/cloudsnapshots` with `{snapshot: {volume_id, force?, metadata?, description?, name?}}`
@@ -385,7 +383,7 @@ entries carry `{server_id, device}` (EMPIRICAL_SPEC §3.5).
   "os-extended-snapshot-attributes:progress"}}`.
 - `force: false` (default) refuses snapshots while the disk is in `attaching` status; `force: true`
   allows it. (In the real cloud, in-use SYSTEM disks still can't be snapshotted because they
-  cannot detach: EMPIRICAL_SPEC §3.4.)
+  cannot detach: §3.4.)
 - Cinder list: `GET /v2/{pid}/snapshots/detail` → `{snapshots: [{status: "available",
   description, updated_at, volume_id, id, size, "os-extended-snapshot-attributes:progress": "100%",
   name, "os-extended-snapshot-attributes:project_id", created_at, metadata}]}`.
@@ -450,7 +448,7 @@ Image goes `queued → saving → active`.
 2. `PUT /v1/cloudimages/{image_id}/upload` with `{"image_url": "bucketname:Centos6.5-disk1.vmdk"}`
    → **200** `{job_id}` (job_type `imsNativeImportImageJob`); poll; image status becomes `active`.
 
-### 5.4 Glance-style direct upload (the OBS-bypass route, EMPIRICAL_SPEC §5.2)
+### 5.4 Glance-style direct upload (the OBS-bypass route, §5.2)
 - `POST /v2/images` (create metadata) → **201**, status `queued`. Request: `name`, `visibility`
   (only `private`), `protected`, `container_format` (default `bare`), `disk_format`
   (`zvhd2|vhd|raw|iso|qcow2`, default zvhd2), `min_disk`, `min_ram`, `__os_version`, `tags`.
@@ -501,7 +499,7 @@ Image goes `queued → saving → active`.
 - From backup: `{name (req), backup_id (req), whole_image_type: "CBR"|…}`.
 → `{job_id}` (job_type `imsCreateWholeImageByInstanceJob`/`…ByBackupJob`).
 Docs do NOT require the server stopped for the ECS flow (it creates a backup first): but the
-real HCS deployment requires STOPPED (EMPIRICAL_SPEC §2.9; profile-gated).
+real HCS deployment requires STOPPED (§2.9; profile-gated).
 
 ### 5.7 Image status values
 `queued` (metadata created, awaiting file) → `saving` (uploading) → `active` (available);
@@ -584,7 +582,7 @@ Sources:
   port_range_min/max, remote_ip_prefix | remote_group_id | remote_address_group_id
   (mutually exclusive), security_group_id, tenant_id, id, description}}`.
 - **Duplicate rule → 409 `VPC.0602`** "Security group rule already exists." (docs code; the
-  real cloud was observed returning 409 `SecurityGroupRuleExists`: EMPIRICAL_SPEC §4.5 wins
+  real cloud was observed returning 409 `SecurityGroupRuleExists`: §4.5 wins
   for the sim, per profile).
 - Query: `GET /v1/{pid}/security-groups` (marker/limit/vpc_id), detail, rules list/detail;
   DELETE → 204.
@@ -658,7 +656,7 @@ Optional header `x-obs-bucket-type: OBJECT|POSIX`. Response 200:
   `IllegalLocationConstraintException`).
 - Response **200, no body**, header `Location: /<bucket-name>`.
 - Errors: 409 `BucketAlreadyExists` (globally unique namespace), 409 `BucketAlreadyOwnedByYou`,
-  400 `InvalidBucketName`. Max **100 buckets/account** (matches EMPIRICAL_SPEC §6.3 quota);
+  400 `InvalidBucketName`. Max **100 buckets/account** (matches §6.3 quota);
   deleted names release after ~30 min. Same-name re-create in the same region is idempotent.
 - Bucket naming: 3-63 chars, lowercase letters/digits/hyphens/periods, start with digit/letter,
   no IP-format, no leading/trailing `-`/`.`, no `..`, no `.-`/`-.` adjacency.
@@ -761,7 +759,7 @@ https://support.huaweicloud.com/intl/en-us/api-eip/ErrorCode.html.
 | `APIGW.0307` | 401 | The token must be updated. |
 | **`APIGW.0308`** | **429** | **The throttling threshold has been reached.** (default ~200 calls/s per API) |
 
-**Important interpretation for the simulator:** EMPIRICAL_SPEC §1.3 observed rapid scripted
+**Important interpretation for the simulator:** §1.3 observed rapid scripted
 calls → 401/403 with `APIGW.0301`. That matches this table: under rapid calling the gateway
 starts failing AK lookups (`AK access failed to reach the limit,forbidden.` → 401 APIGW.0301),
 and a 30 s backoff clears it. So the rate-limit emulation should emit **APIGW.0301/401** with
@@ -772,9 +770,9 @@ pure throttling response would be APIGW.0308/429. Implement both, configurable.
 | Code | HTTP | Documented message |
 |---|---|---|
 | `Ecs.0001` | 400 | Insufficient ECS quota |
-| **`Ecs.0005`** | **400** | Invalid parameter values / Invalid request body: the generic invalid-parameter code. The observed variant `"device is illegal"` (non-bootable volume at /dev/vda, EMPIRICAL_SPEC §2.6) is a real-world message under this code; docs note one code maps to many messages. |
+| **`Ecs.0005`** | **400** | Invalid parameter values / Invalid request body: the generic invalid-parameter code. The observed variant `"device is illegal"` (non-bootable volume at /dev/vda, §2.6) is a real-world message under this code; docs note one code maps to many messages. |
 | `Ecs.0011` | 400 | Password complexity not met |
-| **`Ecs.0100`** | **400** | The ECS status does not meet requirements…: observed variant `"server does not support reset password"` (EMPIRICAL_SPEC §2.7). Documented reset-password codes: Ecs.0610/0611/0613. |
+| **`Ecs.0100`** | **400** | The ECS status does not meet requirements…: observed variant `"server does not support reset password"` (§2.7). Documented reset-password codes: Ecs.0610/0611/0613. |
 | `Ecs.0114`/`Ecs.0614` | 404 | The ECS does not exist |
 | `Ecs.0605` | 400 | ECS locked |
 | `Common.0002` | 400 | The request body cannot be left blank |
@@ -829,11 +827,11 @@ Batch async APIs use `{"response": [{"id": …}]}` with per-item error entries
 - OBS: virtual-host style `bucket.obs.<region>.myhuaweicloud.com`; the bucket name is part of
   the Host header and the CanonicalizedResource.
 - SDKs accept arbitrary endpoints via `new Region(name, url)`: the wiring mechanism for the
-  simulator (EMPIRICAL_SPEC §1.5): clients pass `Region("sim", "http://127.0.0.1:<port>")`.
+  simulator (§1.5): clients pass `Region("sim", "http://127.0.0.1:<port>")`.
 - Project scoping: `X-Project-Id` header on project-scoped calls; `{project_id}` path segment
   in most URIs. One project per region.
 - HCS-style regions resolve via the **cn-north-4** IAM endpoint with GlobalCredentials
-  (EMPIRICAL_SPEC §1.2: keep this behavior in the `hcs` quirk profile).
+  (§1.2: keep this behavior in the `hcs` quirk profile).
 
 ---
 
@@ -851,12 +849,12 @@ Batch async APIs use `{"response": [{"id": …}]}` with per-item error entries
 ## 11. Open items / to verify against real captures
 
 - Whether ECS `addresses` is keyed by VPC name or VPC id per profile (spec says name in tr-west-1).
-- HCS sparse fields in ECS list view (flavor/az missing: EMPIRICAL_SPEC §2.8).
-- EVS create-response anomaly (id not under `volume.id` in HCS: EMPIRICAL_SPEC §3.3) has no
+- HCS sparse fields in ECS list view (flavor/az missing: §2.8).
+- EVS create-response anomaly (id not under `volume.id` in HCS: §3.3) has no
   documented counterpart; profile-gated.
 - The exact 409 code string for duplicate SG rules: docs say `VPC.0602`, observation says
   `SecurityGroupRuleExists`: encode the observed one per profile, keep both in the table.
 - OBS list-params signing: docs confirm `prefix`/`max-keys`/`marker` are NOT signed
   sub-resources (§1.2): matches observation; no open question.
 - IMS whole-image: docs allow running servers (backup-based), HCS observation requires STOPPED
-  (EMPIRICAL_SPEC §2.9): profile-gated.
+  (§2.9): profile-gated.

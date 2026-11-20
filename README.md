@@ -4,9 +4,7 @@
   <img src="https://raw.githubusercontent.com/larbi-ishak/Larrot/main/docs/larrot-logo-red.png" alt="Larrot" width="160">
 </p>
 
-# Larrot 🦜
-
-**Larrot repeats Huawei Cloud.**
+# Larrot
 
 *A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud.*
 
@@ -19,11 +17,7 @@
 > Larrot is an independent, community-developed open-source project.
 > It is not affiliated with, endorsed by, or sponsored by Huawei Technologies.
 
-Larrot is a parrot. It listens to Huawei Cloud and repeats the parts it
-implements: endpoints, per-service error envelopes, async jobs, and the
-production quirks we observed and documented in
-[docs/EMPIRICAL_SPEC.md](docs/EMPIRICAL_SPEC.md)
-(*yes, including `Ecs.0005 "device is illegal"`*).
+A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud.
 
 How faithful is it? Measured, not claimed: **72/72 conformance checks green
 across 15 core services**, 339 unit/integration tests, 130 negative tests,
@@ -204,7 +198,7 @@ Full catalog grouped by category: **[CATALOG.md](CATALOG.md)**
   in-use volume, can't detach a system disk
 - **Async job model**: every mutation returns `job_id`, completes after 1-3s, clients poll
 - **Per-region quirk profiles**: tr-west-1 (HCS) behaves differently from ap-southeast-1
-- **Exact error codes**: `Ecs.0005 "device is illegal"`, `APIGW.0301`, `SecurityGroupRuleExists`
+- **Exact error codes**: `Ecs.0005`, `APIGW.0301`, `SecurityGroupRuleExists`
 - **Rate limiting**: rapid calls → 401 `APIGW.0301`, 30s backoff clears it
 - **Signature verification**: recomputes SDK-HMAC-SHA256 and OBS v2 signatures (accept-and-check)
 
@@ -256,7 +250,7 @@ at 100%. Beyond those:
 - Single port: services that share a path on the real cloud (RDS/DDS/
   GaussDB on `/v3/{pid}/instances`, DCS/DMS on `/v2/{pid}/instances`) are
   separated by namespaced routes; first-registered wins on the bare path
-- Some error codes are modeled on documented behavior, not empirically
+- Some error codes are modeled on documented behavior, not directly
   observed (e.g., the newer 409 in-use guards)
 - Jobs always complete in 1-3s; no real region latency, quotas are static
 - Terraform provider compatibility is not yet validated

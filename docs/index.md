@@ -1,8 +1,6 @@
-# Larrot 🦜
+# Larrot
 
-**Larrot repeats Huawei Cloud.**
-
-A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud.
+**A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud.
 It runs the REST APIs of Huawei Cloud's international site on your
 machine - 59 services, 720 documented operations, on ports 8200/8201.
 
@@ -48,8 +46,6 @@ Full numbers: [Coverage](coverage.md), [Conformance](conformance.md).
 - [Architecture](architecture.md) - how it's built
 - [Real-world architectures](architectures.md) - the 50 tested scenarios
 - [Examples](examples.md) - SDK code and scenario walkthroughs
-- [Empirical spec](empirical-spec.md) - the observed production quirks
-  the simulator reproduces
 
 ## The web console
 

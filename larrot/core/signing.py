@@ -1,6 +1,6 @@
 """SDK-HMAC-SHA256 and OBS v2 signing: verification (server) and signing (client).
 
-Two signing universes (EMPIRICAL_SPEC §1.4):
+Two signing universes (see docs)1.4):
 - REST services: SDK-HMAC-SHA256 (HMAC-SHA256, canonical request)
 - OBS: v2 HMAC-SHA1 (different StringToSign, unsigned list params)
 """

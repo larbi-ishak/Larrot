@@ -90,7 +90,7 @@ def create_app() -> FastAPI:
     """Create the REST app (port 8200)."""
     app = FastAPI(
         title="Larrot",
-        description="Larrot repeats Huawei Cloud. A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud",
+        description="A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud",
         version="1.0.0",
         docs_url="/docs",
         redoc_url="/redoc",

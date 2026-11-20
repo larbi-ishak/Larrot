@@ -109,7 +109,7 @@ def _build_server(state, pid, spec, suffix=None):
 
 
 def resolve_device(server, volume_bootable, requested):
-    """The Ecs.0005 rules: pure function (EMPIRICAL_SPEC §2.6)."""
+    """The Ecs.0005 rules: pure function (see docs)2.6)."""
     used = [v["device"] for v in server["os-extended-volumes:volumes_attached"]]
     if requested:
         if requested.startswith("/dev/sd"):
