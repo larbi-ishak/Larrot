@@ -274,7 +274,6 @@ async def create_checkpoint(request: Request, pid: str):
         backup_ids.append(backup_id)
 
     async def _flip():
-        await asyncio.sleep(1.5)
         for bid in backup_ids:
             b = state.cbr_backups.get(bid)
             if b:
@@ -284,7 +283,8 @@ async def create_checkpoint(request: Request, pid: str):
         if c:
             c["status"] = "available"
 
-    asyncio.get_event_loop().create_task(_flip())
+    # Through the job engine so tests can force completion (complete_now)
+    await state.jobs.submit("createCheckpoint", {"checkpoint_id": cp_id}, _flip)
     return {"checkpoint": _checkpoint_json(state.checkpoints[cp_id])}
 
 
@@ -339,21 +339,46 @@ async def restore_backup(request: Request, pid: str, backup_id: str):
         return JSONResponse(cbr_error("CBR.0013", "The backup does not exist."), status_code=404)
     if b["status"] != "available":
         return JSONResponse(cbr_error("CBR.0005", "The backup is not available yet."), status_code=400)
-    if b["resource_type"] != "OS::Cinder::Volume":
-        return JSONResponse(cbr_error("CBR.0006",
-            "Only volume backups can be restored to volumes in the sim."), status_code=400)
+
+    if b["resource_type"] == "OS::Nova::Server":
+        # Server backup restore: provisions a replacement ECS (root volume included)
+        from .ecs import _build_server
+        image = next(iter(state.images))
+        flavor = next(f for f in state.flavors
+                      if state.project(pid)["name"] in f["regions"])
+        server = _build_server(state, pid, {
+            "imageRef": image, "flavorRef": flavor["id"],
+            "name": f"restore-{b['resource_name']}"[:64],
+        })
+        state.servers[server["id"]] = server
+
+        async def _server_ready():
+            s = state.servers.get(server["id"])
+            if s:
+                s["status"] = "ACTIVE"
+                s["OS-EXT-STS:vm_state"] = "active"
+                s["OS-EXT-STS:power_state"] = 1
+                s["updated"] = now_millis()
+            return None
+
+        await state.jobs.submit("restoreServer", {"server_id": server["id"]}, _server_ready)
+        body = await request.json()
+        return {"restore": {"resource_id": b["resource_id"], "server_id": server["id"],
+                             "volume_ids": "auto_boot;auto_data_1",
+                             "power_on": body.get("restore", {}).get("power_on", False),
+                             "mappings": [], "details": None}}
 
     new_vol_id = state.create_volume(pid, f"restore-{b['resource_name']}",
                                       b["resource_size"], "az-dc-1", "SAS", True)
 
     async def _flip():
-        await asyncio.sleep(1.5)
         v = state.volumes.get(new_vol_id)
         if v:
             v["status"] = "available"
             v["updated_at"] = now_millis()
 
-    asyncio.get_event_loop().create_task(_flip())
+    # Through the job engine so tests can force completion (complete_now)
+    await state.jobs.submit("restoreVolume", {"volume_id": new_vol_id}, _flip)
     body = await request.json()
     return {"restore": {"resource_id": b["resource_id"], "volume_id": new_vol_id,
                         "power_on": body.get("restore", {}).get("power_on", False),

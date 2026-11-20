@@ -284,15 +284,11 @@ async def create_snapshot(request: Request, pid: str):
             s["status"] = "available"
             s["updated_at"] = now_millis()
 
-    asyncio.get_event_loop().create_task(_flip_after(_flip, 1.2))
+    # Through the job engine so tests can force completion (complete_now)
+    await state.jobs.submit("createSnapshot", {"snapshot_id": snap_id}, _flip)
 
     s = state.snapshots[snap_id]
     return JSONResponse({"snapshot": _snap_json(s)}, status_code=202)
-
-
-async def _flip_after(fn, delay):
-    await asyncio.sleep(delay)
-    await fn()
 
 
 def _snap_json(s):

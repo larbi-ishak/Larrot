@@ -268,6 +268,13 @@ async def create_servers(request: Request, pid: str):
     if body.get("dry_run") is True:
         return Response(status_code=202)
 
+    # Quota enforcement (maxTotalInstances, mirrors the /cloudservers/limits view)
+    used = len([x for x in state.servers.values() if x["project_id"] == pid])
+    if used + count > 100:
+        return JSONResponse(ecs_error("Ecs.0015",
+            "The maximum number of ECS instances allowed per user has been reached."),
+            status_code=405)
+
     count = min(count, 100)
     server_ids, sub_jobs = [], []
     for i in range(count):
