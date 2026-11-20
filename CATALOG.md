@@ -144,4 +144,4 @@ Total: 59 services across 71 router modules. Every mutating call returns a
   `GET /v1/{pid}/jobs/{job_id}` until `SUCCESS` (1-3s, jittered).
 - **Quirk profiles**: the `hcs` profile (tr-west-1) reproduces observed
   production quirks: sparse list views, flavors 404, empty v2.1 volume lists.
-  See `EMPIRICAL_SPEC.md`.
+  See `docs/EMPIRICAL_SPEC.md`.

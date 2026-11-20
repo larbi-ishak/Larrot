@@ -3,9 +3,9 @@
 (Formerly known as `huawei-sim`.)
 
 How the simulator is built, how a request flows through it, and where every piece
-lives in the code. Companion docs: `EMPIRICAL_SPEC.md` (what the real cloud does),
+lives in the code. Companion docs: `docs/EMPIRICAL_SPEC.md` (what the real cloud does),
 `API_DOCS_RESEARCH.md` (what the official docs say), `DECISIONS.md` (why it's built
-this way), `DEVLOG.md` (the build journal).
+this way), `docs/DEVLOG.md` (the build journal).
 
 ---
 
@@ -24,7 +24,7 @@ complete before a server leaves `BUILD`; stopping a stopped server is rejected
 with the real error code.
 
 Fidelity targets, in priority order:
-1. `EMPIRICAL_SPEC.md`: observed real-cloud behavior wins everywhere.
+1. `docs/EMPIRICAL_SPEC.md`: observed real-cloud behavior wins everywhere.
 2. `API_DOCS_RESEARCH.md`: documented shapes where we have no observation.
 3. Anything unobserved and undocumented is a flagged placeholder (see `DECISIONS.md`).
 

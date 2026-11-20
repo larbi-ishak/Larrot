@@ -3,7 +3,7 @@
 
 Sends the same requests to a real Huawei Cloud test project AND to Larrot,
 normalizes dynamic fields, and diffs the responses. This converts
-EMPIRICAL_SPEC.md from manual notes into a runnable regression harness.
+docs/EMPIRICAL_SPEC.md from manual notes into a runnable regression harness.
 
 Modes:
   sim-only (default): validate the sim against expected statuses/shapes.

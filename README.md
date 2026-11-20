@@ -2,12 +2,7 @@
 
 # Larrot 🦜
 
-**Larrot repeats Huawei Cloud. Perfectly.**
-
-<p>
-  <img src="https://raw.githubusercontent.com/larbi-ishak/Larrot/main/docs/huawei-cloud-logo.png" alt="Huawei Cloud" width="280">
-</p>
-<sub>the cloud Larrot repeats</sub>
+**Larrot repeats Huawei Cloud.**
 
 *A local Huawei Cloud API simulator: like LocalStack, but for Huawei Cloud.*
 
@@ -17,15 +12,24 @@
 
 ---
 
-Larrot is a parrot. Larrot listens to Huawei Cloud and repeats it: every endpoint,
-every error envelope, every async job, every quirk we observed in production.
-*Yes, even `Ecs.0005 "device is illegal"`.*
+Larrot is a parrot. It listens to Huawei Cloud and repeats the parts it
+implements: endpoints, per-service error envelopes, async jobs, and the
+production quirks we observed and documented in
+[docs/EMPIRICAL_SPEC.md](docs/EMPIRICAL_SPEC.md)
+(*yes, including `Ecs.0005 "device is illegal"`*).
 
-**Can your SDK tell the difference? That's the point.**
+How faithful is it? Measured, not claimed: **72/72 conformance checks green
+across 15 core services**, 339 unit/integration tests, 130 negative tests,
+and the example below runs unmodified against the official
+`huaweicloudsdk*` Python SDKs. Full numbers:
+**[CONFORMANCE_REPORT.md](CONFORMANCE_REPORT.md)** and
+**[ROADMAP.md](ROADMAP.md)**.
 
-It runs the REST APIs of Huawei Cloud's international site (`*.myhuaweicloud.com`)
-on your machine: 59 services: IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, OBS, CCE,
-ModelArts + MaaS, and 50 more: on ports 8200/8201.
+It runs the REST APIs of Huawei Cloud's international site
+(`*.myhuaweicloud.com`) on your machine: **59 services** on ports
+8200/8201. See [CATALOG.md](CATALOG.md) for the full list grouped by
+category, and [Known limitations](#known-limitations) for what is shallow
+or missing.
 
 ## Quick start
 
@@ -58,26 +62,68 @@ larrot obs buckets
 larrot --json ecs list
 ```
 
-## Wire real SDKs
+## End-to-end with the official SDKs
 
-Point any `@huaweicloud` SDK at the simulator with a custom endpoint:
+This example runs **unmodified** against Larrot using the official
+`huaweicloudsdk*` packages (validated output below):
 
 ```python
+import time
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
-from huaweicloudsdkecs.v2 import EcsClient, CreateServersRequest
+from huaweicloudsdkvpc.v2 import (VpcClient, CreateVpcRequest,
+                                  CreateVpcRequestBody, CreateVpcOption)
+from huaweicloudsdkevs.v2 import (EvsClient, CreateVolumeRequest,
+                                  CreateVolumeRequestBody, CreateVolumeOption,
+                                  ShowVolumeRequest)
+from huaweicloudsdkecs.v2 import (EcsClient, CreatePostPaidServersRequest,
+                                  CreatePostPaidServersRequestBody, PostPaidServer,
+                                  ShowJobRequest, ShowServerRequest)
 
-credentials = BasicCredentials() \
-    .with_ak("HWYSIMAK00000001") \
+ENDPOINT = "http://127.0.0.1:8200"
+credentials = BasicCredentials().with_ak("HWYSIMAK00000001") \
     .with_sk("HWYSIMSK00000001") \
     .with_project_id("79814d675f6142d9b4a8ee417b924444")
+vpc_client = VpcClient.new_builder().with_credentials(credentials).with_endpoint(ENDPOINT).build()
+evs_client = EvsClient.new_builder().with_credentials(credentials).with_endpoint(ENDPOINT).build()
+ecs_client = EcsClient.new_builder().with_credentials(credentials).with_endpoint(ENDPOINT).build()
 
-client = EcsClient.newBuilder() \
-    .withCredential(credentials) \
-    .withEndpoint("http://127.0.0.1:8200") \
-    .build()
+# 1. Create a VPC
+vpc = vpc_client.create_vpc(CreateVpcRequest(
+    body=CreateVpcRequestBody(vpc=CreateVpcOption(name="demo-vpc", cidr="192.168.0.0/16"))
+)).vpc
+print(f"1. VPC created:   {vpc.id}  ({vpc.name}, {vpc.cidr})")
+
+# 2. Create a volume (async: returns job_id + volume_ids)
+vol_resp = evs_client.create_volume(CreateVolumeRequest(
+    body=CreateVolumeRequestBody(volume=CreateVolumeOption(size=10, name="demo-vol"))
+))
+while ecs_client.show_job(ShowJobRequest(job_id=vol_resp.job_id)).status != "SUCCESS":
+    time.sleep(0.5)
+vol = evs_client.show_volume(ShowVolumeRequest(volume_id=vol_resp.volume_ids[0])).volume
+print(f"2. Volume ready:  {vol.name}, {vol.size} GB, status={vol.status}")
+
+# 3. Create an ECS instance (async: returns a job)
+resp = ecs_client.create_post_paid_servers(CreatePostPaidServersRequest(
+    body=CreatePostPaidServersRequestBody(server=PostPaidServer(
+        image_ref="1ce5800a-e487-4c1b-b264-3353a39e2b4b",
+        flavor_ref="s6.large.2", name="demo-vm"))))
+while ecs_client.show_job(ShowJobRequest(job_id=resp.job_id)).status != "SUCCESS":
+    time.sleep(0.5)
+
+# 4. Show the server
+server = ecs_client.show_server(ShowServerRequest(server_id=resp.server_ids[0])).server
+print(f"3. Server ready:  {server.name}  status={server.status}  flavor={server.flavor.id}")
 ```
 
-Your existing scripts run **unchanged**: just change the endpoint.
+Actual output against a running Larrot:
+
+```
+1. VPC created:   a5447b0b-a64a-48b7-af4f-b05b86ed8834  (demo-vpc, 192.168.0.0/16)
+2. Volume ready:  demo-vol, 10 GB, status=available
+3. Server ready:  demo-vm  status=ACTIVE  flavor=s6.large.2
+```
+
+Your existing SDK scripts run unchanged: point the endpoint at Larrot and go.
 
 ## Services
 
@@ -143,6 +189,36 @@ python3 tools/smoke.py        # 23-check smoke suite
 python3 -m pytest tests/      # unit tests
 ```
 
+## Known limitations
+
+Honest scope statement: Larrot emulates **API behavior**, not infrastructure.
+No virtual machines run, no packets flow, no disks exist.
+
+**Depth varies by service.** The conformance suite covers 15 core services
+(IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, DNS, KMS, ELB, SFS, CCE, FG, GW)
+at 100%. Beyond those:
+
+- **Deep** (state machines, guards, async jobs, cross-service validation):
+  OBS, HSS, CDN, DWS, CSS, MRS, SMS, DC, ER, DIS, DataArts, OMS, DES,
+  CodeArts, ServiceStage, CSE, CCI, CFW, DSC, VOD, IEF, ModelArts + MaaS
+- **Shallow** (basic CRUD, minimal lifecycle): BMS, AS, SMN, CES, LTS,
+  DCS, DMS, DDS, GaussDB, WAF, TMS, EPS, APIG, SWR, IoTDA, AOM, DLI,
+  Anti-DDoS, BSS, NAT, VPN, SFS, peering, ACL, routes
+
+**Other limitations:**
+
+- Signature verification is accept-and-check: mismatches are logged, never
+  rejected (a deliberate choice for local development; the real cloud
+  rejects them)
+- Single port: services that share a path on the real cloud (RDS/DDS/
+  GaussDB on `/v3/{pid}/instances`, DCS/DMS on `/v2/{pid}/instances`) are
+  separated by namespaced routes; first-registered wins on the bare path
+- Some error codes are modeled on documented behavior, not empirically
+  observed (e.g., the newer 409 in-use guards)
+- Jobs always complete in 1-3s; no real region latency, quotas are static
+- Terraform provider compatibility is not yet validated
+  (see [examples/terraform](examples/terraform/README.md))
+
 ## License
 
 Apache 2.0: see [LICENSE](LICENSE)
@@ -150,10 +226,3 @@ Apache 2.0: see [LICENSE](LICENSE)
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)
-
-## Trademark notice
-
-Huawei Cloud and the Huawei Cloud logo are trademarks of Huawei Technologies
-Co., Ltd. Larrot is an independent, community project and is not affiliated
-with, endorsed by, or sponsored by Huawei. The logo is used here only to
-identify the service whose APIs this project simulates.
