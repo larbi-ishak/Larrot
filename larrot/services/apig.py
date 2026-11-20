@@ -279,3 +279,31 @@ async def delete_app(request: Request, pid: str, app_id: str):
         return JSONResponse({"error_msg": "App not found", "error_code": "APIG.0006"}, status_code=404)
     del s.apig_apps[app_id]
     return Response(status_code=204)
+
+
+@router.post("/v2/{pid}/apigw/authorizers")
+async def create_authorizer(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "apig_authorizers"):
+        s.apig_authorizers = {}
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse({"error_msg": "name is required", "error_code": "APIG.0001"}, status_code=400)
+    aid = new_id()
+    s.apig_authorizers[aid] = {
+        "id": aid, "name": name,
+        "type": body.get("type", "FRONT"),
+        "authorizer_uri": body.get("authorizer_uri", ""),
+        "user_data": body.get("user_data", ""),
+        "project_id": pid, "created_at": now_millis(),
+    }
+    return {"id": aid, "name": name}
+
+
+@router.get("/v2/{pid}/apigw/authorizers")
+async def list_authorizers(request: Request, pid: str):
+    s = request.app.state.sim
+    auths = [a for a in getattr(s, "apig_authorizers", {}).values()
+             if a["project_id"] == pid]
+    return {"authorizers": auths, "total": len(auths)}

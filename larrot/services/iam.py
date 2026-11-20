@@ -582,3 +582,58 @@ async def delete_protocol(request: Request, provider_id: str, protocol_id: str):
         return JSONResponse(apigw_error("IAM.0014", "protocol not found"), status_code=404)
     del state.iam_protocols[key]
     return Response(status_code=204)
+
+
+# ---------------------------------------------------------------------------
+# access keys (OS-CREDENTIAL, tier-7)
+# ---------------------------------------------------------------------------
+
+@router.post("/v3.0/OS-CREDENTIAL/credentials")
+async def create_access_key(request: Request):
+    state = request.app.state.sim
+    if not hasattr(state, "iam_credentials"):
+        state.iam_credentials = {}
+    body = await request.json()
+    user_id = body.get("user_id", "")
+    if user_id and user_id not in getattr(state, "iam_users", {}):
+        return JSONResponse(apigw_error("IAM.0002", "user not found"), status_code=404)
+    ak = "HWY" + new_id()[:17].upper()
+    sk = new_id().replace("-", "") + new_id().replace("-", "")  # 64 chars
+    state.iam_credentials[ak] = {
+        "access": ak, "secret": sk, "status": "active",
+        "user_id": user_id, "description": body.get("description", ""),
+        "create_time": now_millis(),
+    }
+    return {"credential": {"access": ak, "secret": sk, "status": "active",
+                            "user_id": user_id,
+                            "description": body.get("description", "")}}
+
+
+@router.get("/v3.0/OS-CREDENTIAL/credentials")
+async def list_access_keys(request: Request):
+    state = request.app.state.sim
+    creds = [{"access": c["access"], "status": c["status"],
+              "user_id": c["user_id"], "description": c["description"],
+              "create_time": c["create_time"]}
+             for c in getattr(state, "iam_credentials", {}).values()]
+    return {"credentials": creds}
+
+
+@router.get("/v3.0/OS-CREDENTIAL/credentials/{access_key}")
+async def show_access_key(request: Request, access_key: str):
+    state = request.app.state.sim
+    c = getattr(state, "iam_credentials", {}).get(access_key)
+    if not c:
+        return JSONResponse(apigw_error("IAM.0015", "access key not found"), status_code=404)
+    return {"credential": {"access": c["access"], "status": c["status"],
+                            "user_id": c["user_id"], "description": c["description"],
+                            "create_time": c["create_time"]}}
+
+
+@router.delete("/v3.0/OS-CREDENTIAL/credentials/{access_key}")
+async def delete_access_key(request: Request, access_key: str):
+    state = request.app.state.sim
+    if access_key not in getattr(state, "iam_credentials", {}):
+        return JSONResponse(apigw_error("IAM.0015", "access key not found"), status_code=404)
+    del state.iam_credentials[access_key]
+    return Response(status_code=204)

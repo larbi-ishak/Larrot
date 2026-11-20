@@ -182,3 +182,61 @@ async def create_data_key(request: Request, pid: str):
     cipher = _b64.b64encode(f"sim-encrypted:{plain}".encode()).decode()
     return {"data_key_length": key_spec, "plain_text": plain,
             "cipher_text": cipher, "key_id": k["id"]}
+
+
+@router.post("/v1/{pid}/kms/encrypt-datakey")
+async def encrypt_data_key(request: Request, pid: str):
+    """Encrypt a plain data key with a CMK."""
+    import base64 as _b64
+    s = request.app.state.sim
+    body = await request.json()
+    k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
+    if not k:
+        return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}},
+                            status_code=404)
+    plain = body.get("plain_text", "")
+    if not plain:
+        return JSONResponse({"error": {"code": "KMS.1001",
+                                        "message": "plain_text is required"}}, status_code=400)
+    cipher = _b64.b64encode(f"sim-encrypted:{plain}".encode()).decode()
+    return {"key_id": k["id"], "cipher_text": cipher}
+
+
+@router.post("/v1/{pid}/kms/decrypt-datakey")
+async def decrypt_data_key(request: Request, pid: str):
+    """Decrypt an encrypted data key."""
+    import base64 as _b64
+    s = request.app.state.sim
+    body = await request.json()
+    k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
+    if not k:
+        return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}},
+                            status_code=404)
+    cipher = body.get("cipher_text", "")
+    if not cipher:
+        return JSONResponse({"error": {"code": "KMS.1001",
+                                        "message": "cipher_text is required"}}, status_code=400)
+    try:
+        raw = _b64.b64decode(cipher).decode()
+        if not raw.startswith("sim-encrypted:"):
+            raise ValueError("not a sim cipher")
+        plain = raw[len("sim-encrypted:"):]
+    except Exception:
+        return JSONResponse({"error": {"code": "KMS.1003",
+                                        "message": "invalid cipher_text"}}, status_code=400)
+    return {"key_id": k["id"], "plain_text": plain}
+
+
+@router.post("/v1/{pid}/kms/cancel-key-deletion")
+async def cancel_key_deletion(request: Request, pid: str):
+    """Cancel the scheduled deletion of a CMK (restores it to disabled)."""
+    s = request.app.state.sim
+    body = await request.json()
+    k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
+    if not k:
+        return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}},
+                            status_code=404)
+    k["state"] = "3"  # disabled (pending deletion cancelled)
+    k.pop("deletion_date", None)
+    k["updated_at"] = now_millis()
+    return {"key_id": k["id"], "key_state": 3}

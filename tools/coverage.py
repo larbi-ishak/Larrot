@@ -1235,5 +1235,47 @@ REGISTRY_TIER6 = {
 for _svc, _ops in REGISTRY_TIER6.items():
     REGISTRY.setdefault(_svc, []).extend(_ops)
 
+
+# ---------------------------------------------------------------------------
+# Tier-7 registries: access keys, authorizers, inventory/replication, datakey crypto
+# ---------------------------------------------------------------------------
+
+REGISTRY_TIER7 = {
+    "IAM": [
+        ("CreateAccessKey", "POST", "/v3.0/OS-CREDENTIAL/credentials"),
+        ("ListAccessKeys", "GET", "/v3.0/OS-CREDENTIAL/credentials"),
+        ("ShowAccessKey", "GET", "/v3.0/OS-CREDENTIAL/credentials/{access_key}"),
+        ("DeleteAccessKey", "DELETE", "/v3.0/OS-CREDENTIAL/credentials/{access_key}"),
+    ],
+    "APIG": [
+        ("CreateAuthorizer", "POST", "/v2/{pid}/apigw/authorizers"),
+        ("ListAuthorizers", "GET", "/v2/{pid}/apigw/authorizers"),
+    ],
+    "OBS": [
+        ("SetBucketInventory", "PUT", "/{bucket}?inventory"),
+        ("GetBucketInventory", "GET", "/{bucket}?inventory"),
+        ("SetBucketReplication", "PUT", "/{bucket}?replication"),
+        ("GetBucketReplication", "GET", "/{bucket}?replication"),
+        ("SetBucketNotification", "PUT", "/{bucket}?notification"),
+        ("GetBucketNotification", "GET", "/{bucket}?notification"),
+        ("DeleteBucketWebsite", "DELETE", "/{bucket}?website"),
+        ("DeleteBucketCors", "DELETE", "/{bucket}?cors"),
+        ("DeleteBucketLifecycle", "DELETE", "/{bucket}?lifecycle"),
+        ("DeleteBucketEncryption", "DELETE", "/{bucket}?encryption"),
+        ("DeleteBucketPolicy", "DELETE", "/{bucket}?policy"),
+    ],
+    "KMS": [
+        ("EncryptDataKey", "POST", "/v1/{pid}/kms/encrypt-datakey"),
+        ("DecryptDataKey", "POST", "/v1/{pid}/kms/decrypt-datakey"),
+        ("CancelKeyDeletion", "POST", "/v1/{pid}/kms/cancel-key-deletion"),
+    ],
+    "VPC": [
+        ("CreateSubnetNested", "POST", "/v1/{pid}/vpcs/{vpc_id}/subnets"),
+    ],
+}
+
+for _svc, _ops in REGISTRY_TIER7.items():
+    REGISTRY.setdefault(_svc, []).extend(_ops)
+
 if __name__ == "__main__":
     run()

@@ -163,11 +163,7 @@ async def show_subnet(request: Request, pid: str, subnet_id: str):
     return {"subnet": _subnet_json(s)}
 
 
-@router.post("/v1/{pid}/subnets")
-async def create_subnet(request: Request, pid: str):
-    state = request.app.state.sim
-    body = await request.json()
-    spec = body["subnet"]
+def _create_subnet_core(state, pid, spec):
     vpc = state.vpcs.get(spec.get("vpc_id", ""))
     if not vpc or vpc["project_id"] != pid:
         return JSONResponse(vpc_error("VPC.0003", "VPC does not exist."), status_code=404)
@@ -184,6 +180,23 @@ async def create_subnet(request: Request, pid: str):
               "created_at": now, "updated_at": now, "project_id": pid}
     state.subnets[subnet["id"]] = subnet
     return {"subnet": _subnet_json(subnet)}
+
+
+@router.post("/v1/{pid}/vpcs/{vpc_id}/subnets")
+async def create_subnet_nested(request: Request, pid: str, vpc_id: str):
+    """Creating a subnet at the documented nested path."""
+    state = request.app.state.sim
+    body = await request.json()
+    spec = dict(body.get("subnet", {}))
+    spec["vpc_id"] = vpc_id  # the path wins, like the real API
+    return _create_subnet_core(state, pid, spec)
+
+
+@router.post("/v1/{pid}/subnets")
+async def create_subnet(request: Request, pid: str):
+    state = request.app.state.sim
+    body = await request.json()
+    return _create_subnet_core(state, pid, body["subnet"])
 
 
 @router.put("/v1/{pid}/vpcs/{vpc_id}/subnets/{subnet_id}")

@@ -100,14 +100,16 @@ async def _bucket_handler(state, request, bucket, method, query):
             b["versioning"] = b"Enabled" in body_bytes
             return PlainTextResponse("", status_code=200)
         if any(k in query for k in ("acl", "tagging", "policy", "cors", "lifecycle",
-                                     "website", "encryption")):
+                                     "website", "encryption", "inventory",
+                                     "replication", "notification")):
             b = state.obs_buckets.get(bucket)
             if not b:
                 return _error("NoSuchBucket", "The specified bucket does not exist",
                               extra={"BucketName": bucket}, status=404)
             body_bytes = await request.body()
             key = next(k for k in ("acl", "tagging", "policy", "cors", "lifecycle",
-                                    "website", "encryption")
+                                    "website", "encryption", "inventory",
+                                    "replication", "notification")
                        if k in query)
             b[key] = body_bytes.decode(errors="replace")[:2048]
             return PlainTextResponse("", status_code=200)
@@ -151,12 +153,16 @@ async def _bucket_handler(state, request, bucket, method, query):
         body += '</DeleteResult>'
         return PlainTextResponse(body, media_type="application/xml")
 
-    if method == "DELETE" and "tagging" in query:
+    if method == "DELETE" and any(k in query for k in
+                                   ("tagging", "website", "cors", "lifecycle",
+                                    "encryption", "policy")):
         b = state.obs_buckets.get(bucket)
         if not b:
             return _error("NoSuchBucket", "The specified bucket does not exist",
                           extra={"BucketName": bucket}, status=404)
-        b.pop("tagging", None)
+        key = next(k for k in ("tagging", "website", "cors", "lifecycle",
+                                "encryption", "policy") if k in query)
+        b.pop(key, None)
         return PlainTextResponse("", status_code=204)
 
     if method == "DELETE":
@@ -253,6 +259,26 @@ async def _bucket_handler(state, request, bucket, method, query):
                     'xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
                     + stored + '</GetBucketEncryptionResult>')
             return PlainTextResponse(body, media_type="application/xml")
+        for sub in ("inventory", "replication", "notification"):
+            if sub in query:
+                if not b:
+                    return _error("NoSuchBucket", "The specified bucket does not exist",
+                                  extra={"BucketName": bucket}, status=404)
+                stored = b.get(sub, "")
+                wrappers = {
+                    "inventory": ("GetBucketInventoryConfigurationResult",
+                                  "InventoryConfiguration"),
+                    "replication": ("ReplicationConfiguration",
+                                    "ReplicationConfiguration"),
+                    "notification": ("GetBucketNotificationResult",
+                                     "NotificationConfiguration"),
+                }
+                outer, inner = wrappers[sub]
+                body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                        f'<{outer} xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
+                        + (stored if stored else f"<{inner}></{inner}>")
+                        + f'</{outer}>')
+                return PlainTextResponse(body, media_type="application/xml")
         if "versions" in query:
             if not b:
                 return _error("NoSuchBucket", "The specified bucket does not exist",

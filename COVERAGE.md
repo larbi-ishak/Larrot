@@ -106,6 +106,7 @@ test references it, **missing** = documented but not implemented.
 | UpdatePort | `PUT` | `/v1/{pid}/ports/{port_id}` | OK |
 | CreatePort | `POST` | `/v1/{pid}/ports` | OK |
 | DeletePort | `DELETE` | `/v1/{pid}/ports/{port_id}` | OK |
+| CreateSubnetNested | `POST` | `/v1/{pid}/vpcs/{vpc_id}/subnets` | OK |
 
 ## EIP (100% of documented operations implemented)
 
@@ -195,6 +196,9 @@ test references it, **missing** = documented but not implemented.
 | GetPublicKey | `GET` | `/v1/{pid}/kms/get-publickey/{key_id}` | OK |
 | UpdateKeyAlias | `POST` | `/v1/{pid}/kms/update-key-alias` | OK |
 | CreateDataKey | `POST` | `/v1/{pid}/kms/create-datakey` | OK |
+| EncryptDataKey | `POST` | `/v1/{pid}/kms/encrypt-datakey` | OK |
+| DecryptDataKey | `POST` | `/v1/{pid}/kms/decrypt-datakey` | OK |
+| CancelKeyDeletion | `POST` | `/v1/{pid}/kms/cancel-key-deletion` | OK |
 
 ## ELB (100% of documented operations implemented)
 
@@ -299,6 +303,10 @@ test references it, **missing** = documented but not implemented.
 | ListProtocols | `GET` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols` | OK |
 | ShowProtocol | `GET` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}` | OK |
 | DeleteProtocol | `DELETE` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}` | OK |
+| CreateAccessKey | `POST` | `/v3.0/OS-CREDENTIAL/credentials` | OK |
+| ListAccessKeys | `GET` | `/v3.0/OS-CREDENTIAL/credentials` | OK |
+| ShowAccessKey | `GET` | `/v3.0/OS-CREDENTIAL/credentials/{access_key}` | OK |
+| DeleteAccessKey | `DELETE` | `/v3.0/OS-CREDENTIAL/credentials/{access_key}` | OK |
 
 ## FG (100% of documented operations implemented)
 
@@ -358,6 +366,17 @@ test references it, **missing** = documented but not implemented.
 | DeleteBucketTagging | `DELETE` | `/{bucket}?tagging` | OK |
 | SetObjectAcl | `PUT` | `/{bucket}/{key}?acl` | OK |
 | RestoreObject | `POST` | `/{bucket}/{key}?restore` | OK |
+| SetBucketInventory | `PUT` | `/{bucket}?inventory` | OK |
+| GetBucketInventory | `GET` | `/{bucket}?inventory` | OK |
+| SetBucketReplication | `PUT` | `/{bucket}?replication` | OK |
+| GetBucketReplication | `GET` | `/{bucket}?replication` | OK |
+| SetBucketNotification | `PUT` | `/{bucket}?notification` | OK |
+| GetBucketNotification | `GET` | `/{bucket}?notification` | OK |
+| DeleteBucketWebsite | `DELETE` | `/{bucket}?website` | OK |
+| DeleteBucketCors | `DELETE` | `/{bucket}?cors` | OK |
+| DeleteBucketLifecycle | `DELETE` | `/{bucket}?lifecycle` | OK |
+| DeleteBucketEncryption | `DELETE` | `/{bucket}?encryption` | OK |
+| DeleteBucketPolicy | `DELETE` | `/{bucket}?policy` | OK |
 
 ## BMS (100% of documented operations implemented)
 
@@ -531,6 +550,8 @@ test references it, **missing** = documented but not implemented.
 | DeleteThrottle | `DELETE` | `/v2/{pid}/apigw/throttles/{throttle_id}` | OK |
 | ShowApp | `GET` | `/v2/{pid}/apigw/apps/{app_id}` | OK |
 | DeleteApp | `DELETE` | `/v2/{pid}/apigw/apps/{app_id}` | OK |
+| CreateAuthorizer | `POST` | `/v2/{pid}/apigw/authorizers` | OK |
+| ListAuthorizers | `GET` | `/v2/{pid}/apigw/authorizers` | OK |
 
 ## SWR (100% of documented operations implemented)
 
@@ -1034,19 +1055,19 @@ deep/shallow lists in the README's Known limitations.
 |---|---|---|---|---|---|
 | ECS | 42 | 42 | 0 | 0 | 100% |
 | EVS | 18 | 18 | 0 | 0 | 100% |
-| VPC | 24 | 24 | 0 | 0 | 100% |
+| VPC | 25 | 25 | 0 | 0 | 100% |
 | EIP | 8 | 8 | 0 | 0 | 100% |
 | IMS | 6 | 6 | 0 | 0 | 100% |
 | CBR | 13 | 13 | 0 | 0 | 100% |
 | RDS | 11 | 11 | 0 | 0 | 100% |
 | DNS | 10 | 10 | 0 | 0 | 100% |
-| KMS | 11 | 11 | 0 | 0 | 100% |
+| KMS | 14 | 14 | 0 | 0 | 100% |
 | ELB | 18 | 18 | 0 | 0 | 100% |
 | SFS | 4 | 4 | 0 | 0 | 100% |
 | CCE | 18 | 18 | 0 | 0 | 100% |
-| IAM | 44 | 44 | 0 | 0 | 100% |
+| IAM | 48 | 48 | 0 | 0 | 100% |
 | FG | 5 | 5 | 0 | 0 | 100% |
-| OBS | 44 | 44 | 0 | 0 | 100% |
+| OBS | 55 | 55 | 0 | 0 | 100% |
 | BMS | 8 | 8 | 0 | 0 | 100% |
 | AS | 10 | 10 | 0 | 0 | 100% |
 | SMN | 13 | 13 | 0 | 0 | 100% |
@@ -1058,7 +1079,7 @@ deep/shallow lists in the README's Known limitations.
 | WAF | 10 | 10 | 0 | 0 | 100% |
 | TMS | 4 | 4 | 0 | 0 | 100% |
 | EPS | 5 | 5 | 0 | 0 | 100% |
-| APIG | 25 | 25 | 0 | 0 | 100% |
+| APIG | 27 | 27 | 0 | 0 | 100% |
 | SWR | 7 | 7 | 0 | 0 | 100% |
 | ModelArts | 39 | 39 | 0 | 0 | 100% |
 | IoTDA | 10 | 10 | 0 | 0 | 100% |
@@ -1095,6 +1116,6 @@ deep/shallow lists in the README's Known limitations.
 | DSC | 6 | 6 | 0 | 0 | 100% |
 | VOD | 10 | 10 | 0 | 0 | 100% |
 | IEF | 8 | 8 | 0 | 0 | 100% |
-| **OVERALL** | **699** | **699** | **0** | **0** | **100%** |
+| **OVERALL** | **720** | **720** | **0** | **0** | **100%** |
 
 Run `python3 tools/coverage.py` to regenerate.
