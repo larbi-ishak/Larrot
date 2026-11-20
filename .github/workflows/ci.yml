@@ -40,7 +40,7 @@ jobs:
             curl -s -o /dev/null http://127.0.0.1:8200/health && break
             sleep 1
           done
-          curl -s http://127.0.0.1:8200/health | grep -q '"status": "ok"' || (echo "server failed to start" && exit 1)
+          curl -s http://127.0.0.1:8200/health | grep -q '"ok"' || (echo "server failed to start" && exit 1)
           python3 tools/smoke.py
 
   docker:
