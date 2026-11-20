@@ -120,7 +120,7 @@ auto-refreshes every 5s</p>
 </table>
 
 <div class="footer">
-<p>huawei-sim v1.0.0 · {total_jobs} total jobs · {running_jobs} running ·
-<a href="https://github.com/your-org/huawei-sim">GitHub</a> · Apache 2.0</p>
+<p>Larrot · {total_jobs} total jobs · {running_jobs} running ·
+<a href="/console">console</a> · <a href="https://github.com/larbi-ishak/Larrot">GitHub</a> · Apache 2.0</p>
 </div>
 </body></html>"""

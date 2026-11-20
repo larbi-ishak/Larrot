@@ -183,3 +183,71 @@ checkpoint = cbr_client.create_checkpoint(
 )
 # checkpoint.status: "protecting" → "available" (the live disk IS captured)
 ```
+
+---
+
+# Scenario-based testing examples
+
+These mirror real workflows and are executable: each one is a passing test in
+`tests/test_scenarios.py`. Run the whole set:
+
+```bash
+python3 -m pytest tests/test_scenarios.py -v
+```
+
+## S1: Deploy a three-tier web application
+
+Network first, then compute, then exposure, then load balancing:
+
+```python
+vpc = vpc_client.create_vpc(CreateVpcRequest(
+    body=CreateVpcRequestBody(vpc=CreateVpcOption(name="web-vpc", cidr="10.10.0.0/16")))).vpc
+# subnet -> security group -> 2x ECS -> EIP bound to a port -> ELB
+# (listener + pool + both servers as members)
+```
+
+Assert what a real deployment would assert: both servers ACTIVE, the EIP bound,
+the pool holding two members, and `/admin/graph/{server_id}` showing the
+topology (NIC + attached volumes).
+
+## S2: Disaster recovery
+
+```python
+server -> volume -> snapshot (available) -> CBR vault (both resources)
+       -> checkpoint -> backup available -> POST /backups/{id}/restore
+       -> a replacement ECS is provisioned
+```
+
+The restore of a server backup provisions a new ECS with its root volume,
+through the async job engine like the real service.
+
+## S3: Tenant isolation
+
+Create one server per project (ap-southeast-1 and tr-west-1). Assert each list
+shows only its own, cross-project reads 404 in both directions, and the HCS
+project keeps its sparse list view (no flavor) even with servers present.
+
+## S4: Quota exhaustion
+
+Fill the 100-instance quota in one batch create, assert the next create is
+rejected with `405 Ecs.0015`, check `/cloudservers/limits` shows 100 used,
+delete a batch, retry, and succeed. Quota enforcement lives in the ECS create
+path, mirroring the limits view.
+
+## S5: Failure recovery with chaos
+
+```bash
+curl -X POST http://127.0.0.1:8200/admin/chaos \
+  -d '{"service":"ecs","mode":"job","failure_rate":1.0,"error_code":"Ecs.0900"}'
+```
+
+The create is accepted, the job FAILs with the injected code, the server stays
+in BUILD. Reset the rules, retry, and the new server reaches ACTIVE. This is
+how you test your client's retry and reconciliation logic against a broken
+cloud.
+
+## Try them in the console
+
+Open `http://127.0.0.1:8200/console` while the scenario tests run: the
+resource browser auto-refreshes every 3 seconds, and the chaos panel can
+inject the S5 failure rule interactively.

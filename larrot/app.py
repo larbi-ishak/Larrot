@@ -124,12 +124,17 @@ def create_app() -> FastAPI:
             status_code=404,
         )
 
-    # Web dashboard
+    # Web dashboard + console
     from fastapi.responses import HTMLResponse
+    from .console import console_html
 
     @app.get("/", include_in_schema=False, response_class=HTMLResponse)
     async def dashboard():
         return HTMLResponse(dashboard_html(state))
+
+    @app.get("/console", include_in_schema=False, response_class=HTMLResponse)
+    async def console():
+        return HTMLResponse(console_html(state))
 
     # Health check
     @app.get("/health", include_in_schema=False)
