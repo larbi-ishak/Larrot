@@ -145,3 +145,66 @@ async def delete_apig_environment(request: Request, pid: str, env_id: str):
         return JSONResponse({"error_msg": "Environment not found", "error_code": "APIG.0005"}, status_code=404)
     del s.apig_environments[env_id]
     return Response(status_code=204)
+
+
+@router.post("/v2/{pid}/apigw/throttles")
+async def create_throttle(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "apig_throttles"):
+        s.apig_throttles = {}
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse({"error_msg": "name is required", "error_code": "APIG.0001"}, status_code=400)
+    tid = new_id()
+    s.apig_throttles[tid] = {
+        "id": tid, "name": name,
+        "time_interval": body.get("time_interval", 60000),
+        "time_unit": body.get("time_unit", "MINUTE"),
+        "api_call_num": body.get("api_call_num", 100),
+        "app_call_limit": body.get("app_call_limit", 100),
+        "description": body.get("description", ""),
+        "project_id": pid, "created_at": now_millis(),
+    }
+    return {"id": tid, "name": name}
+
+
+@router.get("/v2/{pid}/apigw/throttles")
+async def list_throttles(request: Request, pid: str):
+    s = request.app.state.sim
+    ts = [t for t in getattr(s, "apig_throttles", {}).values() if t["project_id"] == pid]
+    return {"throttles": ts, "total": len(ts)}
+
+
+@router.post("/v2/{pid}/apigw/apps")
+async def create_app(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "apig_apps"):
+        s.apig_apps = {}
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse({"error_msg": "name is required", "error_code": "APIG.0001"}, status_code=400)
+    aid = new_id()
+    s.apig_apps[aid] = {
+        "id": aid, "name": name, "description": body.get("description", ""),
+        "app_key": new_id()[:16], "app_secret": new_id()[:32],
+        "project_id": pid, "created_at": now_millis(),
+    }
+    return {"id": aid, "name": name}
+
+
+@router.get("/v2/{pid}/apigw/apps")
+async def list_apps(request: Request, pid: str):
+    s = request.app.state.sim
+    apps = [a for a in getattr(s, "apig_apps", {}).values() if a["project_id"] == pid]
+    return {"apps": apps, "total": len(apps)}
+
+
+@router.get("/v2/{pid}/apigw/environments/{env_id}")
+async def show_apig_environment(request: Request, pid: str, env_id: str):
+    s = request.app.state.sim
+    e = getattr(s, "apig_environments", {}).get(env_id)
+    if not e or e.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Environment not found", "error_code": "APIG.0005"}, status_code=404)
+    return e

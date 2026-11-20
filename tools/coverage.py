@@ -1124,5 +1124,66 @@ REGISTRY_TIER4 = {
 for _svc, _ops in REGISTRY_TIER4.items():
     REGISTRY.setdefault(_svc, []).extend(_ops)
 
+
+# ---------------------------------------------------------------------------
+# Tier-5 registries: federation, throttles, import tasks, bucket sub-resources
+# ---------------------------------------------------------------------------
+
+REGISTRY_TIER5 = {
+    "IAM": [
+        ("CreateIdentityProvider", "PUT", "/v3.0/OS-FEDERATION/identity_providers"),
+        ("ListIdentityProviders", "GET", "/v3.0/OS-FEDERATION/identity_providers"),
+        ("ShowIdentityProvider", "GET", "/v3.0/OS-FEDERATION/identity_providers/{provider_id}"),
+        ("DeleteIdentityProvider", "DELETE", "/v3.0/OS-FEDERATION/identity_providers/{provider_id}"),
+        ("ValidateToken", "HEAD", "/v3/auth/tokens"),
+        ("RevokeToken", "DELETE", "/v3/auth/tokens"),
+    ],
+    "APIG": [
+        ("CreateThrottle", "POST", "/v2/{pid}/apigw/throttles"),
+        ("ListThrottles", "GET", "/v2/{pid}/apigw/throttles"),
+        ("CreateApp", "POST", "/v2/{pid}/apigw/apps"),
+        ("ListApps", "GET", "/v2/{pid}/apigw/apps"),
+        ("ShowEnvironment", "GET", "/v2/{pid}/apigw/environments/{env_id}"),
+    ],
+    "ModelArts": [
+        ("CreateImportTask", "POST", "/v2/{pid}/datasets/{dataset_id}/import-tasks"),
+        ("ListImportTasks", "GET", "/v2/{pid}/datasets/{dataset_id}/import-tasks"),
+        ("DeleteDatasetVersion", "DELETE", "/v2/{pid}/datasets/{dataset_id}/versions/{version_id}"),
+    ],
+    "CCE": [
+        ("ShowAddon", "GET", "/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}"),
+        ("DeleteAddon", "DELETE", "/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}"),
+    ],
+    "OBS": [
+        ("SetBucketPolicy", "PUT", "/{bucket}?policy"),
+        ("GetBucketPolicy", "GET", "/{bucket}?policy"),
+        ("SetBucketCors", "PUT", "/{bucket}?cors"),
+        ("GetBucketCors", "GET", "/{bucket}?cors"),
+        ("SetBucketLifecycle", "PUT", "/{bucket}?lifecycle"),
+        ("GetBucketLifecycle", "GET", "/{bucket}?lifecycle"),
+        ("GetObjectAcl", "GET", "/{bucket}/{key}?acl"),
+        ("ListObjectVersions", "GET", "/{bucket}?versions"),
+    ],
+    "VPC": [
+        ("CreatePort", "POST", "/v1/{pid}/ports"),
+        ("DeletePort", "DELETE", "/v1/{pid}/ports/{port_id}"),
+    ],
+    "ECS": [
+        ("NovaUpdateServer", "PUT", "/v2.1/{pid}/servers/{server_id}"),
+    ],
+    "EVS": [
+        ("CinderListSnapshotsDetail", "GET", "/v2/{pid}/snapshots/detail"),
+    ],
+    "RDS": [
+        ("ApplyParameterTemplate", "POST", "/v3/{pid}/configurations/{configuration_id}/apply"),
+    ],
+    "CES": [
+        ("UpdateAlarm", "PUT", "/v1/{pid}/alarms/{alarm_id}"),
+    ],
+}
+
+for _svc, _ops in REGISTRY_TIER5.items():
+    REGISTRY.setdefault(_svc, []).extend(_ops)
+
 if __name__ == "__main__":
     run()

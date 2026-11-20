@@ -223,6 +223,20 @@ async def nova_list_interfaces(request: Request, pid: str, server_id: str):
         "mac_addr": p["mac_address"]} for p in ports]}
 
 
+@router.put("/v2.1/{pid}/servers/{server_id}")
+async def nova_update_server(request: Request, pid: str, server_id: str):
+    s = request.app.state.sim
+    server = s.servers.get(server_id)
+    if not server or server["project_id"] != pid:
+        return JSONResponse({"error": {"code": "Ecs.0114",
+                                        "message": "The ECS does not exist"}}, status_code=404)
+    body = await request.json()
+    spec = body.get("server", {})
+    if "name" in spec and spec["name"]:
+        server["name"] = spec["name"]
+    return {"server": server}
+
+
 @router.get("/v2.1/{pid}/servers/{server_id}")
 async def nova_show_server(request: Request, pid: str, server_id: str):
     s = request.app.state.sim

@@ -413,3 +413,74 @@ async def get_service_catalog(request: Request):
                          "region": "ap-southeast-1",
                          "url": "http://127.0.0.1:8201"}]},
     ]}
+
+
+# ---------------------------------------------------------------------------
+# identity providers and token lifecycle (tier-5)
+# ---------------------------------------------------------------------------
+
+@router.put("/v3.0/OS-FEDERATION/identity_providers")
+async def create_identity_provider(request: Request):
+    state = request.app.state.sim
+    if not hasattr(state, "iam_idps"):
+        state.iam_idps = {}
+    body = await request.json()
+    pid_ = body.get("id", "")
+    if not pid_:
+        return JSONResponse(apigw_error("IAM.0001", "id is required"), status_code=400)
+    if pid_ in state.iam_idps:
+        return JSONResponse(apigw_error("IAM.0008", "identity provider already exists"),
+                            status_code=409)
+    state.iam_idps[pid_] = {
+        "id": pid_, "enabled": body.get("enabled", False),
+        "description": body.get("description", ""),
+        "domain_id": state.account["domain_id"],
+        "links": {"self": f"/v3.0/OS-FEDERATION/identity_providers/{pid_}"},
+    }
+    return JSONResponse({"identity_provider": state.iam_idps[pid_]}, status_code=201)
+
+
+@router.get("/v3.0/OS-FEDERATION/identity_providers")
+async def list_identity_providers(request: Request):
+    state = request.app.state.sim
+    return {"identity_providers": list(getattr(state, "iam_idps", {}).values())}
+
+
+@router.get("/v3.0/OS-FEDERATION/identity_providers/{provider_id}")
+async def show_identity_provider(request: Request, provider_id: str):
+    state = request.app.state.sim
+    p = getattr(state, "iam_idps", {}).get(provider_id)
+    if not p:
+        return JSONResponse(apigw_error("IAM.0009", "identity provider not found"),
+                            status_code=404)
+    return {"identity_provider": p}
+
+
+@router.delete("/v3.0/OS-FEDERATION/identity_providers/{provider_id}")
+async def delete_identity_provider(request: Request, provider_id: str):
+    state = request.app.state.sim
+    if provider_id not in getattr(state, "iam_idps", {}):
+        return JSONResponse(apigw_error("IAM.0009", "identity provider not found"),
+                            status_code=404)
+    del state.iam_idps[provider_id]
+    return Response(status_code=204)
+
+
+@router.head("/v3/auth/tokens")
+async def validate_token(request: Request):
+    """Verify a token: HEAD with X-Subject-Token (sim always accepts)."""
+    token = request.headers.get("x-subject-token", "")
+    if not token:
+        return JSONResponse(apigw_error("IAM.0010", "X-Subject-Token is required"),
+                            status_code=401)
+    return Response(status_code=200, headers={"X-Subject-Token": token})
+
+
+@router.delete("/v3/auth/tokens")
+async def revoke_token(request: Request):
+    """Revoke a token (logout). The sim accepts any token."""
+    token = request.headers.get("x-subject-token", "")
+    if not token:
+        return JSONResponse(apigw_error("IAM.0010", "X-Subject-Token is required"),
+                            status_code=401)
+    return Response(status_code=204)

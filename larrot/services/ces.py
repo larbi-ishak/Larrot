@@ -32,6 +32,20 @@ async def show_alarm(request: Request, pid: str, alarm_id: str):
         return JSONResponse({"error_msg": "Alarm not found", "error_code": "CES.0001"}, status_code=404)
     return {"metric_alarms": [a]}
 
+@router.put("/v1/{pid}/alarms/{alarm_id}")
+async def update_alarm(request: Request, pid: str, alarm_id: str):
+    s = request.app.state.sim
+    a = getattr(s, "ces_alarms", {}).get(alarm_id)
+    if not a or a.get("project_id") != pid:
+        return JSONResponse({"error_code": "CES.0001", "error_msg": "alarm not found"},
+                            status_code=404)
+    body = await request.json()
+    for field in ("alarm_name", "alarm_description", "alarm_enabled"):
+        if field in body:
+            a[field] = body[field]
+    return {"alarm_id": alarm_id, "alarm_name": a.get("alarm_name", "")}
+
+
 @router.delete("/v1/{pid}/alarms/{alarm_id}")
 async def delete_alarm(request: Request, pid: str, alarm_id: str):
     s = request.app.state.sim

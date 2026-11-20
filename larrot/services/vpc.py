@@ -319,6 +319,46 @@ async def delete_eip(request: Request, pid: str, eip_id: str):
 # Ports
 # ---------------------------------------------------------------------------
 
+@router.post("/v1/{pid}/ports")
+async def create_port(request: Request, pid: str):
+    state = request.app.state.sim
+    body = await request.json()
+    spec = body.get("port", {})
+    net_id = spec.get("network_id", "")
+    if not net_id or not state.vpcs.get(net_id):
+        return JSONResponse(vpc_error("VPC.0401", "Network does not exist."), status_code=404)
+    port_id = new_id()
+    ip = spec.get("ip_address") or state.next_ip(pid)
+    state.ports[port_id] = {
+        "id": port_id, "network_id": net_id,
+        "subnet_id": spec.get("subnet_id", ""), "mac_address": f"fa:16:3e:{new_id()[:8]}",
+        "ip_address": ip, "device_id": spec.get("device_id", ""),
+        "admin_state_up": spec.get("admin_state_up", True),
+        "project_id": pid, "name": spec.get("name", ""),
+    }
+    return {"port": {
+        "id": port_id, "name": spec.get("name", ""),
+        "status": "DOWN", "admin_state_up": True,
+        "fixed_ips": [{"subnet_id": spec.get("subnet_id", ""), "ip_address": ip}],
+        "mac_address": state.ports[port_id]["mac_address"],
+        "network_id": net_id, "device_id": spec.get("device_id", ""),
+        "tenant_id": pid,
+    }}
+
+
+@router.delete("/v1/{pid}/ports/{port_id}")
+async def delete_port(request: Request, pid: str, port_id: str):
+    state = request.app.state.sim
+    p = state.ports.get(port_id)
+    if not p or p["project_id"] != pid:
+        return JSONResponse(vpc_error("VPC.0402", "Port does not exist."), status_code=404)
+    if p.get("device_id"):
+        return JSONResponse(vpc_error("VPC.0403",
+            "Port is in use by an instance."), status_code=409)
+    del state.ports[port_id]
+    return Response(status_code=204)
+
+
 @router.get("/v1/{pid}/ports/{port_id}")
 async def show_port(request: Request, pid: str, port_id: str):
     state = request.app.state.sim

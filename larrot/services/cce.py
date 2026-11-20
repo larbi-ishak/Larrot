@@ -218,6 +218,27 @@ async def create_addon(request: Request, pid: str, cluster_id: str):
     return {"addon": addon}
 
 
+@router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}")
+async def show_addon(request: Request, pid: str, cluster_id: str, addon_id: str):
+    state = request.app.state.sim
+    a = getattr(state, "cce_addons", {}).get(addon_id)
+    if not a or a["project_id"] != pid or a["cluster_id"] != cluster_id:
+        return JSONResponse({"error": {"code": "CCE.0104",
+                                        "message": "addon not found"}}, status_code=404)
+    return {"addon": a}
+
+
+@router.delete("/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}")
+async def delete_addon(request: Request, pid: str, cluster_id: str, addon_id: str):
+    state = request.app.state.sim
+    a = getattr(state, "cce_addons", {}).get(addon_id)
+    if not a or a["project_id"] != pid or a["cluster_id"] != cluster_id:
+        return JSONResponse({"error": {"code": "CCE.0104",
+                                        "message": "addon not found"}}, status_code=404)
+    del state.cce_addons[addon_id]
+    return Response(status_code=204)
+
+
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/addons")
 async def list_addons(request: Request, pid: str, cluster_id: str):
     state = request.app.state.sim

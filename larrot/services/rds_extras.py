@@ -324,3 +324,22 @@ async def delete_rds_configuration(request: Request, pid: str, configuration_id:
                              "error_msg": "configuration not found"}, status_code=404)
     del s.rds_configurations[configuration_id]
     return Response(status_code=204)
+
+
+@router.post("/v3/{pid}/configurations/{configuration_id}/apply")
+async def apply_rds_configuration(request: Request, pid: str, configuration_id: str):
+    s = request.app.state.sim
+    c = getattr(s, "rds_configurations", {}).get(configuration_id)
+    if not c or c["project_id"] != pid:
+        return JSONResponse({"error_code": "DBS.0202",
+                             "error_msg": "configuration not found"}, status_code=404)
+    body = await request.json()
+    instance_ids = body.get("instance_ids", [])
+    applied = []
+    for iid in instance_ids:
+        inst = getattr(s, "rds_instances", {}).get(iid)
+        if inst:
+            inst.setdefault("applied_configurations", []).append(configuration_id)
+            applied.append(iid)
+    return {"configuration_id": configuration_id,
+            "instance_ids": applied, "success": True}

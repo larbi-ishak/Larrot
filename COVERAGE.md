@@ -53,6 +53,7 @@ test references it, **missing** = documented but not implemented.
 | UpdateServerTags | `PUT` | `/v1/{pid}/cloudservers/{server_id}/tags` | OK |
 | DeleteServerTags | `DELETE` | `/v1/{pid}/cloudservers/{server_id}/tags` | OK |
 | NovaListInterfaces | `GET` | `/v2.1/{pid}/servers/{server_id}/os-interface` | OK |
+| NovaUpdateServer | `PUT` | `/v2.1/{pid}/servers/{server_id}` | OK |
 
 ## EVS (100% of documented operations implemented)
 
@@ -75,6 +76,7 @@ test references it, **missing** = documented but not implemented.
 | OsVendorVolumeDetail | `GET` | `/v2/{pid}/os-vendor-volumes/detail` | OK |
 | OsVendorShowVolume | `GET` | `/v2/{pid}/os-vendor-volumes/{volume_id}` | OK |
 | UpdateSnapshot | `PUT` | `/v2/{pid}/cloudsnapshots/{snapshot_id}` | OK |
+| CinderListSnapshotsDetail | `GET` | `/v2/{pid}/snapshots/detail` | OK |
 
 ## VPC (100% of documented operations implemented)
 
@@ -102,6 +104,8 @@ test references it, **missing** = documented but not implemented.
 | ShowSecurityGroupRule | `GET` | `/v1/{pid}/security-group-rules/{rule_id}` | OK |
 | DeleteSecurityGroupRule | `DELETE` | `/v1/{pid}/security-group-rules/{rule_id}` | OK |
 | UpdatePort | `PUT` | `/v1/{pid}/ports/{port_id}` | OK |
+| CreatePort | `POST` | `/v1/{pid}/ports` | OK |
+| DeletePort | `DELETE` | `/v1/{pid}/ports/{port_id}` | OK |
 
 ## EIP (100% of documented operations implemented)
 
@@ -159,6 +163,7 @@ test references it, **missing** = documented but not implemented.
 | ShowParameterTemplate | `GET` | `/v3/{pid}/configurations/{configuration_id}` | OK |
 | UpdateParameterTemplate | `PUT` | `/v3/{pid}/configurations/{configuration_id}` | OK |
 | DeleteParameterTemplate | `DELETE` | `/v3/{pid}/configurations/{configuration_id}` | OK |
+| ApplyParameterTemplate | `POST` | `/v3/{pid}/configurations/{configuration_id}/apply` | OK |
 
 ## DNS (100% of documented operations implemented)
 
@@ -240,6 +245,8 @@ test references it, **missing** = documented but not implemented.
 | UpdateCluster | `PUT` | `/api/v3/projects/{pid}/clusters/{cluster_id}` | OK |
 | ShowNode | `GET` | `/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}` | OK |
 | DeleteNode | `DELETE` | `/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}` | OK |
+| ShowAddon | `GET` | `/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}` | OK |
+| DeleteAddon | `DELETE` | `/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}` | OK |
 
 ## IAM (100% of documented operations implemented)
 
@@ -275,6 +282,12 @@ test references it, **missing** = documented but not implemented.
 | ListGroupUsers | `GET` | `/v3/groups/{group_id}/users` | OK |
 | ListUserGroups | `GET` | `/v3/users/{user_id}/groups` | OK |
 | GetServiceCatalog | `GET` | `/v3/auth/catalog` | OK |
+| CreateIdentityProvider | `PUT` | `/v3.0/OS-FEDERATION/identity_providers` | OK |
+| ListIdentityProviders | `GET` | `/v3.0/OS-FEDERATION/identity_providers` | OK |
+| ShowIdentityProvider | `GET` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}` | OK |
+| DeleteIdentityProvider | `DELETE` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}` | OK |
+| ValidateToken | `HEAD` | `/v3/auth/tokens` | OK |
+| RevokeToken | `DELETE` | `/v3/auth/tokens` | OK |
 
 ## FG (100% of documented operations implemented)
 
@@ -319,6 +332,14 @@ test references it, **missing** = documented but not implemented.
 | GetObjectMetadata | `HEAD` | `/{bucket}/{key}` | OK |
 | CopyObject | `PUT` | `/{bucket}/{key}` | OK |
 | GetBucketStorageInfo | `GET` | `/{bucket}?storageinfo` | OK |
+| SetBucketPolicy | `PUT` | `/{bucket}?policy` | OK |
+| GetBucketPolicy | `GET` | `/{bucket}?policy` | OK |
+| SetBucketCors | `PUT` | `/{bucket}?cors` | OK |
+| GetBucketCors | `GET` | `/{bucket}?cors` | OK |
+| SetBucketLifecycle | `PUT` | `/{bucket}?lifecycle` | OK |
+| GetBucketLifecycle | `GET` | `/{bucket}?lifecycle` | OK |
+| GetObjectAcl | `GET` | `/{bucket}/{key}?acl` | OK |
+| ListObjectVersions | `GET` | `/{bucket}?versions` | OK |
 
 ## BMS (100% of documented operations implemented)
 
@@ -378,6 +399,7 @@ test references it, **missing** = documented but not implemented.
 | ListMetrics | `GET` | `/v1/{pid}/metrics` | OK |
 | GetMetricData | `GET` | `/v1.0/{pid}/metric-data` | OK |
 | BatchQueryMetricData | `POST` | `/v1.0/{pid}/batch-query/metric-data` | OK |
+| UpdateAlarm | `PUT` | `/v1/{pid}/alarms/{alarm_id}` | OK |
 
 ## LTS (100% of documented operations implemented)
 
@@ -480,6 +502,11 @@ test references it, **missing** = documented but not implemented.
 | ShowGroup | `GET` | `/v2/{pid}/apigw/groups/{group_id}` | OK |
 | DeleteGroup | `DELETE` | `/v2/{pid}/apigw/groups/{group_id}` | OK |
 | DeleteEnvironment | `DELETE` | `/v2/{pid}/apigw/environments/{env_id}` | OK |
+| CreateThrottle | `POST` | `/v2/{pid}/apigw/throttles` | OK |
+| ListThrottles | `GET` | `/v2/{pid}/apigw/throttles` | OK |
+| CreateApp | `POST` | `/v2/{pid}/apigw/apps` | OK |
+| ListApps | `GET` | `/v2/{pid}/apigw/apps` | OK |
+| ShowEnvironment | `GET` | `/v2/{pid}/apigw/environments/{env_id}` | OK |
 
 ## SWR (100% of documented operations implemented)
 
@@ -530,6 +557,9 @@ test references it, **missing** = documented but not implemented.
 | DeleteLabel | `DELETE` | `/v2/{pid}/datasets/{dataset_id}/labels/{label_name}` | OK |
 | AddSamples | `POST` | `/v2/{pid}/datasets/{dataset_id}/samples` | OK |
 | ListSamples | `GET` | `/v2/{pid}/datasets/{dataset_id}/samples` | OK |
+| CreateImportTask | `POST` | `/v2/{pid}/datasets/{dataset_id}/import-tasks` | OK |
+| ListImportTasks | `GET` | `/v2/{pid}/datasets/{dataset_id}/import-tasks` | OK |
+| DeleteDatasetVersion | `DELETE` | `/v2/{pid}/datasets/{dataset_id}/versions/{version_id}` | OK |
 
 ## IoTDA (100% of documented operations implemented)
 
@@ -975,25 +1005,25 @@ deep/shallow lists in the README's Known limitations.
 
 | Service | Documented | Implemented+tested | Implemented untested | Missing | Coverage |
 |---|---|---|---|---|---|
-| ECS | 41 | 41 | 0 | 0 | 100% |
-| EVS | 17 | 17 | 0 | 0 | 100% |
-| VPC | 22 | 22 | 0 | 0 | 100% |
+| ECS | 42 | 42 | 0 | 0 | 100% |
+| EVS | 18 | 18 | 0 | 0 | 100% |
+| VPC | 24 | 24 | 0 | 0 | 100% |
 | EIP | 8 | 8 | 0 | 0 | 100% |
 | IMS | 6 | 6 | 0 | 0 | 100% |
 | CBR | 13 | 13 | 0 | 0 | 100% |
-| RDS | 10 | 10 | 0 | 0 | 100% |
+| RDS | 11 | 11 | 0 | 0 | 100% |
 | DNS | 10 | 10 | 0 | 0 | 100% |
 | KMS | 10 | 10 | 0 | 0 | 100% |
 | ELB | 18 | 18 | 0 | 0 | 100% |
 | SFS | 4 | 4 | 0 | 0 | 100% |
-| CCE | 14 | 14 | 0 | 0 | 100% |
-| IAM | 30 | 30 | 0 | 0 | 100% |
+| CCE | 16 | 16 | 0 | 0 | 100% |
+| IAM | 36 | 36 | 0 | 0 | 100% |
 | FG | 5 | 5 | 0 | 0 | 100% |
-| OBS | 29 | 29 | 0 | 0 | 100% |
+| OBS | 37 | 37 | 0 | 0 | 100% |
 | BMS | 8 | 8 | 0 | 0 | 100% |
 | AS | 10 | 10 | 0 | 0 | 100% |
 | SMN | 13 | 13 | 0 | 0 | 100% |
-| CES | 8 | 8 | 0 | 0 | 100% |
+| CES | 9 | 9 | 0 | 0 | 100% |
 | LTS | 6 | 6 | 0 | 0 | 100% |
 | DCS | 13 | 13 | 0 | 0 | 100% |
 | DMS | 6 | 6 | 0 | 0 | 100% |
@@ -1001,9 +1031,9 @@ deep/shallow lists in the README's Known limitations.
 | WAF | 10 | 10 | 0 | 0 | 100% |
 | TMS | 4 | 4 | 0 | 0 | 100% |
 | EPS | 5 | 5 | 0 | 0 | 100% |
-| APIG | 14 | 14 | 0 | 0 | 100% |
+| APIG | 19 | 19 | 0 | 0 | 100% |
 | SWR | 7 | 7 | 0 | 0 | 100% |
-| ModelArts | 33 | 33 | 0 | 0 | 100% |
+| ModelArts | 36 | 36 | 0 | 0 | 100% |
 | IoTDA | 10 | 10 | 0 | 0 | 100% |
 | GaussDB | 4 | 4 | 0 | 0 | 100% |
 | AOM | 5 | 5 | 0 | 0 | 100% |
@@ -1038,6 +1068,6 @@ deep/shallow lists in the README's Known limitations.
 | DSC | 6 | 6 | 0 | 0 | 100% |
 | VOD | 10 | 10 | 0 | 0 | 100% |
 | IEF | 8 | 8 | 0 | 0 | 100% |
-| **OVERALL** | **642** | **642** | **0** | **0** | **100%** |
+| **OVERALL** | **672** | **672** | **0** | **0** | **100%** |
 
 Run `python3 tools/coverage.py` to regenerate.
