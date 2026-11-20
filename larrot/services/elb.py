@@ -223,3 +223,49 @@ async def list_members(request: Request, pid: str, pool_id: str):
     if not pool:
         return JSONResponse({"error_msg": "Pool not found", "error_code": "ELB.0103"}, status_code=404)
     return {"members": [_member_json(m) for m in pool["members"]], "count": len(pool["members"])}
+
+
+@router.get("/v2/{pid}/elb/listeners/{listener_id}")
+async def show_listener(request: Request, pid: str, listener_id: str):
+    state = request.app.state.sim
+    l = getattr(state, "elb_listeners", {}).get(listener_id)
+    if not l or l.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Listener not found", "error_code": "ELB.0102"}, status_code=404)
+    return {"listener": _listener_json(l)}
+
+
+@router.delete("/v2/{pid}/elb/pools/{pool_id}")
+async def delete_pool(request: Request, pid: str, pool_id: str):
+    state = request.app.state.sim
+    p = getattr(state, "elb_pools", {}).get(pool_id)
+    if not p or p.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Pool not found", "error_code": "ELB.0103"}, status_code=404)
+    del state.elb_pools[pool_id]
+    return Response(status_code=204)
+
+
+@router.post("/v2/{pid}/elb/healthmonitors")
+async def create_health_monitor(request: Request, pid: str):
+    state = request.app.state.sim
+    if not hasattr(state, "elb_healthmonitors"):
+        state.elb_healthmonitors = {}
+    body = await request.json()
+    spec = body.get("healthmonitor", body)
+    hm_id = new_id()
+    now = now_millis()
+    state.elb_healthmonitors[hm_id] = {
+        "id": hm_id, "pool_id": spec.get("pool_id", ""),
+        "type": spec.get("type", "TCP"), "delay": spec.get("delay", 5),
+        "timeout": spec.get("timeout", 10), "max_retries": spec.get("max_retries", 3),
+        "admin_state_up": True, "status": "ACTIVE",
+        "created_at": now, "updated_at": now, "project_id": pid,
+    }
+    return {"healthmonitor": state.elb_healthmonitors[hm_id]}
+
+
+@router.get("/v2/{pid}/elb/healthmonitors")
+async def list_health_monitors(request: Request, pid: str):
+    state = request.app.state.sim
+    hms = [h for h in getattr(state, "elb_healthmonitors", {}).values()
+           if h["project_id"] == pid]
+    return {"healthmonitors": hms, "total": len(hms)}

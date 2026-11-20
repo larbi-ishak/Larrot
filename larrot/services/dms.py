@@ -42,5 +42,22 @@ async def delete_dms_instance(request: Request, pid: str, instance_id: str):
 
 @router.post("/v2/{pid}/instances/{instance_id}/topics")
 async def create_topic(request: Request, pid: str, instance_id: str):
+    s = request.app.state.sim
+    inst = getattr(s, "dms_instances", {}).get(instance_id)
+    if not inst or inst.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Instance not found", "error_code": "DMS.0001"}, status_code=404)
     body = await request.json()
-    return {"topic": body.get("name", "test-topic"), "partition": body.get("partition", 3)}
+    topic = {"name": body.get("name", "test-topic"),
+             "partition": body.get("partition", 3)}
+    inst.setdefault("topics", []).append(topic)
+    return {"topic": topic["name"], "partition": topic["partition"]}
+
+
+@router.get("/v2/{pid}/instances/{instance_id}/topics")
+async def list_dms_topics(request: Request, pid: str, instance_id: str):
+    s = request.app.state.sim
+    inst = getattr(s, "dms_instances", {}).get(instance_id)
+    if not inst or inst.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Instance not found", "error_code": "DMS.0001"}, status_code=404)
+    topics = inst.get("topics", [])
+    return {"topics": topics, "total": len(topics)}

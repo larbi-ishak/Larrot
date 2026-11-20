@@ -260,3 +260,102 @@ class TestGapClosures:
         assert r.json()["image"]["name"] == "renamed-img"
         assert r.json()["image"]["min_disk"] == 20
         assert client.patch("/v2/images/bad-img", json={}).status_code == 404
+
+
+class TestAllServiceGapClosures:
+    """The 16 endpoints added to reach full documented coverage."""
+
+    def test_elb_show_listener_and_pool_delete(self, client):
+        lb = client.post(f"/v2/{PID}/elb/loadbalancers",
+                        json={"loadbalancer": {"name": "gap-lb"}}).json()["loadbalancer"]
+        pool = client.post(f"/v2/{PID}/elb/pools",
+                           json={"pool": {"name": "gap-pool",
+                                           "loadbalancer_id": lb["id"]}}).json()["pool"]
+        listener = client.post(f"/v2/{PID}/elb/listeners",
+                               json={"listener": {"name": "gap-lis", "protocol": "HTTP",
+                                                   "protocol_port": 80,
+                                                   "loadbalancer_id": lb["id"],
+                                                   "default_pool_id": pool["id"]}}).json()["listener"]
+        r = client.get(f"/v2/{PID}/elb/listeners/{listener['id']}")
+        assert r.status_code == 200 and r.json()["listener"]["id"] == listener["id"]
+        assert client.get(f"/v2/{PID}/elb/listeners/bad").status_code == 404
+        assert client.delete(f"/v2/{PID}/elb/pools/{pool['id']}").status_code == 204
+        assert client.delete(f"/v2/{PID}/elb/pools/{pool['id']}").status_code == 404
+
+    def test_elb_health_monitors(self, client):
+        r = client.post(f"/v2/{PID}/elb/healthmonitors",
+                        json={"healthmonitor": {"type": "TCP", "delay": 5}})
+        assert r.status_code == 200
+        hm_id = r.json()["healthmonitor"]["id"]
+        r = client.get(f"/v2/{PID}/elb/healthmonitors")
+        assert any(h["id"] == hm_id for h in r.json()["healthmonitors"])
+
+    def test_ces_metric_data(self, client):
+        r = client.get(f"/v1.0/{PID}/metric-data?metric_name=cpu_util")
+        assert r.status_code == 200
+        assert r.json()["metric_data_results"][0]["datapoints"][0]["value"] == 42.0
+
+    def test_dcs_flavors(self, client):
+        r = client.get(f"/v2/{PID}/flavors")
+        assert r.status_code == 200 and len(r.json()["flavors"]) == 3
+
+    def test_dms_list_topics(self, client):
+        # DMS shares POST /v2/{pid}/instances with DCS (first registered wins),
+        # so seed the DMS instance directly like the catalog documents.
+        sim = client.app.state.sim
+        if not hasattr(sim, "dms_instances"):
+            sim.dms_instances = {}
+        iid = "dms-seed-001"
+        sim.dms_instances[iid] = {"instance_id": iid, "name": "gap-dms",
+                                   "project_id": PID, "topics": []}
+        client.post(f"/v2/{PID}/instances/{iid}/topics", json={"name": "t1"})
+        r = client.get(f"/v2/{PID}/instances/{iid}/topics")
+        assert r.status_code == 200 and r.json()["total"] >= 1
+        assert client.get(f"/v2/{PID}/instances/bad/topics").status_code == 404
+
+    def test_tms_post_resources(self, client):
+        assert client.post("/v1.0/project-tags/resources", json={}).status_code == 200
+
+    def test_apig_list_apis(self, client):
+        client.post(f"/v2/{PID}/apigw/apis", json={"name": "a1"})
+        r = client.get(f"/v2/{PID}/apigw/apis")
+        assert r.status_code == 200 and r.json()["total"] >= 1
+
+    def test_modelarts_datasets(self, client):
+        r = client.post(f"/v2/{PID}/datasets", json={"dataset_name": "imgs"})
+        assert r.status_code == 200
+        did = r.json()["dataset_id"]
+        assert client.get(f"/v2/{PID}/datasets").json()["total"] == 1
+        assert client.delete(f"/v2/{PID}/datasets/{did}").status_code == 204
+        assert client.delete(f"/v2/{PID}/datasets/{did}").status_code == 404
+        assert client.post(f"/v2/{PID}/datasets", json={}).status_code == 400
+
+    def test_iotda_send_command(self, client):
+        dev = client.post(f"/v5/iot/{PID}/devices",
+                          json={"device_name": "gap-dev"}).json()["device_id"]
+        r = client.post(f"/v5/iot/{PID}/devices/{dev}/commands",
+                        json={"service_id": "s1", "command_name": "reboot"})
+        assert r.status_code == 200 and r.json()["status"] == "PENDING"
+        assert client.post(f"/v5/iot/{PID}/devices/bad/commands",
+                           json={}).status_code == 404
+
+    def test_vpn_show_gateway_and_delete_connection(self, client):
+        g = client.post(f"/v5/{PID}/vpn-gateways",
+                        json={"name": "gap-vpn"}).json()["vpn_gateway"]
+        r = client.get(f"/v5/{PID}/vpn-gateways/{g['id']}")
+        assert r.status_code == 200 and r.json()["vpn_gateway"]["id"] == g["id"]
+        assert client.get(f"/v5/{PID}/vpn-gateways/bad").status_code == 404
+        c = client.post(f"/v5/{PID}/vpn-connections",
+                        json={"name": "c1", "vgw_id": g["id"]}).json()
+        cid = c.get("vpn_connection", c).get("id") or c.get("id")
+        assert client.delete(f"/v5/{PID}/vpn-connections/{cid}").status_code == 204
+        assert client.delete(f"/v5/{PID}/vpn-connections/{cid}").status_code == 404
+
+    def test_dws_show_snapshot(self, client):
+        cid = client.post(f"/v1.0/{PID}/dws/clusters",
+                          json={"name": "snap-vm", "number_of_node": 3}).json()["cluster"]["id"]
+        snap = client.post(f"/v1.0/{PID}/dws/snapshots",
+                           json={"name": "s", "cluster_id": cid}).json()["snapshot"]
+        r = client.get(f"/v1.0/{PID}/dws/snapshots/{snap['id']}")
+        assert r.status_code == 200 and r.json()["snapshot"]["id"] == snap["id"]
+        assert client.get(f"/v1.0/{PID}/dws/snapshots/bad").status_code == 404

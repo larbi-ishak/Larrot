@@ -9,6 +9,7 @@ async def create_or_delete_tags(request: Request):
     return {"success": True, "request_id": new_id()}
 
 @router.get("/v1.0/project-tags/resources")
+@router.post("/v1.0/project-tags/resources")
 async def list_tag_resources(request: Request):
     return {"resources": [], "total_count": 0}
 

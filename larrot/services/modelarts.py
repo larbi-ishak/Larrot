@@ -395,3 +395,46 @@ async def delete_api_key(request: Request, pid: str, key_id: str):
                             status_code=404)
     del s.maas_keys[key_id]
     return Response(status_code=204)
+
+
+# ---------------------------------------------------------------------------
+# datasets
+# ---------------------------------------------------------------------------
+
+@router.post("/v2/{pid}/datasets")
+async def create_dataset(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "ma_datasets"):
+        s.ma_datasets = {}
+    body = await request.json()
+    name = body.get("dataset_name", "")
+    if not name:
+        return JSONResponse({"error_code": "MA.0009",
+                             "error_msg": "dataset_name is required"}, status_code=400)
+    did = new_id()
+    s.ma_datasets[did] = {
+        "dataset_id": did, "dataset_name": name,
+        "data_type": body.get("data_type", 0),
+        "data_source": body.get("data_source", {}),
+        "status": "INIT", "samples": 0,
+        "project_id": pid, "created_at": now_millis(),
+    }
+    return {"dataset_id": did, "dataset_name": name}
+
+
+@router.get("/v2/{pid}/datasets")
+async def list_datasets(request: Request, pid: str):
+    s = request.app.state.sim
+    ds = [d for d in getattr(s, "ma_datasets", {}).values() if d["project_id"] == pid]
+    return {"datasets": ds, "total": len(ds)}
+
+
+@router.delete("/v2/{pid}/datasets/{dataset_id}")
+async def delete_dataset(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    del s.ma_datasets[dataset_id]
+    return Response(status_code=204)

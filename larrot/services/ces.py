@@ -75,3 +75,13 @@ async def batch_metric_data(request: Request, pid: str):
                      "data_points": [{"timestamp": now_millis(), "value": 42.0}],
                      "dim_0": dims})
     return {"metric_data_results": out}
+
+
+@router.get("/v1.0/{pid}/metric-data")
+async def get_metric_data(request: Request, pid: str):
+    """Query metric datapoints (documented: GET /v1.0/{project_id}/metric-data)."""
+    return {"metric_data_results": [{
+        "metric_name": request.query_params.get("metric_name", "cpu_util"),
+        "dim.0": request.query_params.get("dim.0", ""),
+        "datapoints": [{"timestamp": now_millis(), "value": 42.0}],
+    }]}

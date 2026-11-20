@@ -46,3 +46,16 @@ async def delete_device(request: Request, pid: str, device_id: str):
         return JSONResponse({"error_msg": "Device not found", "error_code": "IoT.0001"}, status_code=404)
     del s.iot_devices[device_id]
     return Response(status_code=204)
+
+
+@router.post("/v5/iot/{pid}/devices/{device_id}/commands")
+async def send_command(request: Request, pid: str, device_id: str):
+    s = request.app.state.sim
+    dev = getattr(s, "iot_devices", {}).get(device_id)
+    if not dev or dev.get("project_id") != pid:
+        return JSONResponse({"error_code": "IOTDA.00001",
+                             "error_msg": "device not found"}, status_code=404)
+    body = await request.json()
+    return {"command_id": new_id(), "service_id": body.get("service_id", ""),
+            "command_name": body.get("command_name", ""),
+            "status": "PENDING", "result": None}

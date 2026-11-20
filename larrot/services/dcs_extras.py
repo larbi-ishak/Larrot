@@ -90,3 +90,15 @@ async def analyze_hot_keys(request: Request, pid: str, instance_id: str):
         {"key": "counter:page_views", "qps": 5000, "shard": 1},
         {"key": "cache:user:12345", "qps": 3200, "shard": 3},
     ], "total": 2}
+
+
+@router.get("/v2/{pid}/flavors")
+async def list_dcs_flavors(request: Request, pid: str):
+    return {"flavors": [
+        {"flavor_id": "redis.ha.xlarge.2", "spec_code": "redis_cluster",
+         "cache_mode": "cluster", "vcpus": 2, "memory": 4},
+        {"flavor_id": "redis.ha.2xlarge.4", "spec_code": "redis_cluster",
+         "cache_mode": "cluster", "vcpus": 4, "memory": 16},
+        {"flavor_id": "redis.single.xlarge.1", "spec_code": "redis_single_node",
+         "cache_mode": "single", "vcpus": 2, "memory": 4},
+    ]}

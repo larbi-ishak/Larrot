@@ -40,8 +40,25 @@ async def list_api_groups(request: Request, pid: str):
 
 @router.post("/v2/{pid}/apigw/apis")
 async def create_api(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "apig_apis"):
+        s.apig_apis = {}
     body = await request.json()
     aid = new_id()
-    return {"id": aid, "name": body.get("name", f"api-{aid[:8]}"),
-            "req_method": body.get("req_method", "GET"),
-            "req_uri": body.get("req_uri", "/test")}
+    s.apig_apis[aid] = {
+        "id": aid, "name": body.get("name", f"api-{aid[:8]}"),
+        "req_method": body.get("req_method", "GET"),
+        "req_uri": body.get("req_uri", "/test"),
+        "group_id": body.get("group_id", ""),
+        "project_id": pid, "created_at": now_millis(),
+    }
+    return {"id": aid, "name": s.apig_apis[aid]["name"],
+            "req_method": s.apig_apis[aid]["req_method"],
+            "req_uri": s.apig_apis[aid]["req_uri"]}
+
+
+@router.get("/v2/{pid}/apigw/apis")
+async def list_apig_apis(request: Request, pid: str):
+    s = request.app.state.sim
+    apis = [a for a in getattr(s, "apig_apis", {}).values() if a.get("project_id") == pid]
+    return {"apis": apis, "total": len(apis)}

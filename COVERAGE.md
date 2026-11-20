@@ -180,6 +180,10 @@ test references it, **missing** = documented but not implemented.
 | ListPools | `GET` | `/v2/{pid}/elb/pools` | OK |
 | CreateMember | `POST` | `/v2/{pid}/elb/pools/{pool_id}/members` | OK |
 | ListMembers | `GET` | `/v2/{pid}/elb/pools/{pool_id}/members` | OK |
+| ShowListener | `GET` | `/v2/{pid}/elb/listeners/{listener_id}` | OK |
+| DeletePool | `DELETE` | `/v2/{pid}/elb/pools/{pool_id}` | OK |
+| CreateHealthMonitor | `POST` | `/v2/{pid}/elb/healthmonitors` | OK |
+| ListHealthMonitors | `GET` | `/v2/{pid}/elb/healthmonitors` | OK |
 
 ## SFS (100% of documented operations implemented)
 
@@ -234,6 +238,608 @@ test references it, **missing** = documented but not implemented.
 | UploadPart | `PUT` | `/{bucket}/{key}?partNumber&uploadId` | OK |
 | CompleteMultipartUpload | `POST` | `/{bucket}/{key}?uploadId` | OK |
 
+## BMS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| ListBmsServers | `GET` | `/v1/{pid}/baremetalservers/detail` | OK |
+| CreateBmsServer | `POST` | `/v1/{pid}/baremetalservers` | OK |
+| ShowBmsServer | `GET` | `/v1/{pid}/baremetalservers/{server_id}` | OK |
+| DeleteBmsServer | `DELETE` | `/v1/{pid}/baremetalservers/{server_id}` | OK |
+| BmsBatchActions | `POST` | `/v1/{pid}/baremetalservers/{server_id}/action` | OK |
+| ListBmsNics | `GET` | `/v1/{pid}/baremetalservers/{server_id}/nics` | OK |
+| ListBmsFlavors | `GET` | `/v1/{pid}/baremetalservers/flavors` | OK |
+
+## AS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateScalingGroup | `POST` | `/v1/{pid}/scaling_group` | OK |
+| ListScalingGroups | `GET` | `/v1/{pid}/scaling_group` | OK |
+| ShowScalingGroup | `GET` | `/v1/{pid}/scaling_group/{group_id}` | OK |
+| DeleteScalingGroup | `DELETE` | `/v1/{pid}/scaling_group/{group_id}` | OK |
+| CreateScalingPolicy | `POST` | `/v1/{pid}/scaling_policy` | OK |
+| ListScalingPolicies | `GET` | `/v1/{pid}/scaling_policy` | OK |
+| ExecuteScalingPolicy | `POST` | `/v1/{pid}/scaling_policy/{policy_id}/execute` | OK |
+| ListScalingInstances | `GET` | `/v1/{pid}/scaling_group/{group_id}/instances` | OK |
+
+## SMN (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateTopic | `POST` | `/v2/{pid}/notifications/topics` | OK |
+| ListTopics | `GET` | `/v2/{pid}/notifications/topics` | OK |
+| ShowTopic | `GET` | `/v2/{pid}/notifications/topics/{topic_urn}` | OK |
+| DeleteTopic | `DELETE` | `/v2/{pid}/notifications/topics/{topic_urn}` | OK |
+| Subscribe | `POST` | `/v2/{pid}/notifications/topics/{topic_urn}/subscriptions` | OK |
+| ListSubscriptions | `GET` | `/v2/{pid}/notifications/topics/{topic_urn}/subscriptions` | OK |
+| Unsubscribe | `DELETE` | `/v2/{pid}/notifications/topics/{topic_urn}/subscriptions/{sub_urn}` | OK |
+| Publish | `POST` | `/v2/{pid}/notifications/topics/{topic_urn}/publish` | OK |
+
+## CES (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| ListAlarms | `GET` | `/v1/{pid}/alarms` | OK |
+| CreateAlarm | `POST` | `/v1/{pid}/alarms` | OK |
+| ShowAlarm | `GET` | `/v1/{pid}/alarms/{alarm_id}` | OK |
+| DeleteAlarm | `DELETE` | `/v1/{pid}/alarms/{alarm_id}` | OK |
+| ListAlarmsHistory | `GET` | `/v1/{pid}/alarms/{alarm_id}/history` | OK |
+| ListMetrics | `GET` | `/v1/{pid}/metrics` | OK |
+| GetMetricData | `GET` | `/v1.0/{pid}/metric-data` | OK |
+| BatchQueryMetricData | `POST` | `/v1.0/{pid}/batch-query/metric-data` | OK |
+
+## LTS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateLogGroup | `POST` | `/v2/{pid}/log-groups` | OK |
+| ListLogGroups | `GET` | `/v2/{pid}/log-groups` | OK |
+| DeleteLogGroup | `DELETE` | `/v2/{pid}/log-groups/{group_id}` | OK |
+| CreateLogStream | `POST` | `/v2/{pid}/log-groups/{group_id}/log-streams` | OK |
+| ListLogStreams | `GET` | `/v2/{pid}/log-groups/{group_id}/log-streams` | OK |
+
+## DCS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v2/{pid}/instances` | OK |
+| ListInstances | `GET` | `/v2/{pid}/instances` | OK |
+| ShowInstance | `GET` | `/v2/{pid}/instances/{instance_id}` | OK |
+| DeleteInstance | `DELETE` | `/v2/{pid}/instances/{instance_id}` | OK |
+| ListFlavors | `GET` | `/v2/{pid}/flavors` | OK |
+| CreateBackup | `POST` | `/v2/{pid}/instances/{instance_id}/backups` | OK |
+| ListBackups | `GET` | `/v2/{pid}/instances/{instance_id}/backups` | OK |
+| DeleteBackup | `DELETE` | `/v2/{pid}/instances/{instance_id}/backups/{backup_id}` | OK |
+| RestoreInstance | `POST` | `/v2/{pid}/instances/{instance_id}/restore` | OK |
+| ListParameters | `GET` | `/v2/{pid}/instances/{instance_id}/parameters` | OK |
+| UpdateParameters | `PUT` | `/v2/{pid}/instances/{instance_id}/parameters` | OK |
+| RestartInstance | `POST` | `/v2/{pid}/instances/{instance_id}/restart` | OK |
+| ResizeInstance | `POST` | `/v2/{pid}/instances/{instance_id}/resize` | OK |
+
+## DMS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v2/{pid}/instances` | OK |
+| ListInstances | `GET` | `/v2/{pid}/instances` | OK |
+| ShowInstance | `GET` | `/v2/{pid}/instances/{instance_id}` | OK |
+| DeleteInstance | `DELETE` | `/v2/{pid}/instances/{instance_id}` | OK |
+| CreateTopic | `POST` | `/v2/{pid}/instances/{instance_id}/topics` | OK |
+| ListTopics | `GET` | `/v2/{pid}/instances/{instance_id}/topics` | OK |
+
+## DDS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v3/{pid}/instances` | OK |
+| ListInstances | `GET` | `/v3/{pid}/instances` | OK |
+| ShowInstance | `GET` | `/v3/{pid}/instances/{instance_id}` | OK |
+| DeleteInstance | `DELETE` | `/v3/{pid}/instances/{instance_id}` | OK |
+
+## WAF (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateHost | `POST` | `/v1/{pid}/waf/hosts` | OK |
+| ListHosts | `GET` | `/v1/{pid}/waf/hosts` | OK |
+| ShowHost | `GET` | `/v1/{pid}/waf/hosts/{domain_id}` | OK |
+| UpdateHost(bindPolicy) | `PUT` | `/v1/{pid}/waf/hosts/{domain_id}` | OK |
+| DeleteHost | `DELETE` | `/v1/{pid}/waf/hosts/{domain_id}` | OK |
+| CreatePolicy | `POST` | `/v1/{pid}/waf/policies` | OK |
+| ListPolicies | `GET` | `/v1/{pid}/waf/policies` | OK |
+| ShowPolicy | `GET` | `/v1/{pid}/waf/policies/{policy_id}` | OK |
+| CreateRule | `POST` | `/v1/{pid}/waf/policies/{policy_id}/rules` | OK |
+| ListRules | `GET` | `/v1/{pid}/waf/policies/{policy_id}/rules` | OK |
+
+## TMS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateOrDeleteProjectTags | `POST` | `/v1.0/{pid}/project-tags/create-or-delete` | OK |
+| ListProjectTags | `GET` | `/v1.0/{pid}/project-tags/tags` | OK |
+| ListProjectResources | `POST` | `/v1.0/{pid}/project-tags/resources` | OK |
+| ResourceTagsAction | `POST` | `/v2.0/{pid}/project-tags/resource-tags/action` | OK |
+
+## EPS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateEnterpriseProject | `POST` | `/v1.0/enterprise-projects` | OK |
+| ListEnterpriseProjects | `GET` | `/v1.0/enterprise-projects` | OK |
+| ShowEnterpriseProject | `GET` | `/v1.0/enterprise-projects/{eps_id}` | OK |
+| DeleteEnterpriseProject | `DELETE` | `/v1.0/enterprise-projects/{eps_id}` | OK |
+
+## APIG (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v2/{pid}/apigw/instances` | OK |
+| ListInstances | `GET` | `/v2/{pid}/apigw/instances` | OK |
+| CreateGroup | `POST` | `/v2/{pid}/apigw/groups` | OK |
+| ListGroups | `GET` | `/v2/{pid}/apigw/groups` | OK |
+| CreateApi | `POST` | `/v2/{pid}/apigw/apis` | OK |
+| ListApis | `GET` | `/v2/{pid}/apigw/apis` | OK |
+
+## SWR (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateNamespace | `POST` | `/v2/manage/namespaces` | OK |
+| ListNamespaces | `GET` | `/v2/manage/namespaces` | OK |
+| CreateRepo | `POST` | `/v2/manage/namespaces/{namespace}/repos` | OK |
+| ListRepos | `GET` | `/v2/manage/namespaces/{namespace}/repos` | OK |
+
+## ModelArts (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateNotebook | `POST` | `/v2/{pid}/notebooks` | OK |
+| ListNotebooks | `GET` | `/v2/{pid}/notebooks` | OK |
+| DeleteNotebook | `DELETE` | `/v2/{pid}/notebooks/{notebook_id}` | OK |
+| CreateTrainingJob | `POST` | `/v2/{pid}/training-jobs` | OK |
+| ListTrainingJobs | `GET` | `/v2/{pid}/training-jobs` | OK |
+| CreateDataset | `POST` | `/v2/{pid}/datasets` | OK |
+| ListDatasets | `GET` | `/v2/{pid}/datasets` | OK |
+| DeleteDataset | `DELETE` | `/v2/{pid}/datasets/{dataset_id}` | OK |
+| RegisterModel | `POST` | `/v1/{pid}/models` | OK |
+| ListModels | `GET` | `/v1/{pid}/models` | OK |
+| ShowModel | `GET` | `/v1/{pid}/models/{model_id}` | OK |
+| DeleteModel | `DELETE` | `/v1/{pid}/models/{model_id}` | OK |
+| CreateService | `POST` | `/v1/{pid}/services` | OK |
+| ListServices | `GET` | `/v1/{pid}/services` | OK |
+| ShowService | `GET` | `/v1/{pid}/services/{service_id}` | OK |
+| DeleteService | `DELETE` | `/v1/{pid}/services/{service_id}` | OK |
+| CreateFineTuningJob | `POST` | `/v1/{pid}/fine-tuning-jobs` | OK |
+| ListFineTuningJobs | `GET` | `/v1/{pid}/fine-tuning-jobs` | OK |
+| MaaSListModels | `GET` | `/v1/models` | OK |
+| MaaSChatCompletions | `POST` | `/v1/chat/completions` | OK |
+| MaaSEmbeddings | `POST` | `/v1/embeddings` | OK |
+| CreateApiKey | `POST` | `/v1/{pid}/maas/keys` | OK |
+| ListApiKeys | `GET` | `/v1/{pid}/maas/keys` | OK |
+| DeleteApiKey | `DELETE` | `/v1/{pid}/maas/keys/{key_id}` | OK |
+
+## IoTDA (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateProduct | `POST` | `/v5/iot/{pid}/products` | OK |
+| ListProducts | `GET` | `/v5/iot/{pid}/products` | OK |
+| CreateDevice | `POST` | `/v5/iot/{pid}/devices` | OK |
+| ListDevices | `GET` | `/v5/iot/{pid}/devices` | OK |
+| DeleteDevice | `DELETE` | `/v5/iot/{pid}/devices/{device_id}` | OK |
+| SendCommand | `POST` | `/v5/iot/{pid}/devices/{device_id}/commands` | OK |
+
+## GaussDB (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v3/{pid}/instances` | OK |
+| ListInstances | `GET` | `/v3/{pid}/instances` | OK |
+| ShowInstance | `GET` | `/v3/{pid}/instances/{instance_id}` | OK |
+| DeleteInstance | `DELETE` | `/v3/{pid}/instances/{instance_id}` | OK |
+
+## AOM (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateApp | `POST` | `/v1/{pid}/aom/apps` | OK |
+| ListApps | `GET` | `/v1/{pid}/aom/apps` | OK |
+| CreateComponent | `POST` | `/v1/{pid}/aom/components` | OK |
+| ListAlarms | `GET` | `/v1/{pid}/aom/alarms` | OK |
+| CreateAlarmRule | `POST` | `/v2/{pid}/aom/alarm-rules` | OK |
+
+## DLI (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateDatabase | `POST` | `/v1.0/{pid}/databases` | OK |
+| ListDatabases | `GET` | `/v1.0/{pid}/databases` | OK |
+| CreateTable | `POST` | `/v1.0/{pid}/tables` | OK |
+| SubmitSqlJob | `POST` | `/v1.0/{pid}/jobs/submit` | OK |
+| ShowSqlJob | `GET` | `/v1.0/{pid}/jobs/{job_id}` | OK |
+| ListSqlJobs | `GET` | `/v1.0/{pid}/jobs` | OK |
+| CreateQueue | `POST` | `/v1.0/{pid}/queues` | OK |
+| ListQueues | `GET` | `/v1.0/{pid}/queues` | OK |
+| DeleteQueue | `DELETE` | `/v1.0/{pid}/queues/{queue_id}` | OK |
+
+## Anti-DDoS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| SetDefaultProtection | `POST` | `/v1/{pid}/antiddos/default` | OK |
+| GetDefaultProtection | `GET` | `/v1/{pid}/antiddos/default` | OK |
+| GetProtectionStatus | `GET` | `/v1/{pid}/antiddos/status` | OK |
+| EnableProtection | `POST` | `/v1/{pid}/antiddos/enable` | OK |
+
+## BSS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| ListCustomerOrders | `GET` | `/v2/orders/customer-orders` | OK |
+| ListOrderResources | `GET` | `/v2/orders/customer-orders/resources` | OK |
+| ListAccountBalances | `GET` | `/v2/accounts/customer-accounts/balances` | OK |
+| PayOrder | `POST` | `/v2/orders/customer-orders/pay` | OK |
+
+## NAT (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateNatGateway | `POST` | `/v2.0/{pid}/nat_gateways` | OK |
+| ListNatGateways | `GET` | `/v2.0/{pid}/nat_gateways` | OK |
+| ShowNatGateway | `GET` | `/v2.0/{pid}/nat_gateways/{gateway_id}` | OK |
+| DeleteNatGateway | `DELETE` | `/v2.0/{pid}/nat_gateways/{gateway_id}` | OK |
+| CreateSnatRule | `POST` | `/v2.0/{pid}/snat_rules` | OK |
+| ListSnatRules | `GET` | `/v2.0/{pid}/snat_rules` | OK |
+| DeleteSnatRule | `DELETE` | `/v2.0/{pid}/snat_rules/{rule_id}` | OK |
+| CreateDnatRule | `POST` | `/v2.0/{pid}/dnat_rules` | OK |
+| ListDnatRules | `GET` | `/v2.0/{pid}/dnat_rules` | OK |
+| DeleteDnatRule | `DELETE` | `/v2.0/{pid}/dnat_rules/{rule_id}` | OK |
+
+## Peering (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreatePeering | `POST` | `/v2.0/{pid}/vpc-peerings` | OK |
+| ListPeerings | `GET` | `/v2.0/{pid}/vpc-peerings` | OK |
+| ShowPeering | `GET` | `/v2.0/{pid}/vpc-peerings/{peering_id}` | OK |
+| AcceptPeering | `PUT` | `/v2.0/{pid}/vpc-peerings/{peering_id}/accept` | OK |
+| RejectPeering | `PUT` | `/v2.0/{pid}/vpc-peerings/{peering_id}/reject` | OK |
+| DeletePeering | `DELETE` | `/v2.0/{pid}/vpc-peerings/{peering_id}` | OK |
+
+## ACL (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateAcl | `POST` | `/v3/{pid}/vpc/acls` | OK |
+| ListAcls | `GET` | `/v3/{pid}/vpc/acls` | OK |
+| ShowAcl | `GET` | `/v3/{pid}/vpc/acls/{acl_id}` | OK |
+| DeleteAcl | `DELETE` | `/v3/{pid}/vpc/acls/{acl_id}` | OK |
+| CreateIngressRule | `POST` | `/v3/{pid}/vpc/acls/{acl_id}/ingress-rules` | OK |
+| CreateEgressRule | `POST` | `/v3/{pid}/vpc/acls/{acl_id}/egress-rules` | OK |
+| AssociateSubnet | `POST` | `/v3/{pid}/vpc/acls/{acl_id}/associate` | OK |
+| DisassociateSubnet | `POST` | `/v3/{pid}/vpc/acls/{acl_id}/disassociate` | OK |
+
+## VPC-Routes (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateRouteTable | `POST` | `/v1/{pid}/vpc/routetables` | OK |
+| ListRouteTables | `GET` | `/v1/{pid}/vpc/routetables` | OK |
+| ShowRouteTable | `GET` | `/v1/{pid}/vpc/routetables/{rt_id}` | OK |
+| DeleteRouteTable | `DELETE` | `/v1/{pid}/vpc/routetables/{rt_id}` | OK |
+| CreateRoute | `POST` | `/v1/{pid}/vpc/routetables/{rt_id}/routes` | OK |
+| DeleteRoute | `DELETE` | `/v1/{pid}/vpc/routetables/{rt_id}/routes/{route_id}` | OK |
+
+## VPN (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateVpnGateway | `POST` | `/v5/{pid}/vpn-gateways` | OK |
+| ListVpnGateways | `GET` | `/v5/{pid}/vpn-gateways` | OK |
+| ShowVpnGateway | `GET` | `/v5/{pid}/vpn-gateways/{gateway_id}` | OK |
+| DeleteVpnGateway | `DELETE` | `/v5/{pid}/vpn-gateways/{gateway_id}` | OK |
+| CreateVpnConnection | `POST` | `/v5/{pid}/vpn-connections` | OK |
+| ListVpnConnections | `GET` | `/v5/{pid}/vpn-connections` | OK |
+| DeleteVpnConnection | `DELETE` | `/v5/{pid}/vpn-connections/{connection_id}` | OK |
+
+## GeminiDB (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v3/{pid}/gemini/instances` | OK |
+| ListInstances | `GET` | `/v3/{pid}/gemini/instances` | OK |
+| ShowInstance | `GET` | `/v3/{pid}/gemini/instances/{instance_id}` | OK |
+| DeleteInstance | `DELETE` | `/v3/{pid}/gemini/instances/{instance_id}` | OK |
+| InstanceAction | `POST` | `/v3/{pid}/gemini/instances/{instance_id}/action` | OK |
+| ListFlavors | `GET` | `/v3/{pid}/gemini/flavors` | OK |
+
+## DDM (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v1/{pid}/instances` | OK |
+| ListInstances | `GET` | `/v1/{pid}/instances` | OK |
+| DeleteInstance | `DELETE` | `/v1/{pid}/instances/{instance_id}` | OK |
+| CreateSchema | `POST` | `/v1/{pid}/instances/{instance_id}/schemas` | OK |
+| ListSchemas | `GET` | `/v1/{pid}/instances/{instance_id}/schemas` | OK |
+| DeleteSchema | `DELETE` | `/v1/{pid}/instances/{instance_id}/schemas/{schema_name}` | OK |
+| CreateShardRule | `POST` | `/v1/{pid}/instances/{instance_id}/schemas/{schema_name}/shard-rules` | OK |
+
+## DBSS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v1/{pid}/dbss/instances` | OK |
+| ListInstances | `GET` | `/v1/{pid}/dbss/instances` | OK |
+| ShowInstance | `GET` | `/v1/{pid}/dbss/instances/{instance_id}` | OK |
+| DeleteInstance | `DELETE` | `/v1/{pid}/dbss/instances/{instance_id}` | OK |
+| CreateAuditRule | `POST` | `/v1/{pid}/dbss/instances/{instance_id}/audit-rules` | OK |
+| ListAuditLogs | `GET` | `/v1/{pid}/dbss/instances/{instance_id}/audit-logs` | OK |
+
+## HSS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| ListHosts | `GET` | `/v5/{pid}/hosts` | OK |
+| ShowHost | `GET` | `/v5/{pid}/hosts/{host_id}` | OK |
+| SetProtection | `POST` | `/v5/{pid}/hosts/{host_id}/protection` | OK |
+| ListPolicies | `GET` | `/v5/{pid}/policy` | OK |
+| CreatePolicy | `POST` | `/v5/{pid}/policy` | OK |
+| ListAlarmEvents | `GET` | `/v5/{pid}/alarm-events` | OK |
+| CreateAlarmEvent | `POST` | `/v5/{pid}/alarm-events` | OK |
+| ListVulnerabilities | `GET` | `/v5/{pid}/vulnerabilities` | OK |
+| ScanVulnerabilities | `POST` | `/v5/{pid}/vulnerabilities/scan` | OK |
+| ListQuotas | `GET` | `/v5/{pid}/quotas` | OK |
+
+## CDN (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateDomain | `POST` | `/v1/domains` | OK |
+| ListDomains | `GET` | `/v1/domains` | OK |
+| ShowDomain | `GET` | `/v1/domains/{domain_id}` | OK |
+| UpdateDomain | `PUT` | `/v1/domains/{domain_id}` | OK |
+| DeleteDomain | `DELETE` | `/v1/domains/{domain_id}` | OK |
+| PurgeCache | `POST` | `/v1.0/purgecache` | OK |
+| Preheat | `POST` | `/v1.0/preheating` | OK |
+| ListHistoryTasks | `GET` | `/v1.0/historytasks` | OK |
+| QueryStatistics | `GET` | `/v1.0/statistics` | OK |
+
+## DWS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateCluster | `POST` | `/v1.0/{pid}/clusters` | OK |
+| ListClusters | `GET` | `/v1.0/{pid}/clusters` | OK |
+| ShowCluster | `GET` | `/v1.0/{pid}/clusters/{cluster_id}` | OK |
+| DeleteCluster | `DELETE` | `/v1.0/{pid}/clusters/{cluster_id}` | OK |
+| ResizeCluster | `POST` | `/v1.0/{pid}/clusters/{cluster_id}/resize` | OK |
+| CreateSnapshot | `POST` | `/v1.0/{pid}/snapshots` | OK |
+| ListSnapshots | `GET` | `/v1.0/{pid}/snapshots` | OK |
+| ShowSnapshot | `GET` | `/v1.0/{pid}/snapshots/{snapshot_id}` | OK |
+
+## CSS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateCluster | `POST` | `/v1.0/{pid}/css/clusters` | OK |
+| ListClusters | `GET` | `/v1.0/{pid}/css/clusters` | OK |
+| ShowCluster | `GET` | `/v1.0/{pid}/css/clusters/{cluster_id}` | OK |
+| DeleteCluster | `DELETE` | `/v1.0/{pid}/css/clusters/{cluster_id}` | OK |
+| RestartCluster | `POST` | `/v1.0/{pid}/css/clusters/{cluster_id}/restart` | OK |
+| CreateIndex | `POST` | `/v1.0/{pid}/css/clusters/{cluster_id}/indices` | OK |
+| ListIndices | `GET` | `/v1.0/{pid}/css/clusters/{cluster_id}/indices` | OK |
+| DeleteIndex | `DELETE` | `/v1.0/{pid}/css/clusters/{cluster_id}/indices/{index_name}` | OK |
+
+## MRS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateCluster | `POST` | `/v1.1/{pid}/cluster_infos` | OK |
+| ListClusters | `GET` | `/v1.1/{pid}/cluster_infos` | OK |
+| ShowCluster | `GET` | `/v1.1/{pid}/cluster_infos/{cluster_id}` | OK |
+| DeleteCluster | `DELETE` | `/v1.1/{pid}/cluster_infos/{cluster_id}` | OK |
+| SubmitJob | `POST` | `/v1.1/{pid}/cluster_infos/{cluster_id}/jobs` | OK |
+| ResizeCluster | `POST` | `/v1.1/{pid}/cluster_infos/{cluster_id}/resize` | OK |
+
+## SMS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| RegisterSource | `POST` | `/v3/{pid}/sources` | OK |
+| ListSources | `GET` | `/v3/{pid}/sources` | OK |
+| ShowSource | `GET` | `/v3/{pid}/sources/{source_id}` | OK |
+| DeleteSource | `DELETE` | `/v3/{pid}/sources/{source_id}` | OK |
+| CreateTask | `POST` | `/v3/{pid}/tasks` | OK |
+| ListTasks | `GET` | `/v3/{pid}/tasks` | OK |
+| ShowTask | `GET` | `/v3/{pid}/tasks/{task_id}` | OK |
+| DeleteTask | `DELETE` | `/v3/{pid}/tasks/{task_id}` | OK |
+| CreateTemplate | `POST` | `/v3/{pid}/templates` | OK |
+| ListTemplates | `GET` | `/v3/{pid}/templates` | OK |
+
+## DC (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateDirectConnect | `POST` | `/v2.0/{pid}/direct-connects` | OK |
+| ListDirectConnects | `GET` | `/v2.0/{pid}/direct-connects` | OK |
+| ShowDirectConnect | `GET` | `/v2.0/{pid}/direct-connects/{conn_id}` | OK |
+| DeleteDirectConnect | `DELETE` | `/v2.0/{pid}/direct-connects/{conn_id}` | OK |
+| CreateVirtualGateway | `POST` | `/v2.0/{pid}/virtual-gateways` | OK |
+| ListVirtualGateways | `GET` | `/v2.0/{pid}/virtual-gateways` | OK |
+| DeleteVirtualGateway | `DELETE` | `/v2.0/{pid}/virtual-gateways/{vgw_id}` | OK |
+| CreateVirtualInterface | `POST` | `/v2.0/{pid}/virtual-interfaces` | OK |
+| ListVirtualInterfaces | `GET` | `/v2.0/{pid}/virtual-interfaces` | OK |
+| DeleteVirtualInterface | `DELETE` | `/v2.0/{pid}/virtual-interfaces/{vif_id}` | OK |
+
+## ER (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateInstance | `POST` | `/v3/{pid}/enterprise-router/instances` | OK |
+| ListInstances | `GET` | `/v3/{pid}/enterprise-router/instances` | OK |
+| ShowInstance | `GET` | `/v3/{pid}/enterprise-router/instances/{er_id}` | OK |
+| DeleteInstance | `DELETE` | `/v3/{pid}/enterprise-router/instances/{er_id}` | OK |
+| CreateAttachment | `POST` | `/v3/{pid}/enterprise-router/instances/{er_id}/attachments` | OK |
+| ListAttachments | `GET` | `/v3/{pid}/enterprise-router/instances/{er_id}/attachments` | OK |
+| DeleteAttachment | `DELETE` | `/v3/{pid}/enterprise-router/instances/{er_id}/attachments/{attachment_id}` | OK |
+| CreateRouteTable | `POST` | `/v3/{pid}/enterprise-router/instances/{er_id}/route-tables` | OK |
+| ListRouteTables | `GET` | `/v3/{pid}/enterprise-router/instances/{er_id}/route-tables` | OK |
+
+## DIS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateStream | `POST` | `/v2/{pid}/streams` | OK |
+| ListStreams | `GET` | `/v2/{pid}/streams` | OK |
+| ShowStream | `GET` | `/v2/{pid}/streams/{stream_name}` | OK |
+| UpdateStream | `PUT` | `/v2/{pid}/streams/{stream_name}` | OK |
+| DeleteStream | `DELETE` | `/v2/{pid}/streams/{stream_name}` | OK |
+| CreateApp | `POST` | `/v2/{pid}/apps` | OK |
+| ListApps | `GET` | `/v2/{pid}/apps` | OK |
+| CommitCheckpoint | `PUT` | `/v2/{pid}/apps/{app_name}/checkpoints` | OK |
+| ListCheckpoints | `GET` | `/v2/{pid}/apps/{app_name}/checkpoints` | OK |
+
+## DataArts (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateConnection | `POST` | `/v2/{pid}/connections` | OK |
+| ListConnections | `GET` | `/v2/{pid}/connections` | OK |
+| ShowConnection | `GET` | `/v2/{pid}/connections/{conn_id}` | OK |
+| DeleteConnection | `DELETE` | `/v2/{pid}/connections/{conn_id}` | OK |
+| CreateJob | `POST` | `/v2/{pid}/jobs` | OK |
+| ListJobs | `GET` | `/v2/{pid}/jobs` | OK |
+| RunJob | `POST` | `/v2/{pid}/jobs/{job_name}/run` | OK |
+| DeleteJob | `DELETE` | `/v2/{pid}/jobs/{job_id}` | OK |
+| CreateScript | `POST` | `/v2/{pid}/scripts` | OK |
+| ListScripts | `GET` | `/v2/{pid}/scripts` | OK |
+
+## OMS (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateTask | `POST` | `/v2/{pid}/tasks` | OK |
+| ListTasks | `GET` | `/v2/{pid}/tasks` | OK |
+| ShowTask | `GET` | `/v2/{pid}/tasks/{task_id}` | OK |
+| StopTask | `POST` | `/v2/{pid}/tasks/{task_id}/stop` | OK |
+| DeleteTask | `DELETE` | `/v2/{pid}/tasks/{task_id}` | OK |
+
+## DES (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateTask | `POST` | `/v1/{pid}/tasks` | OK |
+| ListTasks | `GET` | `/v1/{pid}/tasks` | OK |
+| ShowTask | `GET` | `/v1/{pid}/tasks/{task_id}` | OK |
+| DeleteTask | `DELETE` | `/v1/{pid}/tasks/{task_id}` | OK |
+
+## CodeArts (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateRepository | `POST` | `/v2/projects/repositories` | OK |
+| ListRepositories | `GET` | `/v2/projects/repositories` | OK |
+| ShowRepository | `GET` | `/v2/projects/repositories/{repo_id}` | OK |
+| DeleteRepository | `DELETE` | `/v2/projects/repositories/{repo_id}` | OK |
+| CreatePipeline | `POST` | `/v2/{pid}/pipelines` | OK |
+| ListPipelines | `GET` | `/v2/{pid}/pipelines` | OK |
+| RunPipeline | `POST` | `/v2/{pid}/pipelines/{pipeline_id}/run` | OK |
+| DeletePipeline | `DELETE` | `/v2/{pid}/pipelines/{pipeline_id}` | OK |
+| CreateBuild | `POST` | `/v2/{pid}/builds` | OK |
+| ListBuilds | `GET` | `/v2/{pid}/builds` | OK |
+| RunBuild | `POST` | `/v2/{pid}/builds/{build_id}/run` | OK |
+
+## ServiceStage (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateEnvironment | `POST` | `/v2/{pid}/cas/environments` | OK |
+| ListEnvironments | `GET` | `/v2/{pid}/cas/environments` | OK |
+| DeleteEnvironment | `DELETE` | `/v2/{pid}/cas/environments/{env_id}` | OK |
+| CreateApplication | `POST` | `/v2/{pid}/cas/applications` | OK |
+| ListApplications | `GET` | `/v2/{pid}/cas/applications` | OK |
+| ShowApplication | `GET` | `/v2/{pid}/cas/applications/{app_id}` | OK |
+| DeleteApplication | `DELETE` | `/v2/{pid}/cas/applications/{app_id}` | OK |
+| CreateComponent | `POST` | `/v2/{pid}/cas/applications/{app_id}/components` | OK |
+| ListComponents | `GET` | `/v2/{pid}/cas/applications/{app_id}/components` | OK |
+
+## CSE (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateEngine | `POST` | `/v2/{pid}/engines` | OK |
+| ListEngines | `GET` | `/v2/{pid}/engines` | OK |
+| ShowEngine | `GET` | `/v2/{pid}/engines/{engine_id}` | OK |
+| DeleteEngine | `DELETE` | `/v2/{pid}/engines/{engine_id}` | OK |
+| RegisterMicroservice | `POST` | `/v2/{pid}/engines/{engine_id}/microservices` | OK |
+| ListMicroservices | `GET` | `/v2/{pid}/engines/{engine_id}/microservices` | OK |
+
+## CCI (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateNamespace | `POST` | `/v1/{pid}/cci/namespaces` | OK |
+| ListNamespaces | `GET` | `/v1/{pid}/cci/namespaces` | OK |
+| DeleteNamespace | `DELETE` | `/v1/{pid}/cci/namespaces/{ns_id}` | OK |
+| CreatePod | `POST` | `/v1/{pid}/cci/namespaces/{ns_id}/pods` | OK |
+| ListPods | `GET` | `/v1/{pid}/cci/namespaces/{ns_id}/pods` | OK |
+| ShowPod | `GET` | `/v1/{pid}/cci/namespaces/{ns_id}/pods/{pod_id}` | OK |
+| DeletePod | `DELETE` | `/v1/{pid}/cci/namespaces/{ns_id}/pods/{pod_id}` | OK |
+
+## CFW (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateFirewall | `POST` | `/v1/{pid}/firewalls` | OK |
+| ListFirewalls | `GET` | `/v1/{pid}/firewalls` | OK |
+| ShowFirewall | `GET` | `/v1/{pid}/firewalls/{firewall_id}` | OK |
+| DeleteFirewall | `DELETE` | `/v1/{pid}/firewalls/{firewall_id}` | OK |
+| CreateRule | `POST` | `/v1/{pid}/firewalls/{firewall_id}/rules` | OK |
+| ListRules | `GET` | `/v1/{pid}/firewalls/{firewall_id}/rules` | OK |
+| DeleteRule | `DELETE` | `/v1/{pid}/firewalls/{firewall_id}/rules/{rule_id}` | OK |
+| RecordHit | `POST` | `/v1/{pid}/firewalls/{firewall_id}/hit-records` | OK |
+| ListHitRecords | `GET` | `/v1/{pid}/firewalls/{firewall_id}/hit-records` | OK |
+
+## DSC (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateAsset | `POST` | `/v1/{pid}/dsc/assets` | OK |
+| ListAssets | `GET` | `/v1/{pid}/dsc/assets` | OK |
+| DeleteAsset | `DELETE` | `/v1/{pid}/dsc/assets/{asset_id}` | OK |
+| CreateScan | `POST` | `/v1/{pid}/dsc/scans` | OK |
+| ListRisks | `GET` | `/v1/{pid}/dsc/risks` | OK |
+| HandleRisk | `POST` | `/v1/{pid}/dsc/risks/{risk_id}/handle` | OK |
+
+## VOD (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateAsset | `POST` | `/v1/{pid}/assets` | OK |
+| ListAssets | `GET` | `/v1/{pid}/assets` | OK |
+| ShowAsset | `GET` | `/v1/{pid}/assets/{asset_id}` | OK |
+| UploadAsset | `POST` | `/v1/{pid}/assets/{asset_id}/upload` | OK |
+| DeleteAsset | `DELETE` | `/v1/{pid}/assets/{asset_id}` | OK |
+| CreateTranscodeTemplate | `POST` | `/v1/{pid}/transcode-templates` | OK |
+| ListTranscodeTemplates | `GET` | `/v1/{pid}/transcode-templates` | OK |
+| DeleteTranscodeTemplate | `DELETE` | `/v1/{pid}/transcode-templates/{template_id}` | OK |
+| CreateCategory | `POST` | `/v1/{pid}/categories` | OK |
+| ListCategories | `GET` | `/v1/{pid}/categories` | OK |
+
+## IEF (100% of documented operations implemented)
+
+| Operation | Method | Path | Status |
+|---|---|---|---|
+| CreateNode | `POST` | `/v2/{pid}/edgemgr/nodes` | OK |
+| ListNodes | `GET` | `/v2/{pid}/edgemgr/nodes` | OK |
+| ShowNode | `GET` | `/v2/{pid}/edgemgr/nodes/{node_id}` | OK |
+| DeleteNode | `DELETE` | `/v2/{pid}/edgemgr/nodes/{node_id}` | OK |
+| CreateDeployment | `POST` | `/v2/{pid}/edgemgr/deployments` | OK |
+| ListDeployments | `GET` | `/v2/{pid}/edgemgr/deployments` | OK |
+| DeleteDeployment | `DELETE` | `/v2/{pid}/edgemgr/deployments/{deployment_id}` | OK |
+
 ## Registry pending
 
 The remaining 44 services are not yet in the curated registry;
@@ -253,12 +859,60 @@ deep/shallow lists in the README's Known limitations.
 | RDS | 5 | 5 | 0 | 0 | 100% |
 | DNS | 6 | 6 | 0 | 0 | 100% |
 | KMS | 7 | 7 | 0 | 0 | 100% |
-| ELB | 10 | 10 | 0 | 0 | 100% |
+| ELB | 14 | 14 | 0 | 0 | 100% |
 | SFS | 4 | 4 | 0 | 0 | 100% |
 | CCE | 5 | 5 | 0 | 0 | 100% |
 | IAM | 3 | 3 | 0 | 0 | 100% |
 | FG | 5 | 5 | 0 | 0 | 100% |
 | OBS | 11 | 11 | 0 | 0 | 100% |
-| **OVERALL** | **151** | **151** | **0** | **0** | **100%** |
+| BMS | 7 | 7 | 0 | 0 | 100% |
+| AS | 8 | 8 | 0 | 0 | 100% |
+| SMN | 8 | 8 | 0 | 0 | 100% |
+| CES | 8 | 8 | 0 | 0 | 100% |
+| LTS | 5 | 5 | 0 | 0 | 100% |
+| DCS | 13 | 13 | 0 | 0 | 100% |
+| DMS | 6 | 6 | 0 | 0 | 100% |
+| DDS | 4 | 4 | 0 | 0 | 100% |
+| WAF | 10 | 10 | 0 | 0 | 100% |
+| TMS | 4 | 4 | 0 | 0 | 100% |
+| EPS | 4 | 4 | 0 | 0 | 100% |
+| APIG | 6 | 6 | 0 | 0 | 100% |
+| SWR | 4 | 4 | 0 | 0 | 100% |
+| ModelArts | 24 | 24 | 0 | 0 | 100% |
+| IoTDA | 6 | 6 | 0 | 0 | 100% |
+| GaussDB | 4 | 4 | 0 | 0 | 100% |
+| AOM | 5 | 5 | 0 | 0 | 100% |
+| DLI | 9 | 9 | 0 | 0 | 100% |
+| Anti-DDoS | 4 | 4 | 0 | 0 | 100% |
+| BSS | 4 | 4 | 0 | 0 | 100% |
+| NAT | 10 | 10 | 0 | 0 | 100% |
+| Peering | 6 | 6 | 0 | 0 | 100% |
+| ACL | 8 | 8 | 0 | 0 | 100% |
+| VPC-Routes | 6 | 6 | 0 | 0 | 100% |
+| VPN | 7 | 7 | 0 | 0 | 100% |
+| GeminiDB | 6 | 6 | 0 | 0 | 100% |
+| DDM | 7 | 7 | 0 | 0 | 100% |
+| DBSS | 6 | 6 | 0 | 0 | 100% |
+| HSS | 10 | 10 | 0 | 0 | 100% |
+| CDN | 9 | 9 | 0 | 0 | 100% |
+| DWS | 8 | 8 | 0 | 0 | 100% |
+| CSS | 8 | 8 | 0 | 0 | 100% |
+| MRS | 6 | 6 | 0 | 0 | 100% |
+| SMS | 10 | 10 | 0 | 0 | 100% |
+| DC | 10 | 10 | 0 | 0 | 100% |
+| ER | 9 | 9 | 0 | 0 | 100% |
+| DIS | 9 | 9 | 0 | 0 | 100% |
+| DataArts | 10 | 10 | 0 | 0 | 100% |
+| OMS | 5 | 5 | 0 | 0 | 100% |
+| DES | 4 | 4 | 0 | 0 | 100% |
+| CodeArts | 11 | 11 | 0 | 0 | 100% |
+| ServiceStage | 9 | 9 | 0 | 0 | 100% |
+| CSE | 6 | 6 | 0 | 0 | 100% |
+| CCI | 7 | 7 | 0 | 0 | 100% |
+| CFW | 9 | 9 | 0 | 0 | 100% |
+| DSC | 6 | 6 | 0 | 0 | 100% |
+| VOD | 10 | 10 | 0 | 0 | 100% |
+| IEF | 7 | 7 | 0 | 0 | 100% |
+| **OVERALL** | **517** | **517** | **0** | **0** | **100%** |
 
 Run `python3 tools/coverage.py` to regenerate.
