@@ -1,4 +1,7 @@
-"""Entry point: starts both REST (8200) and OBS (8201) servers."""
+"""Entry point: starts both REST (8200) and OBS (8201) servers.
+
+SIM_HOST controls the bind address: 127.0.0.1 (default, local-only) or
+0.0.0.0 (all interfaces - required inside Docker, use with care)."""
 
 import os
 import sys
@@ -11,8 +14,8 @@ def main():
     obs_port = int(os.environ.get("SIM_OBS_PORT", "8201"))
     host = os.environ.get("SIM_HOST", "127.0.0.1")
 
-    print(f"huawei-sim v1.0.0")
-    print(f"  REST: http://{host}:{port}  (IAM, ECS, EVS, VPC, EIP, IMS, CBR)")
+    print("Larrot - repeats Huawei Cloud")
+    print(f"  REST: http://{host}:{port}  (59 services)")
     print(f"  OBS:  http://{host}:{obs_port}  (object storage)")
     print(f"  Dashboard: http://{host}:{port}/")
     print(f"  API Docs: http://{host}:{port}/docs")

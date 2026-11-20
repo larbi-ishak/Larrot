@@ -279,3 +279,14 @@ simulator indistinguishable from the real Huawei Cloud APIs, quirks included.
 - Old names (`huawei-sim`, `hcli`) kept as deprecated aliases
 - Internal Python package renamed `huawei_sim` → `larrot`
 - Branding avoids the "Huawei" trademark in the project name (like LocalStack avoids "AWS")
+
+### D32 — Data policy: never use live account data
+
+Real account identifiers (account names, project/domain/user IDs, image
+names) were found in the seed data, docs, git history, and every PyPI
+release. All were replaced with generated values, history was rewritten,
+and old releases must be yanked.
+
+The rule going forward, enforced socially and by review: seed data is
+generated, observed behavior is described without naming the account,
+and the sdist ships only code + README + LICENSE so docs can never leak.

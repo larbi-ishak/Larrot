@@ -7,6 +7,9 @@ services:
       - "8200:8200"   # REST (IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, ...)
       - "8201:8201"   # OBS (object storage)
     environment:
+      # 0.0.0.0 is required inside a container for port mapping to work.
+      # For the bare Python server, SIM_HOST defaults to 127.0.0.1 (local-only).
+      SIM_HOST: 0.0.0.0
       SIM_PROFILE: public
       SIM_AK: HWYSIMAK00000001
       SIM_SK: HWYSIMSK00000001

@@ -2,6 +2,17 @@
 
 Thank you for your interest in contributing! This document covers the basics.
 
+## Data policy (non-negotiable)
+
+**NEVER put real account data in this repository.** No real account names,
+project IDs, domain IDs, user IDs, AK/SK pairs, IP addresses from live
+accounts, instance names, or references to private repos. Seed data must
+be generated values (`sim-lab`, random hex IDs, `HWYSIMAK...` credentials).
+If you observe real-cloud behavior worth simulating, describe the behavior
+- not the account it came from. This applies to code, tests, docs, commit
+messages, and every file that ships in the sdist or wheel. Violations are
+treated as security incidents: history gets rewritten and releases yanked.
+
 ## Getting started
 
 ```bash

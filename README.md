@@ -40,6 +40,40 @@ It runs the REST APIs of Huawei Cloud's international site
 category, and [Known limitations](#known-limitations) for what is shallow
 or missing.
 
+## How it works
+
+```
+        SDKs (huaweicloudsdk*)      larrot CLI        Terraform
+                |                     |                  |
+                +----------+---------+------------------+
+                           |  http://127.0.0.1:8200
+                           v
+              +----------------------------+
+              |   Gateway middleware       |   rate limit (APIGW.0301)
+              |   (every request)          |   chaos injection
+              |                            |   signature verify (accept-and-check)
+              +----------------------------+
+                           |
+                           v
+              +----------------------------+
+              |   59 service routers       |   ECS  EVS  VPC  OBS  RDS  CCE ...
+              |   (720 documented ops)     |   per-service error envelopes
+              +----------------------------+
+                           |
+                           v
+              +----------------------------+
+              |   Shared core              |   async job engine (job_id -> poll)
+              |                            |   quirk profiles (public / hcs)
+              |                            |   resource state + dependency graph
+              +----------------------------+
+                  |              |              |
+                  v              v              v
+          /admin/chaos    /admin/resources   /admin/preset
+          /console        /admin/save|load   /docs (Swagger)
+
+   OBS runs separately on :8201 (like the real cloud's own OBS endpoint)
+```
+
 ## Quick start
 
 ```bash
@@ -181,6 +215,7 @@ Full catalog grouped by category: **[CATALOG.md](CATALOG.md)**
 |---|---|---|
 | `SIM_PORT` | 8200 | REST port |
 | `SIM_OBS_PORT` | 8201 | OBS port |
+| `SIM_HOST` | 127.0.0.1 | Bind address: `127.0.0.1` (local-only) or `0.0.0.0` (all interfaces; Docker requires it) |
 | `SIM_PROFILE` | public | Default quirk profile |
 | `SIM_AK` / `SIM_SK` | HWYSIMAK… / HWYSIMSK… | Credentials |
 | `SIM_RATE_LIMIT` | 100 | Per-AK requests / 10s (0 = disabled) |
