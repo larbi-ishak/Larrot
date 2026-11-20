@@ -567,6 +567,16 @@ async def list_bandwidths(request: Request, pid: str):
     return {"bandwidths": items, "count": len(items)}
 
 
+@router.get("/v2.0/{pid}/bandwidths/{bandwidth_id}")
+async def show_bandwidth(request: Request, pid: str, bandwidth_id: str):
+    state = request.app.state.sim
+    bws = getattr(state, "bandwidths", {})
+    b = bws.get(bandwidth_id)
+    if not b or b.get("project_id") != pid:
+        return JSONResponse(vpc_error("VPC.0504", "Bandwidth does not exist."), status_code=404)
+    return {"bandwidth": b}
+
+
 @router.put("/v2.0/{pid}/bandwidths/{bandwidth_id}")
 async def resize_bandwidth(request: Request, pid: str, bandwidth_id: str):
     state = request.app.state.sim

@@ -207,6 +207,22 @@ async def change_os(request: Request, pid: str, server_id: str):
 # Nova Snapshots (create image from server)
 # ---------------------------------------------------------------------------
 
+@router.get("/v2.1/{pid}/servers/{server_id}/os-interface")
+async def nova_list_interfaces(request: Request, pid: str, server_id: str):
+    s = request.app.state.sim
+    server = s.servers.get(server_id)
+    if not server or server["project_id"] != pid:
+        return JSONResponse({"error": {"code": "Ecs.0114",
+                                        "message": "The ECS does not exist"}}, status_code=404)
+    ports = [p for p in s.ports.values()
+             if p["device_id"] == server_id and p["project_id"] == pid]
+    return {"interfaceAttachments": [{
+        "port_state": "ACTIVE", "fixed_ips": [{"subnet_id": p["subnet_id"],
+                                                "ip_address": p["ip_address"]}],
+        "port_id": p["id"], "net_id": p["network_id"],
+        "mac_addr": p["mac_address"]} for p in ports]}
+
+
 @router.get("/v2.1/{pid}/servers/{server_id}")
 async def nova_show_server(request: Request, pid: str, server_id: str):
     s = request.app.state.sim

@@ -127,6 +127,30 @@ async def delete_message_template(request: Request, pid: str, message_template_i
     return Response(status_code=204)
 
 
+@router.get("/v2/{pid}/notifications/message_templates/{message_template_id}")
+async def show_message_template(request: Request, pid: str, message_template_id: str):
+    s = request.app.state.sim
+    t = getattr(s, "smn_templates", {}).get(message_template_id)
+    if not t or t["project_id"] != pid:
+        return JSONResponse({"error_code": "SMN.0004",
+                             "error_msg": "template not found"}, status_code=404)
+    return t
+
+
+@router.put("/v2/{pid}/notifications/topics/{topic_urn}")
+async def update_topic(request: Request, pid: str, topic_urn: str):
+    s = request.app.state.sim
+    t = next((x for x in getattr(s, "smn_topics", {}).values()
+              if x["topic_urn"] == topic_urn or x["name"] == topic_urn), None)
+    if not t or t["project_id"] != pid:
+        return JSONResponse({"error_code": "SMN.0001", "error_msg": "topic not found"},
+                            status_code=404)
+    body = await request.json()
+    if "display_name" in body:
+        t["display_name"] = body["display_name"]
+    return {"request_id": new_id(), "display_name": t["display_name"]}
+
+
 @router.get("/v2/{pid}/notifications/message_templates")
 async def list_message_templates(request: Request, pid: str):
     s = request.app.state.sim

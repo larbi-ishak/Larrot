@@ -264,3 +264,152 @@ async def list_domains(request: Request):
     return {"domains": [{"id": state.account["domain_id"],
                           "name": state.account["name"],
                           "enabled": True, "description": "sim account"}]}
+
+
+# ---------------------------------------------------------------------------
+# agencies, project details, group membership, catalog (tier-4)
+# ---------------------------------------------------------------------------
+
+@router.post("/v3.0/OS-AGENCY/agencies")
+async def create_agency(request: Request):
+    state = request.app.state.sim
+    if not hasattr(state, "iam_agencies"):
+        state.iam_agencies = {}
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse(apigw_error("IAM.0001", "name is required"), status_code=400)
+    aid = new_id()
+    state.iam_agencies[aid] = {
+        "id": aid, "name": name,
+        "domain_id": state.account["domain_id"],
+        "delegated_domain_id": body.get("delegated_domain_id", ""),
+        "duration": body.get("duration", "FOREVER"),
+        "description": body.get("description", ""),
+        "create_time": now_millis(),
+    }
+    return {"agency": state.iam_agencies[aid]}
+
+
+@router.get("/v3.0/OS-AGENCY/agencies")
+async def list_agencies(request: Request):
+    state = request.app.state.sim
+    return {"agencies": list(getattr(state, "iam_agencies", {}).values())}
+
+
+@router.get("/v3.0/OS-AGENCY/agencies/{agency_id}")
+async def show_agency(request: Request, agency_id: str):
+    state = request.app.state.sim
+    a = getattr(state, "iam_agencies", {}).get(agency_id)
+    if not a:
+        return JSONResponse(apigw_error("IAM.0004", "agency not found"), status_code=404)
+    return {"agency": a}
+
+
+@router.put("/v3.0/OS-AGENCY/agencies/{agency_id}")
+async def update_agency(request: Request, agency_id: str):
+    state = request.app.state.sim
+    a = getattr(state, "iam_agencies", {}).get(agency_id)
+    if not a:
+        return JSONResponse(apigw_error("IAM.0004", "agency not found"), status_code=404)
+    body = await request.json()
+    for field in ("description", "duration"):
+        if field in body:
+            a[field] = body[field]
+    return {"agency": a}
+
+
+@router.delete("/v3.0/OS-AGENCY/agencies/{agency_id}")
+async def delete_agency(request: Request, agency_id: str):
+    state = request.app.state.sim
+    if agency_id not in getattr(state, "iam_agencies", {}):
+        return JSONResponse(apigw_error("IAM.0004", "agency not found"), status_code=404)
+    del state.iam_agencies[agency_id]
+    return Response(status_code=204)
+
+
+@router.get("/v3/projects/{project_id}")
+async def show_project(request: Request, project_id: str):
+    state = request.app.state.sim
+    p = state.project(project_id)
+    if not p:
+        return JSONResponse(apigw_error("IAM.0005", "project not found"), status_code=404)
+    return {"project": {"id": p["id"], "name": p["name"],
+                          "domain_id": p["domain_id"], "enabled": True}}
+
+
+@router.put("/v3/projects/{project_id}")
+async def update_project(request: Request, project_id: str):
+    state = request.app.state.sim
+    p = state.project(project_id)
+    if not p:
+        return JSONResponse(apigw_error("IAM.0005", "project not found"), status_code=404)
+    body = await request.json()
+    if "description" in body:
+        p["description"] = body["description"]
+    return {"project": {"id": p["id"], "name": p["name"],
+                          "domain_id": p["domain_id"], "enabled": True}}
+
+
+@router.put("/v3/groups/{group_id}/users/{user_id}")
+async def add_user_to_group(request: Request, group_id: str, user_id: str):
+    state = request.app.state.sim
+    g = getattr(state, "iam_groups", {}).get(group_id)
+    u = getattr(state, "iam_users", {}).get(user_id)
+    if not g or not u:
+        return JSONResponse(apigw_error("IAM.0006", "group or user not found"), status_code=404)
+    members = g.setdefault("users", [])
+    if user_id not in members:
+        members.append(user_id)
+    return Response(status_code=204)
+
+
+@router.delete("/v3/groups/{group_id}/users/{user_id}")
+async def remove_user_from_group(request: Request, group_id: str, user_id: str):
+    state = request.app.state.sim
+    g = getattr(state, "iam_groups", {}).get(group_id)
+    if not g:
+        return JSONResponse(apigw_error("IAM.0006", "group not found"), status_code=404)
+    if user_id not in g.get("users", []):
+        return JSONResponse(apigw_error("IAM.0007", "user not in group"), status_code=404)
+    g["users"] = [x for x in g["users"] if x != user_id]
+    return Response(status_code=204)
+
+
+@router.get("/v3/groups/{group_id}/users")
+async def list_group_users(request: Request, group_id: str):
+    state = request.app.state.sim
+    g = getattr(state, "iam_groups", {}).get(group_id)
+    if not g:
+        return JSONResponse(apigw_error("IAM.0006", "group not found"), status_code=404)
+    users = [state.iam_users[uid] for uid in g.get("users", [])
+             if uid in getattr(state, "iam_users", {})]
+    return {"users": users}
+
+
+@router.get("/v3/users/{user_id}/groups")
+async def list_user_groups(request: Request, user_id: str):
+    state = request.app.state.sim
+    if user_id not in getattr(state, "iam_users", {}):
+        return JSONResponse(apigw_error("IAM.0002", "user not found"), status_code=404)
+    groups = [g for g in getattr(state, "iam_groups", {}).values()
+              if user_id in g.get("users", [])]
+    return {"groups": groups}
+
+
+@router.get("/v3/auth/catalog")
+async def get_service_catalog(request: Request):
+    return {"catalog": [
+        {"id": "sim-ecs", "name": "ecs", "type": "compute",
+         "endpoints": [{"id": "sim-ecs-ep", "interface": "public",
+                         "region": "ap-southeast-1",
+                         "url": "http://127.0.0.1:8200"}]},
+        {"id": "sim-evs", "name": "evs", "type": "volumev2",
+         "endpoints": [{"id": "sim-evs-ep", "interface": "public",
+                         "region": "ap-southeast-1",
+                         "url": "http://127.0.0.1:8200"}]},
+        {"id": "sim-obs", "name": "obs", "type": "object-store",
+         "endpoints": [{"id": "sim-obs-ep", "interface": "public",
+                         "region": "ap-southeast-1",
+                         "url": "http://127.0.0.1:8201"}]},
+    ]}

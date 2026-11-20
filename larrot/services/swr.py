@@ -50,6 +50,18 @@ async def create_repo(request: Request, pid: str, namespace: str):
             "category": s.swr_repos[rid]["category"]}
 
 
+@router.get("/v2/{pid}/namespaces/{namespace}/repos/{repo}")
+async def show_repo(request: Request, pid: str, namespace: str, repo: str):
+    s = request.app.state.sim
+    r = next((x for x in getattr(s, "swr_repos", {}).values()
+              if x["project_id"] == pid and x["namespace"] == namespace
+              and x["repository"] == repo), None)
+    if not r:
+        return JSONResponse({"error_msg": "repository not found",
+                             "error_code": "SWR.0001"}, status_code=404)
+    return r
+
+
 @router.get("/v2/{pid}/namespaces/{namespace}/repos/{repo}/tags")
 async def list_image_tags(request: Request, pid: str, namespace: str, repo: str):
     s = request.app.state.sim

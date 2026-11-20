@@ -88,3 +88,60 @@ async def list_environments(request: Request, pid: str):
     s = request.app.state.sim
     envs = [e for e in getattr(s, "apig_environments", {}).values() if e["project_id"] == pid]
     return {"environments": envs, "total": len(envs)}
+
+
+@router.get("/v2/{pid}/apigw/apis/{api_id}")
+async def show_api(request: Request, pid: str, api_id: str):
+    s = request.app.state.sim
+    a = getattr(s, "apig_apis", {}).get(api_id)
+    if not a or a.get("project_id") != pid:
+        return JSONResponse({"error_msg": "API not found", "error_code": "APIG.0002"}, status_code=404)
+    return a
+
+
+@router.delete("/v2/{pid}/apigw/apis/{api_id}")
+async def delete_api(request: Request, pid: str, api_id: str):
+    s = request.app.state.sim
+    a = getattr(s, "apig_apis", {}).get(api_id)
+    if not a or a.get("project_id") != pid:
+        return JSONResponse({"error_msg": "API not found", "error_code": "APIG.0002"}, status_code=404)
+    del s.apig_apis[api_id]
+    return Response(status_code=204)
+
+
+@router.get("/v2/{pid}/apigw/instances/{instance_id}")
+async def show_apig_instance(request: Request, pid: str, instance_id: str):
+    s = request.app.state.sim
+    i = getattr(s, "apig_instances", {}).get(instance_id)
+    if not i or i.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Instance not found", "error_code": "APIG.0003"}, status_code=404)
+    return i
+
+
+@router.get("/v2/{pid}/apigw/groups/{group_id}")
+async def show_apig_group(request: Request, pid: str, group_id: str):
+    s = request.app.state.sim
+    g = getattr(s, "apig_groups", {}).get(group_id)
+    if not g or g.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Group not found", "error_code": "APIG.0004"}, status_code=404)
+    return g
+
+
+@router.delete("/v2/{pid}/apigw/groups/{group_id}")
+async def delete_apig_group(request: Request, pid: str, group_id: str):
+    s = request.app.state.sim
+    g = getattr(s, "apig_groups", {}).get(group_id)
+    if not g or g.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Group not found", "error_code": "APIG.0004"}, status_code=404)
+    del s.apig_groups[group_id]
+    return Response(status_code=204)
+
+
+@router.delete("/v2/{pid}/apigw/environments/{env_id}")
+async def delete_apig_environment(request: Request, pid: str, env_id: str):
+    s = request.app.state.sim
+    e = getattr(s, "apig_environments", {}).get(env_id)
+    if not e or e.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Environment not found", "error_code": "APIG.0005"}, status_code=404)
+    del s.apig_environments[env_id]
+    return Response(status_code=204)

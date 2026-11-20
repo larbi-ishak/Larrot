@@ -30,7 +30,7 @@ across 15 core services**, 339 unit/integration tests, 130 negative tests,
 and the example below runs unmodified against the official
 `huaweicloudsdk*` Python SDKs. Full numbers:
 **[CONFORMANCE_REPORT.md](CONFORMANCE_REPORT.md)**,
-**[COVERAGE.md](COVERAGE.md)** (operation-level: 597/597 documented
+**[COVERAGE.md](COVERAGE.md)** (operation-level: 642/642 documented
 operations across all 59 services), and
 **[ROADMAP.md](ROADMAP.md)**.
 

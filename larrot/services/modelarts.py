@@ -472,3 +472,112 @@ async def list_dataset_versions(request: Request, pid: str, dataset_id: str):
         return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
                             status_code=404)
     return {"versions": d.get("versions", []), "total": len(d.get("versions", []))}
+
+
+@router.get("/v2/{pid}/datasets/{dataset_id}")
+async def show_dataset(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    return d
+
+
+@router.get("/v2/{pid}/datasets/{dataset_id}/labels")
+async def list_labels(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    return {"labels": d.get("labels", []), "total": len(d.get("labels", []))}
+
+
+@router.post("/v2/{pid}/datasets/{dataset_id}/labels")
+async def create_label(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse({"error_code": "MA.0011", "error_msg": "label name is required"},
+                            status_code=400)
+    labels = d.setdefault("labels", [])
+    if any(x["name"] == name for x in labels):
+        return JSONResponse({"error_code": "MA.0012", "error_msg": "label already exists"},
+                            status_code=409)
+    label = {"name": name, "type": body.get("type", 0), "property": body.get("property", {})}
+    labels.append(label)
+    return {"labels": [label]}
+
+
+@router.put("/v2/{pid}/datasets/{dataset_id}/labels/{label_name}")
+async def update_label(request: Request, pid: str, dataset_id: str, label_name: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    label = next((x for x in d.get("labels", []) if x["name"] == label_name), None)
+    if not label:
+        return JSONResponse({"error_code": "MA.0013", "error_msg": "label not found"},
+                            status_code=404)
+    body = await request.json()
+    if "name" in body and body["name"]:
+        label["name"] = body["name"]
+    if "type" in body:
+        label["type"] = body["type"]
+    return {"labels": [label]}
+
+
+@router.delete("/v2/{pid}/datasets/{dataset_id}/labels/{label_name}")
+async def delete_label(request: Request, pid: str, dataset_id: str, label_name: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    before = len(d.get("labels", []))
+    d["labels"] = [x for x in d.get("labels", []) if x["name"] != label_name]
+    if len(d["labels"]) == before:
+        return JSONResponse({"error_code": "MA.0013", "error_msg": "label not found"},
+                            status_code=404)
+    return Response(status_code=204)
+
+
+@router.post("/v2/{pid}/datasets/{dataset_id}/samples")
+async def add_samples(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    body = await request.json()
+    samples_in = body.get("samples", [])
+    if not samples_in:
+        return JSONResponse({"error_code": "MA.0014", "error_msg": "samples is required"},
+                            status_code=400)
+    store = d.setdefault("samples_list", [])
+    added = []
+    for smp in samples_in:
+        sid = new_id()
+        store.append({"sample_id": sid, "source": smp.get("source", ""),
+                       "labels": smp.get("labels", [])})
+        added.append(sid)
+    d["samples"] = len(store)
+    return {"sample_ids": added}
+
+
+@router.get("/v2/{pid}/datasets/{dataset_id}/samples")
+async def list_samples(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    return {"samples": d.get("samples_list", []),
+            "total": len(d.get("samples_list", []))}

@@ -254,17 +254,22 @@ def extract_routes():
 
 
 def test_corpus():
+    """The test corpus: test suites and API-exercising tools, but NOT this
+    file (its own registry paths would trivially match every entry)."""
     corpus = ""
     for d in ("tests", "tools"):
         dp = os.path.join(ROOT, d)
         for f in os.listdir(dp):
-            if f.endswith(".py"):
+            if f.endswith(".py") and f != "coverage.py":
                 corpus += open(os.path.join(dp, f)).read()
     return corpus
 
 
 def search_fragment(path):
     """A distinctive literal segment of the path to grep the corpus for."""
+    if "?" in path:
+        # query sub-resource paths (OBS style): match on the query key
+        return "?" + path.split("?", 1)[1].split("&")[0].split("=")[0]
     parts = [p for p in path.split("/") if p]
     if not parts:
         return "/"
@@ -1037,6 +1042,86 @@ REGISTRY_TIER3 = {
 }
 
 for _svc, _ops in REGISTRY_TIER3.items():
+    REGISTRY.setdefault(_svc, []).extend(_ops)
+
+
+# ---------------------------------------------------------------------------
+# Tier-4 registries: agencies, labeling, multipart, addons, show/delete flows
+# ---------------------------------------------------------------------------
+
+REGISTRY_TIER4 = {
+    "IAM": [
+        ("CreateAgency", "POST", "/v3.0/OS-AGENCY/agencies"),
+        ("ListAgencies", "GET", "/v3.0/OS-AGENCY/agencies"),
+        ("ShowAgency", "GET", "/v3.0/OS-AGENCY/agencies/{agency_id}"),
+        ("UpdateAgency", "PUT", "/v3.0/OS-AGENCY/agencies/{agency_id}"),
+        ("DeleteAgency", "DELETE", "/v3.0/OS-AGENCY/agencies/{agency_id}"),
+        ("ShowProject", "GET", "/v3/projects/{project_id}"),
+        ("UpdateProject", "PUT", "/v3/projects/{project_id}"),
+        ("AddUserToGroup", "PUT", "/v3/groups/{group_id}/users/{user_id}"),
+        ("RemoveUserFromGroup", "DELETE", "/v3/groups/{group_id}/users/{user_id}"),
+        ("ListGroupUsers", "GET", "/v3/groups/{group_id}/users"),
+        ("ListUserGroups", "GET", "/v3/users/{user_id}/groups"),
+        ("GetServiceCatalog", "GET", "/v3/auth/catalog"),
+    ],
+    "APIG": [
+        ("ShowApi", "GET", "/v2/{pid}/apigw/apis/{api_id}"),
+        ("DeleteApi", "DELETE", "/v2/{pid}/apigw/apis/{api_id}"),
+        ("ShowInstance", "GET", "/v2/{pid}/apigw/instances/{instance_id}"),
+        ("ShowGroup", "GET", "/v2/{pid}/apigw/groups/{group_id}"),
+        ("DeleteGroup", "DELETE", "/v2/{pid}/apigw/groups/{group_id}"),
+        ("DeleteEnvironment", "DELETE", "/v2/{pid}/apigw/environments/{env_id}"),
+    ],
+    "ModelArts": [
+        ("ShowDataset", "GET", "/v2/{pid}/datasets/{dataset_id}"),
+        ("ListLabels", "GET", "/v2/{pid}/datasets/{dataset_id}/labels"),
+        ("CreateLabel", "POST", "/v2/{pid}/datasets/{dataset_id}/labels"),
+        ("UpdateLabel", "PUT", "/v2/{pid}/datasets/{dataset_id}/labels/{label_name}"),
+        ("DeleteLabel", "DELETE", "/v2/{pid}/datasets/{dataset_id}/labels/{label_name}"),
+        ("AddSamples", "POST", "/v2/{pid}/datasets/{dataset_id}/samples"),
+        ("ListSamples", "GET", "/v2/{pid}/datasets/{dataset_id}/samples"),
+    ],
+    "OBS": [
+        ("ListMultipartUploads", "GET", "/{bucket}?uploads"),
+        ("ListParts", "GET", "/{bucket}/{key}?uploadId"),
+        ("AbortMultipartUpload", "DELETE", "/{bucket}/{key}?uploadId"),
+        ("BatchDeleteObjects", "POST", "/{bucket}?delete"),
+        ("GetObjectMetadata", "HEAD", "/{bucket}/{key}"),
+        ("CopyObject", "PUT", "/{bucket}/{key}"),
+        ("GetBucketStorageInfo", "GET", "/{bucket}?storageinfo"),
+    ],
+    "CCE": [
+        ("CreateAddon", "POST", "/api/v3/projects/{pid}/clusters/{cluster_id}/addons"),
+        ("ListAddons", "GET", "/api/v3/projects/{pid}/clusters/{cluster_id}/addons"),
+        ("UpdateCluster", "PUT", "/api/v3/projects/{pid}/clusters/{cluster_id}"),
+        ("ShowNode", "GET", "/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}"),
+        ("DeleteNode", "DELETE", "/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}"),
+    ],
+    "ECS": [
+        ("NovaListInterfaces", "GET", "/v2.1/{pid}/servers/{server_id}/os-interface"),
+    ],
+    "EIP": [
+        ("ShowBandwidth", "GET", "/v2.0/{pid}/bandwidths/{bandwidth_id}"),
+    ],
+    "DNS": [
+        ("UpdateZone", "PUT", "/v2/zones/{zone_id}"),
+    ],
+    "SMN": [
+        ("ShowMessageTemplate", "GET", "/v2/{pid}/notifications/message_templates/{message_template_id}"),
+        ("UpdateTopic", "PUT", "/v2/{pid}/notifications/topics/{topic_urn}"),
+    ],
+    "SWR": [
+        ("ShowRepo", "GET", "/v2/manage/namespaces/{namespace}/repos/{repo}"),
+    ],
+    "IoTDA": [
+        ("UpdateDevice", "PUT", "/v5/iot/{pid}/devices/{device_id}"),
+    ],
+    "DIS": [
+        ("DeleteCheckpoint", "DELETE", "/v2/{pid}/apps/{app_name}/checkpoints"),
+    ],
+}
+
+for _svc, _ops in REGISTRY_TIER4.items():
     REGISTRY.setdefault(_svc, []).extend(_ops)
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 Real route: POST /v2/{project_id}/streams.
 """
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, Response
 from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis
 
@@ -143,6 +143,21 @@ async def commit_checkpoint(request: Request, pid: str, app_name: str):
         "commit_timestamp": now_millis(), "project_id": pid,
     }
     return {"checkpoint": s.dis_checkpoints[key]}
+
+
+@router.delete("/v2/{pid}/apps/{app_name}/checkpoints")
+async def delete_checkpoint(request: Request, pid: str, app_name: str):
+    s = request.app.state.sim
+    stream_name = request.query_params.get("stream_name", "")
+    if not stream_name:
+        return JSONResponse({"error_code": "DIS.0006",
+                             "error_msg": "stream_name is required"}, status_code=400)
+    key = f"{app_name}/{stream_name}"
+    if key not in getattr(s, "dis_checkpoints", {}):
+        return JSONResponse({"error_code": "DIS.0007",
+                             "error_msg": "checkpoint not found"}, status_code=404)
+    del s.dis_checkpoints[key]
+    return Response(status_code=204)
 
 
 @router.get("/v2/{pid}/apps/{app_name}/checkpoints")

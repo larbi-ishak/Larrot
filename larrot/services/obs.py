@@ -125,6 +125,31 @@ async def _bucket_handler(state, request, bucket, method, query):
     if method == "HEAD":
         return PlainTextResponse("", status_code=200 if bucket in state.obs_buckets else 404)
 
+    if method == "POST" and "delete" in query:
+        import base64
+        raw = await request.body()
+        text = raw.decode(errors="replace")
+        keys = re.findall(r"<Key>([^<]+)</Key>", text)
+        quiet = "<Quiet>true" in text
+        deleted, not_found = [], []
+        for k in keys:
+            sk = f"{bucket}/{k}"
+            if state.obs_objects.pop(sk, None) is not None:
+                deleted.append(k)
+            else:
+                not_found.append(k)
+        if quiet:
+            return PlainTextResponse("", status_code=200)
+        body = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+        body += '<DeleteResult xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">\n'
+        for k in deleted:
+            body += f'<Deleted><Key>{_xml_escape(k)}</Key></Deleted>\n'
+        for k in not_found:
+            body += (f'<Error><Key>{_xml_escape(k)}</Key>'
+                     '<Code>NoSuchKey</Code></Error>\n')
+        body += '</DeleteResult>'
+        return PlainTextResponse(body, media_type="application/xml")
+
     if method == "DELETE":
         has_objects = any(k.startswith(f"{bucket}/") for k in state.obs_objects)
         if has_objects:
@@ -163,8 +188,30 @@ async def _bucket_handler(state, request, bucket, method, query):
                         '<TagSet>' + (tags if tags else "") + '</TagSet></Tagging>')
             return PlainTextResponse(body, media_type="application/xml")
         if "location" in query:
-            body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+            body = ('<?xml xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
                     '<LocationConstraint xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">sim</LocationConstraint>')
+            return PlainTextResponse(body, media_type="application/xml")
+        if "uploads" in query:
+            uploads = [(uid, u) for uid, u in state.obs_uploads.items()
+                       if u["bucket"] == bucket]
+            body = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+            body += '<ListMultipartUploadsResult xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">\n'
+            body += f'<Bucket>{_xml_escape(bucket)}</Bucket>\n'
+            for uid, u in uploads:
+                body += (f'<Upload><Key>{_xml_escape(u["key"])}</Key>'
+                        f'<UploadId>{uid}</UploadId>'
+                        f'<Initiated>{u.get("initiated", "")}</Initiated></Upload>\n')
+            body += '</ListMultipartUploadsResult>'
+            return PlainTextResponse(body, media_type="application/xml")
+        if "storageinfo" in query:
+            n_objs = sum(1 for k in state.obs_objects if k.startswith(f"{bucket}/"))
+            size = sum(len(v["data"]) for k, v in state.obs_objects.items()
+                       if k.startswith(f"{bucket}/"))
+            body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                    '<GetBucketStorageInfoResult '
+                    'xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
+                    f'<Size>{size}</Size><ObjectNumber>{n_objs}</ObjectNumber>'
+                    '</GetBucketStorageInfoResult>')
             return PlainTextResponse(body, media_type="application/xml")
         return _list_objects(state, bucket, query)
 
@@ -235,6 +282,26 @@ async def _object_handler(state, request, bucket, key, method, query):
     if method == "PUT":
         if "partNumber" in query and "uploadId" in query:
             return await _upload_part(state, request, bucket, key, query)
+        copy_source = request.headers.get("x-obs-copy-source", "")
+        if copy_source:
+            src_key = copy_source.lstrip("/")
+            src_obj = state.obs_objects.get(src_key)
+            if not src_obj:
+                return _error("NoSuchKey", "The source object does not exist",
+                              extra={"Key": src_key})
+            state.obs_objects[store_key] = {
+                "bucket": bucket, "key": key, "data": src_obj["data"],
+                "etag": src_obj["etag"], "content_type": src_obj["content_type"],
+                "last_modified": time.strftime("%a, %d %b %Y %H:%M:%S GMT", time.gmtime()),
+                "metadata": dict(src_obj["metadata"]),
+            }
+            body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                    '<CopyObjectResult '
+                    'xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
+                    f'<ETag>{src_obj["etag"]}</ETag>'
+                    f'<LastModified>{state.obs_objects[store_key]["last_modified"]}'
+                    '</LastModified></CopyObjectResult>')
+            return PlainTextResponse(body, media_type="application/xml")
         data = await request.body()
         if len(data) > 5 * 1024 * 1024 * 1024:
             return _error("EntityTooLarge", "Your proposed upload exceeds the maximum size allowed", status=400)

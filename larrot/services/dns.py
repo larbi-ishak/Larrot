@@ -11,6 +11,7 @@ router = APIRouter()
 def _zone_json(z):
     return {"id": z["id"], "name": z["name"], "description": z.get("description", ""),
             "email": z.get("email", "admin@example.com"), "zone_type": z.get("zone_type", "private"),
+            "ttl": z.get("ttl", 300),
             "status": z.get("status", "ACTIVE"), "record_num": len(z.get("recordsets", [])),
             "created_at": z["created_at"], "updated_at": z["updated_at"]}
 
@@ -57,6 +58,23 @@ async def show_zone(request: Request, zone_id: str):
     z = state.dns_zones.get(zone_id)
     if not z:
         return JSONResponse({"error_msg": "Zone not found", "error_code": "DNS.0101"}, status_code=404)
+    return {"zone": _zone_json(z)}
+
+
+@router.put("/v2/zones/{zone_id}")
+async def update_zone(request: Request, zone_id: str):
+    state = request.app.state.sim
+    z = state.dns_zones.get(zone_id)
+    if not z:
+        return JSONResponse(apigw_error("DNS.0101", "Zone does not exist."), status_code=404)
+    body = await request.json()
+    if "email" in body:
+        z["email"] = body["email"]
+    if "ttl" in body:
+        z["ttl"] = body["ttl"]
+    if "description" in body:
+        z["description"] = body["description"]
+    z["updated_at"] = now_millis()
     return {"zone": _zone_json(z)}
 
 

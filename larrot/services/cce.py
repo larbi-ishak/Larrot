@@ -195,3 +195,81 @@ async def list_node_pools(request: Request, pid: str, cluster_id: str):
     pools = [np_ for np_ in getattr(state, "cce_node_pools", {}).values()
              if np_["project_id"] == pid and np_["cluster_id"] == cluster_id]
     return {"nodepools": pools, "count": len(pools)}
+
+
+@router.post("/api/v3/projects/{pid}/clusters/{cluster_id}/addons")
+async def create_addon(request: Request, pid: str, cluster_id: str):
+    state = request.app.state.sim
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
+    if not c or c.get("project_id") != pid:
+        return JSONResponse({"error": {"code": "CCE.0101",
+                                        "message": "cluster not found"}}, status_code=404)
+    if not hasattr(state, "cce_addons"):
+        state.cce_addons = {}
+    body = await request.json()
+    aid = new_id()
+    addon = {"metadata": {"id": aid,
+                            "name": body.get("addon_name", body.get("itemName", "core-dns"))},
+             "spec": {"version": body.get("version", "1.0.0"),
+                       "clusterID": cluster_id},
+             "status": {"state": "running"},
+             "cluster_id": cluster_id, "project_id": pid, "id": aid}
+    state.cce_addons[aid] = addon
+    return {"addon": addon}
+
+
+@router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/addons")
+async def list_addons(request: Request, pid: str, cluster_id: str):
+    state = request.app.state.sim
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
+    if not c or c.get("project_id") != pid:
+        return JSONResponse({"error": {"code": "CCE.0101",
+                                        "message": "cluster not found"}}, status_code=404)
+    addons = [a for a in getattr(state, "cce_addons", {}).values()
+              if a["project_id"] == pid and a["cluster_id"] == cluster_id]
+    return {"addons": addons, "count": len(addons)}
+
+
+@router.put("/api/v3/projects/{pid}/clusters/{cluster_id}")
+async def update_cluster(request: Request, pid: str, cluster_id: str):
+    state = request.app.state.sim
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
+    if not c or c.get("project_id") != pid:
+        return JSONResponse({"error": {"code": "CCE.0101",
+                                        "message": "cluster not found"}}, status_code=404)
+    body = await request.json()
+    spec = body.get("spec", {})
+    if "description" in spec:
+        c["description"] = spec["description"]
+    if "displayName" in spec:
+        c["name"] = spec["displayName"]
+    return {"cluster": _cluster_json(c)}
+
+
+@router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}")
+async def show_node(request: Request, pid: str, cluster_id: str, node_id: str):
+    state = request.app.state.sim
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
+    if not c or c.get("project_id") != pid:
+        return JSONResponse({"error": {"code": "CCE.0101",
+                                        "message": "cluster not found"}}, status_code=404)
+    n = next((x for x in c.get("nodes", []) if x["id"] == node_id), None)
+    if not n:
+        return JSONResponse({"error": {"code": "CCE.0103",
+                                        "message": "node not found"}}, status_code=404)
+    return {"node": n}
+
+
+@router.delete("/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}")
+async def delete_node(request: Request, pid: str, cluster_id: str, node_id: str):
+    state = request.app.state.sim
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
+    if not c or c.get("project_id") != pid:
+        return JSONResponse({"error": {"code": "CCE.0101",
+                                        "message": "cluster not found"}}, status_code=404)
+    before = len(c.get("nodes", []))
+    c["nodes"] = [x for x in c.get("nodes", []) if x["id"] != node_id]
+    if len(c["nodes"]) == before:
+        return JSONResponse({"error": {"code": "CCE.0103",
+                                        "message": "node not found"}}, status_code=404)
+    return Response(status_code=204)
