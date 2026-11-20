@@ -319,6 +319,22 @@ async def delete_eip(request: Request, pid: str, eip_id: str):
 # Ports
 # ---------------------------------------------------------------------------
 
+@router.get("/v1/{pid}/ports/{port_id}")
+async def show_port(request: Request, pid: str, port_id: str):
+    state = request.app.state.sim
+    p = state.ports.get(port_id)
+    if not p or p["project_id"] != pid:
+        return JSONResponse(vpc_error("VPC.0402", "Port does not exist."), status_code=404)
+    return {"port": {
+        "id": p["id"], "name": "",
+        "status": "ACTIVE" if p["device_id"] else "DOWN",
+        "admin_state_up": True,
+        "fixed_ips": [{"subnet_id": p["subnet_id"], "ip_address": p["ip_address"]}],
+        "mac_address": p["mac_address"], "network_id": p["network_id"],
+        "device_id": p["device_id"], "tenant_id": p["project_id"],
+    }}
+
+
 @router.get("/v1/{pid}/ports")
 async def list_ports(request: Request, pid: str):
     state = request.app.state.sim

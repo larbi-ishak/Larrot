@@ -196,6 +196,20 @@ async def list_images_custom(request: Request):
     return body
 
 
+@router.patch("/v2/images/{image_id}")
+async def update_image(request: Request, image_id: str):
+    s = request.app.state.sim
+    img = s.images.get(image_id)
+    if not img:
+        return JSONResponse(ims_error("image not found"), status_code=404)
+    body = await request.json()
+    for field in ("name", "min_disk", "min_ram", "visibility", "description"):
+        if field in body:
+            img[field] = body[field]
+    img["updated_at"] = now_millis()
+    return {"image": img}
+
+
 @router.get("/v2/images/{image_id}")
 async def show_image(request: Request, image_id: str):
     state = request.app.state.sim

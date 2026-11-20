@@ -113,6 +113,7 @@ async def remove_nic(request: Request, pid: str, server_id: str, port_id: str):
 # ---------------------------------------------------------------------------
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/remote_console")
+@router.post("/v1/{pid}/cloudservers/{server_id}/remote_console")
 async def get_remote_console(request: Request, pid: str, server_id: str):
     s = request.app.state.sim
     server = s.servers.get(server_id)
@@ -206,6 +207,15 @@ async def change_os(request: Request, pid: str, server_id: str):
 # Nova Snapshots (create image from server)
 # ---------------------------------------------------------------------------
 
+@router.get("/v2.1/{pid}/servers/{server_id}")
+async def nova_show_server(request: Request, pid: str, server_id: str):
+    s = request.app.state.sim
+    server = s.servers.get(server_id)
+    if not server or server["project_id"] != pid:
+        return JSONResponse({"error": {"code": "Ecs.0114", "message": "The ECS does not exist"}}, status_code=404)
+    return {"server": server}
+
+
 @router.post("/v2.1/{pid}/servers/{server_id}/action")
 async def nova_server_action(request: Request, pid: str, server_id: str):
     s = request.app.state.sim
@@ -213,6 +223,23 @@ async def nova_server_action(request: Request, pid: str, server_id: str):
     if not server or server["project_id"] != pid:
         return JSONResponse({"error": {"code": "Ecs.0114", "message": "The ECS does not exist"}}, status_code=404)
     body = await request.json()
+
+    if "addSecurityGroup" in body:
+        name = body["addSecurityGroup"].get("name", "")
+        if not name:
+            return JSONResponse({"error": {"code": "Ecs.0005", "message": "request body is illegal"}}, status_code=400)
+        groups = [g["name"] for g in server.get("security_groups", [])]
+        if name not in groups:
+            server["security_groups"] = server.get("security_groups", []) + [{"name": name}]
+        return Response(status_code=202)
+
+    if "removeSecurityGroup" in body:
+        name = body["removeSecurityGroup"].get("name", "")
+        if not name:
+            return JSONResponse({"error": {"code": "Ecs.0005", "message": "request body is illegal"}}, status_code=400)
+        server["security_groups"] = [g for g in server.get("security_groups", [])
+                                     if g["name"] != name]
+        return Response(status_code=202)
 
     if "createImage" in body:
         img_name = body["createImage"].get("name", f"snapshot-{server_id[:8]}")

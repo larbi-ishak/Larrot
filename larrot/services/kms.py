@@ -98,3 +98,27 @@ async def decrypt_data(request: Request, pid: str):
     except Exception:
         plain = ""
     return {"plain_text": plain, "key_id": key_id}
+
+
+@router.post("/v1/{pid}/kms/enable-key")
+async def enable_key(request: Request, pid: str):
+    s = request.app.state.sim
+    body = await request.json()
+    k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
+    if not k:
+        return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}}, status_code=404)
+    k["state"] = "2"  # 2 = enabled
+    k["updated_at"] = now_millis()
+    return {"key_id": k["id"], "key_state": 2}
+
+
+@router.post("/v1/{pid}/kms/disable-key")
+async def disable_key(request: Request, pid: str):
+    s = request.app.state.sim
+    body = await request.json()
+    k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
+    if not k:
+        return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}}, status_code=404)
+    k["state"] = "3"  # 3 = disabled
+    k["updated_at"] = now_millis()
+    return {"key_id": k["id"], "key_state": 3}

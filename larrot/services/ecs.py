@@ -237,11 +237,135 @@ async def update_server(request: Request, pid: str, server_id: str):
 
 
 # ---------------------------------------------------------------------------
+# tags (ECS v1)
+# ---------------------------------------------------------------------------
+
+@router.get("/v1/{pid}/cloudservers/{server_id}/tags")
+async def list_server_tags(request: Request, pid: str, server_id: str):
+    state = request.app.state.sim
+    s = state.servers.get(server_id)
+    if not s or s["project_id"] != pid:
+        return JSONResponse(ecs_error("Ecs.0114", "The ECS does not exist."), status_code=404)
+    tags = s.get("tags", {})
+    if isinstance(tags, list):
+        tags = {}
+    return {"tags": tags}
+
+
+@router.post("/v1/{pid}/cloudservers/{server_id}/tags/action")
+async def server_tags_action(request: Request, pid: str, server_id: str):
+    """Batch create/delete ECS tags."""
+    state = request.app.state.sim
+    s = state.servers.get(server_id)
+    if not s or s["project_id"] != pid:
+        return JSONResponse(ecs_error("Ecs.0114", "The ECS does not exist."), status_code=404)
+    body = await request.json()
+    act = body.get("action", "")
+    tags = body.get("tags", [])
+    if act not in ("create", "delete") or not isinstance(tags, list) or not tags:
+        return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+    if isinstance(s.get("tags"), list):
+        s["tags"] = {}
+    for t in tags:
+        if not isinstance(t, dict) or not t.get("key"):
+            return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+        if act == "create":
+            s["tags"][t["key"]] = t.get("value", "")
+        else:
+            s["tags"].pop(t["key"], None)
+    return Response(status_code=202)
+
+
+# ---------------------------------------------------------------------------
+# per-server actions: rebuild, migrate, lock, unlock
+# ---------------------------------------------------------------------------
+
+@router.post("/v1/{pid}/cloudservers/{server_id}/action")
+async def server_action(request: Request, pid: str, server_id: str):
+    state = request.app.state.sim
+    s = state.servers.get(server_id)
+    if not s or s["project_id"] != pid:
+        return JSONResponse(ecs_error("Ecs.0114", "The ECS does not exist."), status_code=404)
+    body = await request.json()
+
+    if "lock" in body:
+        s["locked"] = True
+        return Response(status_code=202)
+    if "unlock" in body:
+        s["locked"] = False
+        return Response(status_code=202)
+
+    def _guard(s):
+        if s["OS-EXT-STS:task_state"]:
+            return JSONResponse(ecs_error("Ecs.0100",
+                "The ECS status does not meet requirements. Make the ECS in the required status and try again."),
+                status_code=400)
+        if s["status"] != "ACTIVE":
+            return JSONResponse(ecs_error("Ecs.0100",
+                "The ECS status does not meet requirements. Make the ECS in the required status and try again."),
+                status_code=400)
+        return None
+
+    if "rebuild" in body:
+        err = _guard(s)
+        if err:
+            return err
+        image_ref = body["rebuild"].get("imageRef", "")
+        if image_ref not in state.images:
+            return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+        s["status"] = "REBUILD"
+        s["OS-EXT-STS:task_state"] = "rebuilding"
+        s["updated"] = now_millis()
+
+        async def effect():
+            x = state.servers.get(server_id)
+            if x:
+                x["status"] = "ACTIVE"
+                x["OS-EXT-STS:vm_state"] = "active"
+                x["OS-EXT-STS:power_state"] = 1
+                x["OS-EXT-STS:task_state"] = None
+                x["image"] = {"id": image_ref}
+                x["updated"] = now_millis()
+            return None
+
+        job_id = await state.jobs.submit("rebuildServer",
+                                         {"server_id": server_id}, effect)
+        return {"job_id": job_id}
+
+    if "migrate" in body:
+        err = _guard(s)
+        if err:
+            return err
+        s["status"] = "MIGRATING"
+        s["OS-EXT-STS:task_state"] = "migrating"
+        s["updated"] = now_millis()
+
+        async def effect():
+            x = state.servers.get(server_id)
+            if x:
+                x["status"] = "ACTIVE"
+                x["OS-EXT-STS:vm_state"] = "active"
+                x["OS-EXT-STS:task_state"] = None
+                old_host = x.get("OS-EXT-SRV-ATTR:host", "host")
+                x["OS-EXT-SRV-ATTR:host"] = old_host.rstrip("ab") + (
+                    "b" if old_host.endswith("a") else "a")
+                x["updated"] = now_millis()
+            return None
+
+        job_id = await state.jobs.submit("migrateServer",
+                                         {"server_id": server_id}, effect)
+        return {"job_id": job_id}
+
+    return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+
+
+# ---------------------------------------------------------------------------
 # create / delete / batch actions
 # ---------------------------------------------------------------------------
 
 @router.post("/v1.1/{pid}/cloudservers")
 @router.post("/v1/{pid}/cloudservers")
+@router.post("/v2.1/{pid}/servers")
 async def create_servers(request: Request, pid: str):
     state = request.app.state.sim
     body = await request.json()
@@ -566,7 +690,7 @@ async def list_volume_attachments(request: Request, pid: str, server_id: str):
 
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/os-resetpwd-flag")
-async def resetpwd_flag(request: Request, pid: str, server_id: str):
+async def show_resetpwd_flag(request: Request, pid: str, server_id: str):
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:
@@ -574,7 +698,24 @@ async def resetpwd_flag(request: Request, pid: str, server_id: str):
     return {"resetpwd_flag": s["image_agent"]}
 
 
+@router.put("/v1/{pid}/cloudservers/{server_id}/os-resetpwd-flag")
+async def update_resetpwd_flag(request: Request, pid: str, server_id: str):
+    """Update the one-click password reset flag (documented: PUT)."""
+    state = request.app.state.sim
+    s = state.servers.get(server_id)
+    if not s or s["project_id"] != pid:
+        return JSONResponse(ecs_error("Ecs.0114", "The ECS does not exist."), status_code=404)
+    body = await request.json()
+    flag = body.get("resetpwd_flag", body.get("flag"))
+    if not isinstance(flag, bool):
+        return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+    s["image_agent"] = flag
+    s["updated"] = now_millis()
+    return {"resetpwd_flag": s["image_agent"]}
+
+
 @router.put("/v1/{pid}/cloudservers/{server_id}/os-reset-password")
+@router.post("/v1/{pid}/cloudservers/{server_id}/os-reset-password")
 async def reset_password(request: Request, pid: str, server_id: str):
     state = request.app.state.sim
     s = state.servers.get(server_id)

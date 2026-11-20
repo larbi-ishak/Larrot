@@ -309,6 +309,20 @@ async def list_snapshots(request: Request, pid: str):
     return {"snapshots": [_snap_json(s) for s in snaps]}
 
 
+@router.get("/v2/{pid}/cloudsnapshots")
+async def list_snapshots(request: Request, pid: str):
+    state = request.app.state.sim
+    snaps = [x for x in state.snapshots.values() if x["project_id"] == pid]
+    return {"snapshots": [_snap_json(x) for x in snaps], "count": len(snaps)}
+
+
+@router.get("/v2/{pid}/cloudsnapshots/detail")
+async def list_snapshots_detail(request: Request, pid: str):
+    state = request.app.state.sim
+    snaps = [x for x in state.snapshots.values() if x["project_id"] == pid]
+    return {"snapshots": [_snap_json(x) for x in snaps], "count": len(snaps)}
+
+
 @router.get("/v2/{pid}/cloudsnapshots/{snapshot_id}")
 async def show_snapshot(request: Request, pid: str, snapshot_id: str):
     state = request.app.state.sim

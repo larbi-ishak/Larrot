@@ -352,6 +352,8 @@ def run():
         for svc, n, ok, pct in scorecard:
             f.write(f"| {svc} | {n} | {ok} | {pct}% |\n")
         f.write(f"| **OVERALL** | **{len(RESULTS)}** | **{total_ok}** | **{overall}%** |\n")
+        f.write("\nOperation-level coverage against the documented APIs:")
+        f.write(" [COVERAGE.md](COVERAGE.md)\n")
         f.write("\nRun `python3 tools/conformance.py` to regenerate.\n")
     return 0 if total_ok == len(RESULTS) else 1
 
