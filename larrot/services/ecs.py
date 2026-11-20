@@ -689,6 +689,19 @@ async def list_volume_attachments(request: Request, pid: str, server_id: str):
         for a in s["os-extended-volumes:volumes_attached"]]}
 
 
+@router.get("/v1/{pid}/cloudservers/{server_id}/os-server-password")
+async def get_server_password(request: Request, pid: str, server_id: str):
+    """Obtain the encrypted password of an ECS (documented: GET os-server-password)."""
+    state = request.app.state.sim
+    s = state.servers.get(server_id)
+    if not s or s["project_id"] != pid:
+        return JSONResponse(ecs_error("Ecs.0114", "The ECS does not exist."), status_code=404)
+    if not s["image_agent"]:
+        return JSONResponse(ecs_error("Ecs.0100",
+            "The ECS does not support the password query."), status_code=400)
+    return {"password": "U2ltLVBhc3N3b3Jk"}
+
+
 @router.get("/v1/{pid}/cloudservers/{server_id}/os-resetpwd-flag")
 async def show_resetpwd_flag(request: Request, pid: str, server_id: str):
     state = request.app.state.sim

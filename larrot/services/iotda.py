@@ -39,6 +39,16 @@ async def list_devices(request: Request, pid: str):
     devices = [d for d in getattr(s, "iot_devices", {}).values() if d["project_id"] == pid]
     return {"devices": devices, "total": len(devices)}
 
+@router.get("/v5/iot/{pid}/devices/{device_id}")
+async def show_device(request: Request, pid: str, device_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "iot_devices", {}).get(device_id)
+    if not d or d.get("project_id") != pid:
+        return JSONResponse({"error_code": "IOTDA.00001",
+                             "error_msg": "device not found"}, status_code=404)
+    return d
+
+
 @router.delete("/v5/iot/{pid}/devices/{device_id}")
 async def delete_device(request: Request, pid: str, device_id: str):
     s = request.app.state.sim

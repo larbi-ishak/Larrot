@@ -269,3 +269,15 @@ async def list_health_monitors(request: Request, pid: str):
     hms = [h for h in getattr(state, "elb_healthmonitors", {}).values()
            if h["project_id"] == pid]
     return {"healthmonitors": hms, "total": len(hms)}
+
+
+@router.get("/v2/{pid}/elb/pools/{pool_id}/members/{member_id}")
+async def show_member(request: Request, pid: str, pool_id: str, member_id: str):
+    state = request.app.state.sim
+    p = getattr(state, "elb_pools", {}).get(pool_id)
+    if not p or p.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Pool not found", "error_code": "ELB.0103"}, status_code=404)
+    m = next((x for x in p.get("members", []) if x.get("id") == member_id), None)
+    if not m:
+        return JSONResponse({"error_msg": "Member not found", "error_code": "ELB.0104"}, status_code=404)
+    return {"member": _member_json(m)}

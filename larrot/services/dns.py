@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
+from ..core.envelopes import apigw_error
 from ..core.jobs import new_id, now_millis
 
 router = APIRouter()
@@ -99,6 +100,38 @@ async def list_recordsets(request: Request, zone_id: str):
         return JSONResponse({"error_msg": "Zone not found", "error_code": "DNS.0101"}, status_code=404)
     return {"recordsets": [_recordset_json(r) for r in zone["recordsets"]],
             "count": len(zone["recordsets"])}
+
+
+@router.get("/v2/zones/{zone_id}/recordsets/{recordset_id}")
+async def show_recordset(request: Request, zone_id: str, recordset_id: str):
+    state = request.app.state.sim
+    z = state.dns_zones.get(zone_id)
+    if not z:
+        return JSONResponse(apigw_error("DNS.0101", "Zone does not exist."), status_code=404)
+    r = next((x for x in z.get("recordsets", []) if x["id"] == recordset_id), None)
+    if not r:
+        return JSONResponse(apigw_error("DNS.0102", "Record set does not exist."), status_code=404)
+    return {"recordset": _recordset_json(r)}
+
+
+@router.put("/v2/zones/{zone_id}/recordsets/{recordset_id}")
+async def update_recordset(request: Request, zone_id: str, recordset_id: str):
+    state = request.app.state.sim
+    z = state.dns_zones.get(zone_id)
+    if not z:
+        return JSONResponse(apigw_error("DNS.0101", "Zone does not exist."), status_code=404)
+    r = next((x for x in z.get("recordsets", []) if x["id"] == recordset_id), None)
+    if not r:
+        return JSONResponse(apigw_error("DNS.0102", "Record set does not exist."), status_code=404)
+    body = await request.json()
+    if "name" in body:
+        r["name"] = body["name"]
+    if "records" in body:
+        r["records"] = body["records"]
+    if "ttl" in body:
+        r["ttl"] = body["ttl"]
+    r["updated_at"] = now_millis()
+    return {"recordset": _recordset_json(r)}
 
 
 @router.delete("/v2/zones/{zone_id}/recordsets/{recordset_id}")

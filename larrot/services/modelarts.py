@@ -438,3 +438,37 @@ async def delete_dataset(request: Request, pid: str, dataset_id: str):
                             status_code=404)
     del s.ma_datasets[dataset_id]
     return Response(status_code=204)
+
+
+@router.post("/v2/{pid}/datasets/{dataset_id}/versions")
+async def create_dataset_version(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    body = await request.json()
+    vid = new_id()
+    version = {"version_id": vid, "version_name": body.get("version_name", f"v-{vid[:8]}"),
+               "status": "PENDING", "samples": d.get("samples", 0),
+               "dataset_id": dataset_id, "project_id": pid, "created_at": now_millis()}
+    d.setdefault("versions", []).append(version)
+
+    async def effect():
+        v = next((x for x in d.get("versions", []) if x["version_id"] == vid), None)
+        if v:
+            v["status"] = "ACTIVE"
+        return None
+
+    await s.jobs.submit("createDatasetVersion", {"version_id": vid}, effect)
+    return {"version_id": vid, "status": "PENDING"}
+
+
+@router.get("/v2/{pid}/datasets/{dataset_id}/versions")
+async def list_dataset_versions(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    return {"versions": d.get("versions", []), "total": len(d.get("versions", []))}

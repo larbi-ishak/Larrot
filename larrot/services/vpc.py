@@ -415,6 +415,21 @@ async def show_sg(request: Request, pid: str, sg_id: str):
     return {"security_group": _sg_json(g)}
 
 
+@router.put("/v1/{pid}/security-groups/{sg_id}")
+async def update_sg(request: Request, pid: str, sg_id: str):
+    state = request.app.state.sim
+    g = state.security_groups.get(sg_id)
+    if not g or g["project_id"] != pid:
+        return JSONResponse(vpc_error("VPC.0603", "Security group does not exist."), status_code=404)
+    body = await request.json()
+    spec = body.get("security_group", {})
+    if "name" in spec and spec["name"]:
+        g["name"] = spec["name"]
+    if "description" in spec:
+        g["description"] = spec["description"]
+    return {"security_group": g}
+
+
 @router.delete("/v1/{pid}/security-groups/{sg_id}")
 async def delete_sg(request: Request, pid: str, sg_id: str):
     state = request.app.state.sim
@@ -483,6 +498,49 @@ async def list_sg_rules(request: Request, pid: str):
 # ---------------------------------------------------------------------------
 # Bandwidths (v2.0)
 # ---------------------------------------------------------------------------
+
+def _find_sg_rule(state, pid, rule_id):
+    for g in state.security_groups.values():
+        if g["project_id"] == pid:
+            for r in g.get("rules", []):
+                if r["id"] == rule_id:
+                    return g, r
+    return None, None
+
+
+@router.get("/v1/{pid}/security-group-rules/{rule_id}")
+async def show_sg_rule(request: Request, pid: str, rule_id: str):
+    state = request.app.state.sim
+    _, r = _find_sg_rule(state, pid, rule_id)
+    if not r:
+        return JSONResponse(vpc_error("VPC.0605", "Security group rule does not exist."), status_code=404)
+    return {"security_group_rule": _rule_json(r)}
+
+
+@router.delete("/v1/{pid}/security-group-rules/{rule_id}")
+async def delete_sg_rule(request: Request, pid: str, rule_id: str):
+    state = request.app.state.sim
+    g, r = _find_sg_rule(state, pid, rule_id)
+    if not r:
+        return JSONResponse(vpc_error("VPC.0605", "Security group rule does not exist."), status_code=404)
+    g["rules"] = [x for x in g["rules"] if x["id"] != rule_id]
+    return Response(status_code=204)
+
+
+@router.put("/v1/{pid}/ports/{port_id}")
+async def update_port(request: Request, pid: str, port_id: str):
+    state = request.app.state.sim
+    p = state.ports.get(port_id)
+    if not p or p["project_id"] != pid:
+        return JSONResponse(vpc_error("VPC.0402", "Port does not exist."), status_code=404)
+    body = await request.json()
+    spec = body.get("port", {})
+    if "name" in spec:
+        p["name"] = spec["name"]
+    if "admin_state_up" in spec:
+        p["admin_state_up"] = spec["admin_state_up"]
+    return {"port": p}
+
 
 @router.get("/v2.0/{pid}/bandwidths")
 async def list_bandwidths(request: Request, pid: str):

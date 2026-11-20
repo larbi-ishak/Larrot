@@ -122,3 +122,24 @@ async def disable_key(request: Request, pid: str):
     k["state"] = "3"  # 3 = disabled
     k["updated_at"] = now_millis()
     return {"key_id": k["id"], "key_state": 3}
+
+
+@router.post("/v1/{pid}/kms/gen-random")
+async def gen_random(request: Request, pid: str):
+    import base64, os as _os
+    body = await request.json()
+    length = body.get("random_data_length", 64)
+    if not isinstance(length, int) or not (16 <= length <= 8192):
+        return JSONResponse({"error": {"code": "KMS.1001",
+                                        "message": "random_data_length must be 16-8192"}}, status_code=400)
+    return {"random_data": base64.b64encode(_os.urandom(length)).decode()}
+
+
+@router.get("/v1/{pid}/kms/get-publickey/{key_id}")
+async def get_public_key(request: Request, pid: str, key_id: str):
+    s = request.app.state.sim
+    k = getattr(s, "kms_keys", {}).get(key_id)
+    if not k:
+        return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}}, status_code=404)
+    return {"key_id": k["id"], "public_key":
+            "-----BEGIN PUBLIC KEY-----\nU2ltLVB1YmxpY0tleQ==\n-----END PUBLIC KEY-----\n"}

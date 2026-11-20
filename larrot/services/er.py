@@ -164,6 +164,16 @@ async def create_route_table(request: Request, pid: str, er_id: str):
     return {"route_table": s.er_route_tables[tid]}
 
 
+@router.get("/v3/{pid}/enterprise-router/instances/{er_id}/route-tables/{route_table_id}")
+async def show_route_table(request: Request, pid: str, er_id: str, route_table_id: str):
+    s = request.app.state.sim
+    t = getattr(s, "er_route_tables", {}).get(route_table_id)
+    if not t or t["project_id"] != pid or t["er_id"] != er_id:
+        return JSONResponse({"error_code": "ER.0007", "error_msg": "route table not found"},
+                            status_code=404)
+    return {"route_table": t}
+
+
 @router.get("/v3/{pid}/enterprise-router/instances/{er_id}/route-tables")
 async def list_route_tables(request: Request, pid: str, er_id: str):
     s = request.app.state.sim

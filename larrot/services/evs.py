@@ -364,3 +364,20 @@ async def rollback_snapshot(request: Request, pid: str, snapshot_id: str):
 
     job_id = await state.jobs.submit("rollbackSnapshot", {"volume_id": s["volume_id"]}, effect)
     return JSONResponse({"job_id": job_id}, status_code=202)
+
+
+@router.put("/v2/{pid}/cloudsnapshots/{snapshot_id}")
+async def update_snapshot(request: Request, pid: str, snapshot_id: str):
+    state = request.app.state.sim
+    snap = state.snapshots.get(snapshot_id)
+    if not snap or snap["project_id"] != pid:
+        return JSONResponse(evs_error("EVS.5404",
+            "Resource(Volume, Snapshot, Backup .etc) cound not be found."), status_code=404)
+    body = await request.json()
+    spec = body.get("snapshot", {})
+    if "name" in spec and spec["name"]:
+        snap["name"] = spec["name"]
+    if "description" in spec:
+        snap["description"] = spec["description"]
+    snap["updated_at"] = now_millis()
+    return {"snapshot": _snap_json(snap)}

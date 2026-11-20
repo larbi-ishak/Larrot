@@ -133,3 +133,44 @@ async def list_nodes(request: Request, pid: str, cluster_id: str):
     if not cluster or cluster["project_id"] != pid:
         return JSONResponse({"error_msg": "Cluster not found", "error_code": "CCE.0101"}, status_code=404)
     return {"nodes": [_node_json(n) for n in cluster["nodes"]], "count": len(cluster["nodes"])}
+
+
+@router.post("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools")
+async def create_node_pool(request: Request, pid: str, cluster_id: str):
+    state = request.app.state.sim
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
+    if not c or c.get("project_id") != pid:
+        return JSONResponse({"error": {"code": "CCE.0101",
+                                        "message": "cluster not found"}}, status_code=404)
+    if not hasattr(state, "cce_node_pools"):
+        state.cce_node_pools = {}
+    body = await request.json()
+    npid = new_id()
+    state.cce_node_pools[npid] = {
+        "metadata": {"name": body.get("nodepool_name", f"nodepool-{npid[:8]}")},
+        "status": {"phase": "Creating", "currentNode": 0},
+        "spec": {"initialNodeCount": body.get("initialNodeCount", 1),
+                  "flavor": body.get("flavor", "s6.large.2")},
+        "cluster_id": cluster_id, "project_id": pid, "id": npid,
+    }
+
+    async def effect():
+        np_ = state.cce_node_pools.get(npid)
+        if np_:
+            np_["status"] = {"phase": "Active", "currentNode": np_["spec"]["initialNodeCount"]}
+        return None
+
+    await state.jobs.submit("createNodePool", {"nodepool_id": npid}, effect)
+    return {"nodepool": state.cce_node_pools[npid]}
+
+
+@router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools")
+async def list_node_pools(request: Request, pid: str, cluster_id: str):
+    state = request.app.state.sim
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
+    if not c or c.get("project_id") != pid:
+        return JSONResponse({"error": {"code": "CCE.0101",
+                                        "message": "cluster not found"}}, status_code=404)
+    pools = [np_ for np_ in getattr(state, "cce_node_pools", {}).values()
+             if np_["project_id"] == pid and np_["cluster_id"] == cluster_id]
+    return {"nodepools": pools, "count": len(pools)}

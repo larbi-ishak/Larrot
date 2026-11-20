@@ -266,6 +266,8 @@ def test_corpus():
 def search_fragment(path):
     """A distinctive literal segment of the path to grep the corpus for."""
     parts = [p for p in path.split("/") if p]
+    if not parts:
+        return "/"
     literal = [p for p in parts if not p.startswith("{")]
     return "/" + (literal[-1] if literal else parts[-1])
 
@@ -295,10 +297,15 @@ def run():
         ok = impl = missing = 0
         for (name, method, path) in ops:
             if svc == "OBS":
-                # OBS is served by a single catch-all route; the operations are
+                # OBS is served by a single catch-all route; operations are
                 # validated by the OBS test suites, not by route matching.
-                rows.append((name, method, path, "OK"))
-                ok += 1
+                frag = search_fragment(path)
+                tested = frag in corpus
+                rows.append((name, method, path, "OK" if tested else "impl"))
+                if tested:
+                    ok += 1
+                else:
+                    impl += 1
                 continue
             cand = normalize(path)
             for doc_p, sim_p in ALIASES.items():
@@ -847,6 +854,93 @@ REGISTRY["GeminiDB"] = [(n, m, p.replace("/v3/{pid}/instances", "/v3/{pid}/gemin
 # ELB-extra entries fold into ELB
 REGISTRY["ELB"] = REGISTRY["ELB"] + REGISTRY.pop("ELB-extra")
 
+
+
+# ---------------------------------------------------------------------------
+# Tier-2 registries: deeper documented operations beyond the core set
+# ---------------------------------------------------------------------------
+
+REGISTRY_TIER2 = {
+    "IAM": [
+        ("CreateUser", "POST", "/v3/users"),
+        ("ListUsers", "GET", "/v3/users"),
+        ("ShowUser", "GET", "/v3/users/{user_id}"),
+        ("UpdateUser", "PUT", "/v3/users/{user_id}"),
+        ("DeleteUser", "DELETE", "/v3/users/{user_id}"),
+        ("CreateUserGroup", "POST", "/v3/groups"),
+        ("ListUserGroups", "GET", "/v3/groups"),
+        ("ListRoles", "GET", "/v3/roles"),
+    ],
+    "ECS": [
+        ("GetServerPassword", "GET", "/v1/{pid}/cloudservers/{server_id}/os-server-password"),
+    ],
+    "EVS": [
+        ("UpdateSnapshot", "PUT", "/v2/{pid}/cloudsnapshots/{snapshot_id}"),
+    ],
+    "VPC": [
+        ("UpdateSecurityGroup", "PUT", "/v1/{pid}/security-groups/{sg_id}"),
+        ("ShowSecurityGroupRule", "GET", "/v1/{pid}/security-group-rules/{rule_id}"),
+        ("DeleteSecurityGroupRule", "DELETE", "/v1/{pid}/security-group-rules/{rule_id}"),
+        ("UpdatePort", "PUT", "/v1/{pid}/ports/{port_id}"),
+    ],
+    "DNS": [
+        ("ShowRecordset", "GET", "/v2/zones/{zone_id}/recordsets/{recordset_id}"),
+        ("UpdateRecordset", "PUT", "/v2/zones/{zone_id}/recordsets/{recordset_id}"),
+    ],
+    "KMS": [
+        ("GenRandom", "POST", "/v1/{pid}/kms/gen-random"),
+        ("GetPublicKey", "GET", "/v1/{pid}/kms/get-publickey/{key_id}"),
+    ],
+    "CBR": [
+        ("UpdatePolicy", "PUT", "/v3/{pid}/policies/{policy_id}"),
+    ],
+    "ELB": [
+        ("ShowMember", "GET", "/v2/{pid}/elb/pools/{pool_id}/members/{member_id}"),
+    ],
+    "CCE": [
+        ("CreateNodePool", "POST", "/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools"),
+        ("ListNodePools", "GET", "/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools"),
+    ],
+    "SMN": [
+        ("CreateMessageTemplate", "POST", "/v2/{pid}/notifications/message_templates"),
+        ("ListMessageTemplates", "GET", "/v2/{pid}/notifications/message_templates"),
+    ],
+    "SWR": [
+        ("ListImageTags", "GET", "/v2/manage/namespaces/{namespace}/repos/{repo}/tags"),
+    ],
+    "IoTDA": [
+        ("ShowDevice", "GET", "/v5/iot/{pid}/devices/{device_id}"),
+    ],
+    "ModelArts": [
+        ("CreateDatasetVersion", "POST", "/v2/{pid}/datasets/{dataset_id}/versions"),
+        ("ListDatasetVersions", "GET", "/v2/{pid}/datasets/{dataset_id}/versions"),
+    ],
+    "VPN": [
+        ("ShowVpnConnection", "GET", "/v5/{pid}/vpn-connections/{connection_id}"),
+    ],
+    "ER": [
+        ("ShowRouteTable", "GET", "/v3/{pid}/enterprise-router/instances/{er_id}/route-tables/{route_table_id}"),
+    ],
+    "APIG": [
+        ("CreateEnvironment", "POST", "/v2/{pid}/apigw/environments"),
+        ("ListEnvironments", "GET", "/v2/{pid}/apigw/environments"),
+    ],
+    "OBS": [
+        ("SetBucketVersioning", "PUT", "/{bucket}?versioning"),
+        ("GetBucketVersioning", "GET", "/{bucket}?versioning"),
+        ("SetBucketAcl", "PUT", "/{bucket}?acl"),
+        ("GetBucketAcl", "GET", "/{bucket}?acl"),
+        ("SetBucketTagging", "PUT", "/{bucket}?tagging"),
+        ("GetBucketTagging", "GET", "/{bucket}?tagging"),
+    ],
+}
+
+for _svc, _ops in REGISTRY_TIER2.items():
+    REGISTRY.setdefault(_svc, []).extend(_ops)
+
+# SWR tier-2 uses the manage path -> alias
+ALIASES["/v2/manage/namespaces/{namespace}/repos/{repo}/tags"] = \
+    "/v2/{pid}/namespaces/{namespace}/repos/{repo}/tags"
 
 if __name__ == "__main__":
     run()

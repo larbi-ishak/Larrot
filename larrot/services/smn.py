@@ -93,3 +93,31 @@ async def show_topic(request: Request, pid: str, topic_urn: str):
         return JSONResponse({"error_code": "SMN.0001", "error_msg": "topic not found"},
                             status_code=404)
     return t
+
+
+@router.post("/v2/{pid}/notifications/message_templates")
+async def create_message_template(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "smn_templates"):
+        s.smn_templates = {}
+    body = await request.json()
+    name = body.get("message_template_name", "")
+    if not name:
+        return JSONResponse({"error_code": "SMN.0003",
+                             "error_msg": "message_template_name is required"}, status_code=400)
+    tid = new_id()
+    s.smn_templates[tid] = {
+        "message_template_id": tid, "name": name,
+        "protocol": body.get("protocol", "email"),
+        "content": body.get("content", ""),
+        "tag_names": body.get("tag_names", []),
+        "project_id": pid, "created_at": now_millis(),
+    }
+    return {"message_template_id": tid, "name": name}
+
+
+@router.get("/v2/{pid}/notifications/message_templates")
+async def list_message_templates(request: Request, pid: str):
+    s = request.app.state.sim
+    tpls = [t for t in getattr(s, "smn_templates", {}).values() if t["project_id"] == pid]
+    return {"message_templates": tpls, "count": len(tpls)}

@@ -91,6 +91,25 @@ def _list_buckets(state):
 
 async def _bucket_handler(state, request, bucket, method, query):
     if method == "PUT":
+        if "versioning" in query:
+            b = state.obs_buckets.get(bucket)
+            if not b:
+                return _error("NoSuchBucket", "The specified bucket does not exist",
+                              extra={"BucketName": bucket}, status=404)
+            body_bytes = await request.body()
+            b["versioning"] = b"Enabled" in body_bytes
+            return PlainTextResponse("", status_code=200)
+        if "acl" in query or "tagging" in query:
+            b = state.obs_buckets.get(bucket)
+            if not b:
+                return _error("NoSuchBucket", "The specified bucket does not exist",
+                              extra={"BucketName": bucket}, status=404)
+            body_bytes = await request.body()
+            if "acl" in query:
+                b["acl"] = body_bytes.decode(errors="replace")[:512]
+            else:
+                b["tagging"] = body_bytes.decode(errors="replace")[:512]
+            return PlainTextResponse("", status_code=200)
         if bucket in state.obs_buckets:
             return _error("BucketAlreadyOwnedByYou",
                 "Your previous request for creating a bucket with this name succeeds and you already own the bucket.",
@@ -115,6 +134,34 @@ async def _bucket_handler(state, request, bucket, method, query):
         return PlainTextResponse("", status_code=204)
 
     if method == "GET":
+        b = state.obs_buckets.get(bucket)
+        if "versioning" in query:
+            if not b:
+                return _error("NoSuchBucket", "The specified bucket does not exist",
+                              extra={"BucketName": bucket}, status=404)
+            status = "Enabled" if b.get("versioning") else "Disabled"
+            body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                    f'<VersioningConfiguration xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
+                    f'<Status>{status}</Status></VersioningConfiguration>')
+            return PlainTextResponse(body, media_type="application/xml")
+        if "acl" in query or "tagging" in query:
+            if not b:
+                return _error("NoSuchBucket", "The specified bucket does not exist",
+                              extra={"BucketName": bucket}, status=404)
+            key = "acl" if "acl" in query else "tagging"
+            if key == "acl":
+                body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                        '<AccessControlPolicy xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
+                        '<Owner><ID>' + state.account["domain_id"] + '</ID></Owner>'
+                        '<AccessControlList><Grant><Grantee><ID>' + state.account["domain_id"] +
+                        '</ID></Grantee><Permission>FULL_CONTROL</Permission></Grant>'
+                        '</AccessControlList></AccessControlPolicy>')
+            else:
+                tags = b.get("tagging", "")
+                body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                        '<Tagging xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
+                        '<TagSet>' + (tags if tags else "") + '</TagSet></Tagging>')
+            return PlainTextResponse(body, media_type="application/xml")
         if "location" in query:
             body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
                     '<LocationConstraint xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">sim</LocationConstraint>')

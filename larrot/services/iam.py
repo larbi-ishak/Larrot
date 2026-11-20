@@ -1,9 +1,9 @@
 """IAM: Keystone APIs (projects, tokens)."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from ..core.envelopes import apigw_error
-from ..core.jobs import new_request_id
+from ..core.jobs import new_request_id, new_id, now_millis
 
 router = APIRouter()
 
@@ -90,3 +90,97 @@ async def create_token(request: Request):
     response = JSONResponse(token_body, status_code=201)
     response.headers["X-Subject-Token"] = f"simtoken-{uuid.uuid4().hex}"
     return response
+
+
+# ---------------------------------------------------------------------------
+# users, groups, roles (tier-2 documented operations)
+# ---------------------------------------------------------------------------
+
+@router.post("/v3/users")
+async def create_user(request: Request):
+    state = request.app.state.sim
+    if not hasattr(state, "iam_users"):
+        state.iam_users = {}
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse(apigw_error("IAM.0001", "name is required"), status_code=400)
+    uid = new_id()
+    state.iam_users[uid] = {
+        "id": uid, "name": name, "domain_id": state.account["domain_id"],
+        "enabled": body.get("enabled", True),
+        "email": body.get("email", ""), "description": body.get("description", ""),
+        "password_expires_at": None, "created_at": now_millis(),
+    }
+    return {"user": state.iam_users[uid]}
+
+
+@router.get("/v3/users")
+async def list_users(request: Request):
+    state = request.app.state.sim
+    users = list(getattr(state, "iam_users", {}).values())
+    return {"users": users}
+
+
+@router.get("/v3/users/{user_id}")
+async def show_user(request: Request, user_id: str):
+    state = request.app.state.sim
+    u = getattr(state, "iam_users", {}).get(user_id)
+    if not u:
+        return JSONResponse(apigw_error("IAM.0002", "user not found"), status_code=404)
+    return {"user": u}
+
+
+@router.put("/v3/users/{user_id}")
+async def update_user(request: Request, user_id: str):
+    state = request.app.state.sim
+    u = getattr(state, "iam_users", {}).get(user_id)
+    if not u:
+        return JSONResponse(apigw_error("IAM.0002", "user not found"), status_code=404)
+    body = await request.json()
+    for field in ("name", "email", "description", "enabled"):
+        if field in body:
+            u[field] = body[field]
+    return {"user": u}
+
+
+@router.delete("/v3/users/{user_id}")
+async def delete_user(request: Request, user_id: str):
+    state = request.app.state.sim
+    if user_id not in getattr(state, "iam_users", {}):
+        return JSONResponse(apigw_error("IAM.0002", "user not found"), status_code=404)
+    del state.iam_users[user_id]
+    return Response(status_code=204)
+
+
+@router.post("/v3/groups")
+async def create_user_group(request: Request):
+    state = request.app.state.sim
+    if not hasattr(state, "iam_groups"):
+        state.iam_groups = {}
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse(apigw_error("IAM.0001", "name is required"), status_code=400)
+    gid = new_id()
+    state.iam_groups[gid] = {
+        "id": gid, "name": name, "domain_id": state.account["domain_id"],
+        "description": body.get("description", ""), "created_at": now_millis(),
+    }
+    return {"group": state.iam_groups[gid]}
+
+
+@router.get("/v3/groups")
+async def list_user_groups(request: Request):
+    state = request.app.state.sim
+    return {"groups": list(getattr(state, "iam_groups", {}).values())}
+
+
+@router.get("/v3/roles")
+async def list_roles(request: Request):
+    return {"roles": [
+        {"id": "r_00000000000000000000000000000000", "name": "system_all_1",
+         "description": "All permissions", "display_name": "Full access"},
+        {"id": "r_00000000000000000000000000000001", "name": "te_admin_1",
+         "description": "Tenant administrator", "display_name": "Tenant admin"},
+    ]}

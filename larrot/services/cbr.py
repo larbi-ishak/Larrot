@@ -206,6 +206,19 @@ async def show_policy(request: Request, pid: str, policy_id: str):
     return {"policy": {**p, "policy_type": "disk"}}
 
 
+@router.put("/v3/{pid}/policies/{policy_id}")
+async def update_policy(request: Request, pid: str, policy_id: str):
+    state = request.app.state.sim
+    p = state.cbr_policies.get(policy_id)
+    if not p or p.get("project_id") != pid:
+        return JSONResponse(cbr_error("CBR.0020", "The policy does not exist."), status_code=404)
+    body = await request.json()
+    for field in ("name", "enabled", "definition"):
+        if field in body:
+            p[field] = body[field]
+    return {"policy": p}
+
+
 @router.delete("/v3/{pid}/policies/{policy_id}")
 async def delete_policy(request: Request, pid: str, policy_id: str):
     state = request.app.state.sim

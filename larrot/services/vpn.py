@@ -72,6 +72,16 @@ async def show_vpn_gateway(request: Request, pid: str, gateway_id: str):
     return {"vpn_gateway": g}
 
 
+@router.get("/v5/{pid}/vpn-connections/{connection_id}")
+async def show_vpn_connection(request: Request, pid: str, connection_id: str):
+    s = request.app.state.sim
+    c = getattr(s, "vpn_connections", {}).get(connection_id)
+    if not c or c.get("project_id") != pid:
+        return JSONResponse({"error_msg": "VPN connection not found",
+                             "error_code": "VPN.0002"}, status_code=404)
+    return {"vpn_connection": c}
+
+
 @router.delete("/v5/{pid}/vpn-connections/{connection_id}")
 async def delete_vpn_connection(request: Request, pid: str, connection_id: str):
     s = request.app.state.sim

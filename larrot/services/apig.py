@@ -62,3 +62,29 @@ async def list_apig_apis(request: Request, pid: str):
     s = request.app.state.sim
     apis = [a for a in getattr(s, "apig_apis", {}).values() if a.get("project_id") == pid]
     return {"apis": apis, "total": len(apis)}
+
+
+@router.post("/v2/{pid}/apigw/environments")
+async def create_environment(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "apig_environments"):
+        s.apig_environments = {}
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse({"error_msg": "name is required", "error_code": "APIG.0001"}, status_code=400)
+    eid = new_id()
+    s.apig_environments[eid] = {
+        "id": eid, "name": name,
+        "description": body.get("description", ""),
+        "instance_id": body.get("instance_id", ""),
+        "project_id": pid, "created_at": now_millis(),
+    }
+    return {"id": eid, "name": name}
+
+
+@router.get("/v2/{pid}/apigw/environments")
+async def list_environments(request: Request, pid: str):
+    s = request.app.state.sim
+    envs = [e for e in getattr(s, "apig_environments", {}).values() if e["project_id"] == pid]
+    return {"environments": envs, "total": len(envs)}
