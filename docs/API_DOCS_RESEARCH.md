@@ -406,7 +406,7 @@ Attachments on detail: `attachments: [{server_id, device, id, …}]`.
 ## 5. IMS
 
 **Detailed appendix with full field tables and the complete doc-URL index:
-`docs/API_DOCS_RESEARCH.md`.**
+`api-docs-research.md`.**
 
 Sources:
 - Registering an Image: https://support.huaweicloud.com/intl/en-us/api-ims/ims_03_0608.html

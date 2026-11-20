@@ -260,7 +260,7 @@ at 100%. Beyond those:
   observed (e.g., the newer 409 in-use guards)
 - Jobs always complete in 1-3s; no real region latency, quotas are static
 - Terraform provider compatibility is not yet validated
-  (see [examples/terraform](examples/terraform/README.md))
+  (see [examples/terraform](https://github.com/larbi-ishak/Larrot/tree/main/examples/terraform))
 
 ## License
 

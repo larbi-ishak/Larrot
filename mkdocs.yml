@@ -1,0 +1,46 @@
+site_name: Larrot
+site_description: Larrot repeats Huawei Cloud. A local Huawei Cloud API simulator - LocalStack, but for Huawei Cloud.
+site_url: https://larbi-ishak.github.io/Larrot/
+repo_url: https://github.com/larbi-ishak/Larrot
+repo_name: larbi-ishak/Larrot
+copyright: Apache 2.0
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: red
+      accent: red
+      toggle: { icon: material/weather-night, name: dark mode }
+    - scheme: slate
+      primary: red
+      accent: red
+      toggle: { icon: material/weather-sunny, name: light mode }
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+  icon:
+    logo: material/cloud
+
+markdown_extensions:
+  - tables
+  - fenced_code
+  - nl2br
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Catalog: catalog.md
+  - Architecture: architecture.md
+  - Real-world architectures: architectures.md
+  - Examples: examples.md
+  - Coverage: coverage.md
+  - Conformance: conformance.md
+  - Progress: progress.md
+  - Empirical spec: empirical-spec.md
+  - API research: api-docs-research.md
+  - Contributing: contributing.md

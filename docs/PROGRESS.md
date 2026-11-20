@@ -11,7 +11,7 @@ numbers below are the status.
 | Router modules | 71 |
 | Documented operations in the registry | 720 |
 | Implemented + tested | 720/720 |
-| Operation-level report | [COVERAGE.md](../COVERAGE.md) |
+| Operation-level report | [coverage.md](coverage.md) |
 
 ## Test suites
 
@@ -30,8 +30,8 @@ numbers below are the status.
 - Chaos fault injection (`/admin/chaos`, api + job modes)
 - Resource explorer (`/admin/resources`, `/admin/graph`)
 - Preset environments (`/admin/preset`: three-tier-app, dr, multi-tenant)
-- Compatibility scorecard (`tools/conformance.py` -> CONFORMANCE_REPORT.md)
-- Operation coverage matrix (`tools/coverage.py` -> COVERAGE.md)
+- Compatibility scorecard (`tools/conformance.py` -> conformance.md)
+- Operation coverage matrix (`tools/coverage.py` -> coverage.md)
 - Request fuzzing (`tests/test_fuzz.py`)
 - Differential harness (`tools/differential.py`, real-account mode via env vars)
 - Web console (`/console`) and dashboard (`/`)
