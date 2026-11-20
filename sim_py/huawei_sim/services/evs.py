@@ -64,7 +64,8 @@ async def _create_volume(request, pid, include_ids):
     body = await request.json()
     spec = body["volume"]
 
-    if not (10 <= spec["size"] <= 32768):
+    size = spec.get("size")
+    if not isinstance(size, int) or isinstance(size, bool) or not (10 <= size <= 32768):
         return JSONResponse(evs_error("EVS.1010", "invalid volume size!"), status_code=400)
 
     bootable = bool(spec.get("imageRef") or spec.get("snapshot_id"))
@@ -84,7 +85,7 @@ async def _create_volume(request, pid, include_ids):
     ids = []
     for i in range(count):
         n = name if count == 1 else f"{name}-{i:04d}"
-        vid = state.create_volume(pid, n, spec["size"], az, vtype, bootable, source)
+        vid = state.create_volume(pid, n, size, az, vtype, bootable, source)
         ids.append(vid)
 
     async def effect():
@@ -108,12 +109,13 @@ async def create_volume_cinder(request: Request, pid: str):
     state = request.app.state.sim
     body = await request.json()
     spec = body["volume"]
-    if not (10 <= spec["size"] <= 32768):
+    size = spec.get("size")
+    if not isinstance(size, int) or isinstance(size, bool) or not (10 <= size <= 32768):
         return JSONResponse(evs_error("EVS.1010", "invalid volume size!"), status_code=400)
     bootable = bool(spec.get("imageRef") or spec.get("snapshot_id"))
     source = ("imageRef", spec["imageRef"]) if spec.get("imageRef") else None
     az = spec.get("availability_zone", "az-dc-1")
-    vid = state.create_volume(pid, spec.get("name", ""), spec["size"], az,
+    vid = state.create_volume(pid, spec.get("name", ""), size, az,
                               spec.get("volume_type", "SAS"), bootable, source)
 
     async def effect():

@@ -96,9 +96,11 @@ def create_app() -> FastAPI:
         )
 
     # Web dashboard
-    @app.get("/", include_in_schema=False)
+    from fastapi.responses import HTMLResponse
+
+    @app.get("/", include_in_schema=False, response_class=HTMLResponse)
     async def dashboard():
-        return dashboard_html(state)
+        return HTMLResponse(dashboard_html(state))
 
     # Health check
     @app.get("/health", include_in_schema=False)

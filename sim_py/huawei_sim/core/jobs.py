@@ -1,6 +1,7 @@
 """Async job engine — every mutating op returns job_id, completes after jittered delay."""
 
 import asyncio
+import inspect
 import random
 import uuid
 from dataclasses import dataclass, field
@@ -37,6 +38,7 @@ class Job:
     end_time: str | None = None
     error_code: str | None = None
     fail_reason: str | None = None
+    effect: Callable | None = None  # internal — never serialized
 
     def to_json(self) -> dict:
         return {
@@ -72,25 +74,54 @@ class JobEngine:
             job_id=job_id,
             job_type=job_type,
             begin_time=now_millis(),
+            effect=effect,
         )
-        asyncio.create_task(self._run(job_id, effect))
+        asyncio.create_task(self._run(job_id))
         return job_id
 
-    async def _run(self, job_id: str, effect):
+    async def _run(self, job_id: str):
         delay = random.uniform(*self.delay_range)
         await asyncio.sleep(delay)
-        result = effect()
-        import inspect
+        job = self.jobs.get(job_id)
+        if job is None or job.status != "RUNNING":
+            return  # already force-completed via complete_now()
+        result = job.effect()
         if inspect.iscoroutine(result):
             result = await result
+        self._apply_result(job, result)
+
+    def _apply_result(self, job: Job, result):
+        job.end_time = now_millis()
+        if result is None:
+            job.status = "SUCCESS"
+        else:
+            job.status = "FAIL"
+            job.error_code, job.fail_reason = result
+
+    def complete_now(self, job_id: str) -> bool:
+        """Force-complete a RUNNING job synchronously — test hook.
+
+        TestClient (and other in-process clients) never run the background
+        asyncio task, so jobs stay RUNNING forever. This runs the effect
+        immediately and marks the job SUCCESS. Only call from sync context.
+        """
         job = self.jobs.get(job_id)
-        if job:
-            job.end_time = now_millis()
-            if result is None:
-                job.status = "SUCCESS"
-            else:
-                job.status = "FAIL"
-                job.error_code, job.fail_reason = result
+        if job is None or job.status != "RUNNING":
+            return False
+        result = job.effect()
+        if inspect.iscoroutine(result):
+            result = asyncio.run(result)
+        self._apply_result(job, result)
+        return True
+
+    def complete_all(self) -> int:
+        """Force-complete every RUNNING job — test hook (sync context only)."""
+        n = 0
+        for job_id in list(self.jobs):
+            if self.jobs[job_id].status == "RUNNING":
+                if self.complete_now(job_id):
+                    n += 1
+        return n
 
     def get(self, job_id: str) -> Job | None:
         return self.jobs.get(job_id)

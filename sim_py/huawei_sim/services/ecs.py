@@ -259,10 +259,16 @@ async def create_servers(request: Request, pid: str):
     region = state.project(pid)["name"]
     if not any(f["id"] == spec["flavorRef"] and region in f["regions"] for f in state.flavors):
         return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+    name = spec.get("name")
+    if not isinstance(name, str) or not name:
+        return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+    count = spec.get("count", 1)
+    if not isinstance(count, int) or isinstance(count, bool) or count < 1:
+        return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
     if body.get("dry_run") is True:
         return Response(status_code=202)
 
-    count = min(spec.get("count", 1), 100)
+    count = min(count, 100)
     server_ids, sub_jobs = [], []
     for i in range(count):
         suffix = i if count > 1 else None
@@ -281,7 +287,7 @@ async def create_servers(request: Request, pid: str):
             s = state.servers.get(sid)
             if s:
                 s["status"] = "ACTIVE"
-                s["vm_state"] = "active"
+                s["OS-EXT-STS:vm_state"] = "active"
                 s["OS-EXT-STS:power_state"] = 1
                 s["OS-EXT-STS:task_state"] = None
                 s["updated"] = now_millis()
