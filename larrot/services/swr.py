@@ -59,3 +59,16 @@ async def list_image_tags(request: Request, pid: str, namespace: str, repo: str)
     if not repo_obj:
         return JSONResponse({"error_msg": "repository not found", "error_code": "SWR.0001"}, status_code=404)
     return {"tags": repo_obj.get("tags", []), "total": len(repo_obj.get("tags", []))}
+
+
+@router.delete("/v2/{pid}/namespaces/{namespace}/repos/{repo}")
+async def delete_repo(request: Request, pid: str, namespace: str, repo: str):
+    s = request.app.state.sim
+    rid = next((k for k, r in getattr(s, "swr_repos", {}).items()
+                if r["project_id"] == pid and r["namespace"] == namespace
+                and r["repository"] == repo), None)
+    if not rid:
+        return JSONResponse({"error_msg": "repository not found",
+                             "error_code": "SWR.0001"}, status_code=404)
+    del s.swr_repos[rid]
+    return Response(status_code=204)

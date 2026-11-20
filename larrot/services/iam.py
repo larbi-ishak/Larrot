@@ -184,3 +184,83 @@ async def list_roles(request: Request):
         {"id": "r_00000000000000000000000000000001", "name": "te_admin_1",
          "description": "Tenant administrator", "display_name": "Tenant admin"},
     ]}
+
+
+# ---------------------------------------------------------------------------
+# role assignments and domains (tier-3 documented operations)
+# ---------------------------------------------------------------------------
+
+def _assignment_key(project_id, principal_type, principal_id, role_id):
+    return f"{project_id}:{principal_type}:{principal_id}:{role_id}"
+
+
+@router.put("/v3/projects/{project_id}/users/{user_id}/roles/{role_id}")
+async def grant_user_role(request: Request, project_id: str, user_id: str, role_id: str):
+    state = request.app.state.sim
+    if not hasattr(state, "iam_role_assignments"):
+        state.iam_role_assignments = {}
+    state.iam_role_assignments[
+        _assignment_key(project_id, "user", user_id, role_id)] = {
+        "project_id": project_id, "principal_type": "user",
+        "principal_id": user_id, "role_id": role_id}
+    return Response(status_code=204)
+
+
+@router.delete("/v3/projects/{project_id}/users/{user_id}/roles/{role_id}")
+async def revoke_user_role(request: Request, project_id: str, user_id: str, role_id: str):
+    state = request.app.state.sim
+    key = _assignment_key(project_id, "user", user_id, role_id)
+    if getattr(state, "iam_role_assignments", {}).pop(key, None) is None:
+        return JSONResponse(apigw_error("IAM.0003", "role assignment not found"), status_code=404)
+    return Response(status_code=204)
+
+
+@router.get("/v3/projects/{project_id}/users/{user_id}/roles")
+async def list_user_roles(request: Request, project_id: str, user_id: str):
+    state = request.app.state.sim
+    roles = [{"id": a["role_id"], "name": "assigned",
+              "links": {"self": f"/v3/roles/{a['role_id']}"}}
+             for a in getattr(state, "iam_role_assignments", {}).values()
+             if a["project_id"] == project_id
+             and a["principal_type"] == "user" and a["principal_id"] == user_id]
+    return {"roles": roles}
+
+
+@router.put("/v3/projects/{project_id}/groups/{group_id}/roles/{role_id}")
+async def grant_group_role(request: Request, project_id: str, group_id: str, role_id: str):
+    state = request.app.state.sim
+    if not hasattr(state, "iam_role_assignments"):
+        state.iam_role_assignments = {}
+    state.iam_role_assignments[
+        _assignment_key(project_id, "group", group_id, role_id)] = {
+        "project_id": project_id, "principal_type": "group",
+        "principal_id": group_id, "role_id": role_id}
+    return Response(status_code=204)
+
+
+@router.delete("/v3/projects/{project_id}/groups/{group_id}/roles/{role_id}")
+async def revoke_group_role(request: Request, project_id: str, group_id: str, role_id: str):
+    state = request.app.state.sim
+    key = _assignment_key(project_id, "group", group_id, role_id)
+    if getattr(state, "iam_role_assignments", {}).pop(key, None) is None:
+        return JSONResponse(apigw_error("IAM.0003", "role assignment not found"), status_code=404)
+    return Response(status_code=204)
+
+
+@router.get("/v3/projects/{project_id}/groups/{group_id}/roles")
+async def list_group_roles(request: Request, project_id: str, group_id: str):
+    state = request.app.state.sim
+    roles = [{"id": a["role_id"], "name": "assigned",
+              "links": {"self": f"/v3/roles/{a['role_id']}"}}
+             for a in getattr(state, "iam_role_assignments", {}).values()
+             if a["project_id"] == project_id
+             and a["principal_type"] == "group" and a["principal_id"] == group_id]
+    return {"roles": roles}
+
+
+@router.get("/v3/domains")
+async def list_domains(request: Request):
+    state = request.app.state.sim
+    return {"domains": [{"id": state.account["domain_id"],
+                          "name": state.account["name"],
+                          "enabled": True, "description": "sim account"}]}

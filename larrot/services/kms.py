@@ -143,3 +143,20 @@ async def get_public_key(request: Request, pid: str, key_id: str):
         return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}}, status_code=404)
     return {"key_id": k["id"], "public_key":
             "-----BEGIN PUBLIC KEY-----\nU2ltLVB1YmxpY0tleQ==\n-----END PUBLIC KEY-----\n"}
+
+
+@router.post("/v1/{pid}/kms/update-key-alias")
+async def update_key_alias(request: Request, pid: str):
+    s = request.app.state.sim
+    body = await request.json()
+    k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
+    if not k:
+        return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}},
+                            status_code=404)
+    alias = body.get("key_alias", "")
+    if not alias:
+        return JSONResponse({"error": {"code": "KMS.1001",
+                                        "message": "key_alias is required"}}, status_code=400)
+    k["alias"] = alias
+    k["updated_at"] = now_millis()
+    return {"key_id": k["id"], "key_alias": alias}

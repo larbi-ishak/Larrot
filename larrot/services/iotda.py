@@ -22,6 +22,27 @@ async def list_products(request: Request, pid: str):
     products = [p for p in getattr(s, "iot_products", {}).values() if p["project_id"] == pid]
     return {"products": products, "total": len(products)}
 
+@router.get("/v5/iot/{pid}/products/{product_id}")
+async def show_product(request: Request, pid: str, product_id: str):
+    s = request.app.state.sim
+    p = getattr(s, "iot_products", {}).get(product_id)
+    if not p or p.get("project_id") != pid:
+        return JSONResponse({"error_code": "IOTDA.00002",
+                             "error_msg": "product not found"}, status_code=404)
+    return p
+
+
+@router.delete("/v5/iot/{pid}/products/{product_id}")
+async def delete_product(request: Request, pid: str, product_id: str):
+    s = request.app.state.sim
+    p = getattr(s, "iot_products", {}).get(product_id)
+    if not p or p.get("project_id") != pid:
+        return JSONResponse({"error_code": "IOTDA.00002",
+                             "error_msg": "product not found"}, status_code=404)
+    del s.iot_products[product_id]
+    return Response(status_code=204)
+
+
 @router.post("/v5/iot/{pid}/devices")
 async def create_device(request: Request, pid: str):
     s = request.app.state.sim

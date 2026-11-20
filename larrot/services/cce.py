@@ -164,6 +164,27 @@ async def create_node_pool(request: Request, pid: str, cluster_id: str):
     return {"nodepool": state.cce_node_pools[npid]}
 
 
+@router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}")
+async def show_node_pool(request: Request, pid: str, cluster_id: str, nodepool_id: str):
+    state = request.app.state.sim
+    np_ = getattr(state, "cce_node_pools", {}).get(nodepool_id)
+    if not np_ or np_["project_id"] != pid or np_["cluster_id"] != cluster_id:
+        return JSONResponse({"error": {"code": "CCE.0102",
+                                        "message": "node pool not found"}}, status_code=404)
+    return {"nodepool": np_}
+
+
+@router.delete("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}")
+async def delete_node_pool(request: Request, pid: str, cluster_id: str, nodepool_id: str):
+    state = request.app.state.sim
+    np_ = getattr(state, "cce_node_pools", {}).get(nodepool_id)
+    if not np_ or np_["project_id"] != pid or np_["cluster_id"] != cluster_id:
+        return JSONResponse({"error": {"code": "CCE.0102",
+                                        "message": "node pool not found"}}, status_code=404)
+    del state.cce_node_pools[nodepool_id]
+    return Response(status_code=204)
+
+
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools")
 async def list_node_pools(request: Request, pid: str, cluster_id: str):
     state = request.app.state.sim

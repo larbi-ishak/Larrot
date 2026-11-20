@@ -63,6 +63,27 @@ async def list_as_policies(request: Request, pid: str):
 # sub-APIs: policy execution + group instances
 # ---------------------------------------------------------------------------
 
+@router.get("/v1/{pid}/scaling_policy/{policy_id}")
+async def show_scaling_policy(request: Request, pid: str, policy_id: str):
+    s = request.app.state.sim
+    pol = getattr(s, "as_policies", {}).get(policy_id)
+    if not pol or pol["project_id"] != pid:
+        return JSONResponse({"error_code": "AS.0001", "error_msg": "policy not found"},
+                            status_code=404)
+    return pol
+
+
+@router.delete("/v1/{pid}/scaling_policy/{policy_id}")
+async def delete_scaling_policy(request: Request, pid: str, policy_id: str):
+    s = request.app.state.sim
+    pol = getattr(s, "as_policies", {}).get(policy_id)
+    if not pol or pol["project_id"] != pid:
+        return JSONResponse({"error_code": "AS.0001", "error_msg": "policy not found"},
+                            status_code=404)
+    del s.as_policies[policy_id]
+    return Response(status_code=204)
+
+
 @router.post("/v1/{pid}/scaling_policy/{policy_id}/execute")
 async def execute_policy(request: Request, pid: str, policy_id: str):
     s = request.app.state.sim

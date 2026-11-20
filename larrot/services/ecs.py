@@ -240,6 +240,32 @@ async def update_server(request: Request, pid: str, server_id: str):
 # tags (ECS v1)
 # ---------------------------------------------------------------------------
 
+@router.put("/v1/{pid}/cloudservers/{server_id}/tags")
+async def update_server_tags(request: Request, pid: str, server_id: str):
+    """Overwrite all tags of an ECS (documented: PUT tags)."""
+    state = request.app.state.sim
+    s = state.servers.get(server_id)
+    if not s or s["project_id"] != pid:
+        return JSONResponse(ecs_error("Ecs.0114", "The ECS does not exist."), status_code=404)
+    body = await request.json()
+    tags = body.get("tags", {})
+    if not isinstance(tags, dict):
+        return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+    s["tags"] = dict(tags)
+    return {"tags": s["tags"]}
+
+
+@router.delete("/v1/{pid}/cloudservers/{server_id}/tags")
+async def delete_server_tags(request: Request, pid: str, server_id: str):
+    """Delete all tags of an ECS (documented: DELETE tags)."""
+    state = request.app.state.sim
+    s = state.servers.get(server_id)
+    if not s or s["project_id"] != pid:
+        return JSONResponse(ecs_error("Ecs.0114", "The ECS does not exist."), status_code=404)
+    s["tags"] = {}
+    return Response(status_code=204)
+
+
 @router.get("/v1/{pid}/cloudservers/{server_id}/tags")
 async def list_server_tags(request: Request, pid: str, server_id: str):
     state = request.app.state.sim

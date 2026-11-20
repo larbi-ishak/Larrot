@@ -35,6 +35,19 @@ async def show_route_table(request: Request, pid: str, rt_id: str):
     return {"routetable": rt}
 
 
+@router.put("/v1/{pid}/vpc/routetables/{rt_id}")
+async def update_route_table(request: Request, pid: str, rt_id: str):
+    s = request.app.state.sim
+    rt = getattr(s, "vpc_route_tables", {}).get(rt_id)
+    if not rt or rt.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Route table not found",
+                             "error_code": "VPC.0401"}, status_code=404)
+    body = await request.json()
+    if "name" in body and body["name"]:
+        rt["name"] = body["name"]
+    return {"routetable": rt}
+
+
 @router.delete("/v1/{pid}/vpc/routetables/{rt_id}")
 async def delete_route_table(request: Request, pid: str, rt_id: str):
     s = request.app.state.sim

@@ -123,6 +123,16 @@ async def list_deployments(request: Request, pid: str):
     return {"deployments": deployments, "total": len(deployments)}
 
 
+@router.get("/v2/{pid}/edgemgr/deployments/{deployment_id}")
+async def show_deployment(request: Request, pid: str, deployment_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ief_deployments", {}).get(deployment_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "IEF.0005",
+                             "error_msg": "deployment not found"}, status_code=404)
+    return {"deployment": d}
+
+
 @router.delete("/v2/{pid}/edgemgr/deployments/{deployment_id}")
 async def delete_deployment(request: Request, pid: str, deployment_id: str):
     s = request.app.state.sim

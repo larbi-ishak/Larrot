@@ -29,6 +29,19 @@ async def show_eps(request: Request, eps_id: str):
         return JSONResponse({"error_msg": "EPS not found", "error_code": "EPS.0001"}, status_code=404)
     return p
 
+@router.put("/v1.0/enterprise-projects/{eps_id}")
+async def update_enterprise_project(request: Request, eps_id: str):
+    s = request.app.state.sim
+    e = getattr(s, "eps_projects", {}).get(eps_id)
+    if not e:
+        return JSONResponse({"error_code": "EPS.0001", "error_msg": "not found"}, status_code=404)
+    body = await request.json()
+    for field in ("name", "description"):
+        if field in body:
+            e[field] = body[field]
+    return e
+
+
 @router.delete("/v1.0/enterprise-projects/{eps_id}")
 async def delete_eps(request: Request, eps_id: str):
     s = request.app.state.sim

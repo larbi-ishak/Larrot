@@ -142,3 +142,12 @@ async def delete_recordset(request: Request, zone_id: str, recordset_id: str):
         return JSONResponse({"error_msg": "Zone not found", "error_code": "DNS.0101"}, status_code=404)
     zone["recordsets"] = [r for r in zone["recordsets"] if r["id"] != recordset_id]
     return Response(status_code=204)
+
+
+@router.get("/v2/recordsets")
+async def list_all_recordsets(request: Request):
+    state = request.app.state.sim
+    out = []
+    for z in state.dns_zones.values():
+        out.extend(_recordset_json(r) for r in z.get("recordsets", []))
+    return {"recordsets": out, "metadata": {"total_count": len(out)}}

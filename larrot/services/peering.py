@@ -68,6 +68,19 @@ async def reject_peering(request: Request, pid: str, peering_id: str):
     return {"peering": _peering_json(p)}
 
 
+@router.put("/v2.0/{pid}/vpc-peerings/{peering_id}")
+async def update_peering(request: Request, pid: str, peering_id: str):
+    s = request.app.state.sim
+    p = getattr(s, "vpc_peerings", {}).get(peering_id)
+    if not p or p.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Peering not found",
+                             "error_code": "VPC.0301"}, status_code=404)
+    body = await request.json()
+    if "name" in body and body["name"]:
+        p["name"] = body["name"]
+    return {"peering": _peering_json(p)}
+
+
 @router.delete("/v2.0/{pid}/vpc-peerings/{peering_id}")
 async def delete_peering(request: Request, pid: str, peering_id: str):
     s = request.app.state.sim

@@ -116,6 +116,17 @@ async def create_message_template(request: Request, pid: str):
     return {"message_template_id": tid, "name": name}
 
 
+@router.delete("/v2/{pid}/notifications/message_templates/{message_template_id}")
+async def delete_message_template(request: Request, pid: str, message_template_id: str):
+    s = request.app.state.sim
+    t = getattr(s, "smn_templates", {}).get(message_template_id)
+    if not t or t["project_id"] != pid:
+        return JSONResponse({"error_code": "SMN.0004",
+                             "error_msg": "template not found"}, status_code=404)
+    del s.smn_templates[message_template_id]
+    return Response(status_code=204)
+
+
 @router.get("/v2/{pid}/notifications/message_templates")
 async def list_message_templates(request: Request, pid: str):
     s = request.app.state.sim

@@ -60,6 +60,19 @@ async def show_acl(request: Request, pid: str, acl_id: str):
     return {"acl": _acl_json(a)}
 
 
+@router.put("/v3/{pid}/vpc/acls/{acl_id}")
+async def update_acl(request: Request, pid: str, acl_id: str):
+    s = request.app.state.sim
+    a = getattr(s, "network_acls", {}).get(acl_id)
+    if not a or a.get("project_id") != pid:
+        return JSONResponse({"error_code": "ACL.0001", "error_msg": "ACL not found"},
+                            status_code=404)
+    body = await request.json()
+    if "name" in body and body["name"]:
+        a["name"] = body["name"]
+    return {"acl": _acl_json(a)}
+
+
 @router.delete("/v3/{pid}/vpc/acls/{acl_id}")
 async def delete_acl(request: Request, pid: str, acl_id: str):
     s = request.app.state.sim

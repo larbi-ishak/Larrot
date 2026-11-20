@@ -255,3 +255,72 @@ async def instance_action(request: Request, pid: str, instance_id: str):
     if "public_ip" in body:
         return {"job_id": new_id(), "action": "bind_public_ip"}
     return JSONResponse({"error_msg": "Unknown action", "error_code": "DBS.0601"}, status_code=400)
+
+
+# ---------------------------------------------------------------------------
+# parameter templates (tier-3 documented operations)
+# ---------------------------------------------------------------------------
+
+@router.get("/v3/{pid}/configurations")
+async def list_rds_configurations(request: Request, pid: str):
+    s = request.app.state.sim
+    cfgs = [c for c in getattr(s, "rds_configurations", {}).values()
+            if c["project_id"] == pid]
+    return {"configurations": cfgs, "total": len(cfgs)}
+
+
+@router.post("/v3/{pid}/configurations")
+async def create_rds_configuration(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "rds_configurations"):
+        s.rds_configurations = {}
+    body = await request.json()
+    name = body.get("name", "")
+    if not name:
+        return JSONResponse({"error_code": "DBS.0201", "error_msg": "name is required"},
+                            status_code=400)
+    cid = new_id()
+    s.rds_configurations[cid] = {
+        "id": cid, "name": name,
+        "description": body.get("description", ""),
+        "datastore": body.get("datastore", {"type": "MySQL", "version": "8.0"}),
+        "parameters": body.get("values", {}),
+        "project_id": pid, "created_at": now_millis(), "updated_at": now_millis(),
+    }
+    return {"configuration": s.rds_configurations[cid]}
+
+
+@router.get("/v3/{pid}/configurations/{configuration_id}")
+async def show_rds_configuration(request: Request, pid: str, configuration_id: str):
+    s = request.app.state.sim
+    c = getattr(s, "rds_configurations", {}).get(configuration_id)
+    if not c or c["project_id"] != pid:
+        return JSONResponse({"error_code": "DBS.0202",
+                             "error_msg": "configuration not found"}, status_code=404)
+    return {"configuration": c}
+
+
+@router.put("/v3/{pid}/configurations/{configuration_id}")
+async def update_rds_configuration(request: Request, pid: str, configuration_id: str):
+    s = request.app.state.sim
+    c = getattr(s, "rds_configurations", {}).get(configuration_id)
+    if not c or c["project_id"] != pid:
+        return JSONResponse({"error_code": "DBS.0202",
+                             "error_msg": "configuration not found"}, status_code=404)
+    body = await request.json()
+    for field in ("name", "description", "parameters"):
+        if field in body:
+            c[field] = body[field]
+    c["updated_at"] = now_millis()
+    return {"configuration": c}
+
+
+@router.delete("/v3/{pid}/configurations/{configuration_id}")
+async def delete_rds_configuration(request: Request, pid: str, configuration_id: str):
+    s = request.app.state.sim
+    c = getattr(s, "rds_configurations", {}).get(configuration_id)
+    if not c or c["project_id"] != pid:
+        return JSONResponse({"error_code": "DBS.0202",
+                             "error_msg": "configuration not found"}, status_code=404)
+    del s.rds_configurations[configuration_id]
+    return Response(status_code=204)

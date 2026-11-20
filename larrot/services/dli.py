@@ -6,12 +6,33 @@ router = APIRouter()
 
 @router.post("/v1.0/{pid}/databases")
 async def create_dli_database(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "dli_databases"):
+        s.dli_databases = {}
     body = await request.json()
-    return {"database_name": body.get("database_name", "my_db"), "is_success": True}
+    name = body.get("database_name", "")
+    if not name:
+        return JSONResponse({"error_code": "DLI.0001",
+                             "error_msg": "database_name is required"}, status_code=400)
+    s.dli_databases[name] = {"database_name": name, "description": body.get("description", ""),
+                              "project_id": pid, "created_at": now_millis()}
+    return {"database_name": name, "is_success": True}
 
 @router.get("/v1.0/{pid}/databases")
 async def list_dli_databases(request: Request, pid: str):
-    return {"databases": [], "total": 0}
+    s = request.app.state.sim
+    dbs = [d for d in getattr(s, "dli_databases", {}).values() if d["project_id"] == pid]
+    return {"databases": dbs, "total": len(dbs)}
+
+@router.delete("/v1.0/{pid}/databases/{database_name}")
+async def delete_dli_database(request: Request, pid: str, database_name: str):
+    s = request.app.state.sim
+    d = getattr(s, "dli_databases", {}).get(database_name)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "DLI.0002", "error_msg": "database not found"},
+                            status_code=404)
+    del s.dli_databases[database_name]
+    return {"is_success": True}
 
 @router.post("/v1.0/{pid}/tables")
 async def create_dli_table(request: Request, pid: str):

@@ -41,6 +41,21 @@ async def create_log_stream(request: Request, pid: str, group_id: str):
         "created_at": now_millis()})
     return {"log_stream_id": sid}
 
+@router.delete("/v2/{pid}/log-groups/{group_id}/log-streams/{stream_id}")
+async def delete_log_stream(request: Request, pid: str, group_id: str, stream_id: str):
+    s = request.app.state.sim
+    g = getattr(s, "lts_groups", {}).get(group_id)
+    if not g or g.get("project_id") != pid:
+        return JSONResponse({"error_code": "LTS.0001", "error_msg": "group not found"},
+                            status_code=404)
+    before = len(g.get("streams", []))
+    g["streams"] = [x for x in g.get("streams", []) if x["id"] != stream_id]
+    if len(g["streams"]) == before:
+        return JSONResponse({"error_code": "LTS.0002", "error_msg": "stream not found"},
+                            status_code=404)
+    return Response(status_code=204)
+
+
 @router.get("/v2/{pid}/log-groups/{group_id}/log-streams")
 async def list_log_streams(request: Request, pid: str, group_id: str):
     s = request.app.state.sim

@@ -281,3 +281,37 @@ async def show_member(request: Request, pid: str, pool_id: str, member_id: str):
     if not m:
         return JSONResponse({"error_msg": "Member not found", "error_code": "ELB.0104"}, status_code=404)
     return {"member": _member_json(m)}
+
+
+@router.get("/v2/{pid}/elb/healthmonitors/{healthmonitor_id}")
+async def show_health_monitor(request: Request, pid: str, healthmonitor_id: str):
+    state = request.app.state.sim
+    h = getattr(state, "elb_healthmonitors", {}).get(healthmonitor_id)
+    if not h or h["project_id"] != pid:
+        return JSONResponse({"error_msg": "Health monitor not found",
+                             "error_code": "ELB.0105"}, status_code=404)
+    return {"healthmonitor": h}
+
+
+@router.delete("/v2/{pid}/elb/healthmonitors/{healthmonitor_id}")
+async def delete_health_monitor(request: Request, pid: str, healthmonitor_id: str):
+    state = request.app.state.sim
+    h = getattr(state, "elb_healthmonitors", {}).get(healthmonitor_id)
+    if not h or h["project_id"] != pid:
+        return JSONResponse({"error_msg": "Health monitor not found",
+                             "error_code": "ELB.0105"}, status_code=404)
+    del state.elb_healthmonitors[healthmonitor_id]
+    return Response(status_code=204)
+
+
+@router.delete("/v2/{pid}/elb/pools/{pool_id}/members/{member_id}")
+async def delete_member(request: Request, pid: str, pool_id: str, member_id: str):
+    state = request.app.state.sim
+    p = getattr(state, "elb_pools", {}).get(pool_id)
+    if not p or p.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Pool not found", "error_code": "ELB.0103"}, status_code=404)
+    before = len(p.get("members", []))
+    p["members"] = [m for m in p.get("members", []) if m.get("id") != member_id]
+    if len(p["members"]) == before:
+        return JSONResponse({"error_msg": "Member not found", "error_code": "ELB.0104"}, status_code=404)
+    return Response(status_code=204)

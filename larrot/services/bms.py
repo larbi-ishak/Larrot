@@ -36,6 +36,19 @@ async def show_bms(request: Request, pid: str, server_id: str):
         return JSONResponse({"error": {"code": "BMS.0101", "message": "BMS not found"}}, status_code=404)
     return {"server": b}
 
+@router.put("/v1/{pid}/baremetalservers/{server_id}")
+async def update_bms_server(request: Request, pid: str, server_id: str):
+    s = request.app.state.sim
+    srv = getattr(s, "bms_servers", {}).get(server_id)
+    if not srv or srv["project_id"] != pid:
+        return JSONResponse({"error_code": "BMS.0101", "error_msg": "server not found"},
+                            status_code=404)
+    body = await request.json()
+    if "name" in body and body["name"]:
+        srv["name"] = body["name"]
+    return srv
+
+
 @router.delete("/v1/{pid}/baremetalservers/{server_id}")
 async def delete_bms(request: Request, pid: str, server_id: str):
     s = request.app.state.sim

@@ -150,6 +150,18 @@ async def list_snapshots(request: Request, pid: str):
     return {"snapshots": snaps, "count": len(snaps)}
 
 
+@router.delete("/v1.0/{pid}/snapshots/{snapshot_id}")
+@router.delete("/v1.0/{pid}/dws/snapshots/{snapshot_id}")
+async def delete_dws_snapshot(request: Request, pid: str, snapshot_id: str):
+    s = request.app.state.sim
+    snap = getattr(s, "dws_snapshots", {}).get(snapshot_id)
+    if not snap or snap.get("project_id") != pid:
+        return JSONResponse({"error_code": "DWS.0005",
+                             "error_msg": "snapshot not found"}, status_code=404)
+    del s.dws_snapshots[snapshot_id]
+    return Response(status_code=204)
+
+
 @router.get("/v1.0/{pid}/snapshots/{snapshot_id}")
 @router.get("/v1.0/{pid}/dws/snapshots/{snapshot_id}")
 async def show_dws_snapshot(request: Request, pid: str, snapshot_id: str):

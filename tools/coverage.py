@@ -942,5 +942,102 @@ for _svc, _ops in REGISTRY_TIER2.items():
 ALIASES["/v2/manage/namespaces/{namespace}/repos/{repo}/tags"] = \
     "/v2/{pid}/namespaces/{namespace}/repos/{repo}/tags"
 
+
+# ---------------------------------------------------------------------------
+# Tier-3 registries: the next documented-operation slice
+# ---------------------------------------------------------------------------
+
+REGISTRY_TIER3 = {
+    "IAM": [
+        ("GrantRoleToUserOnProject", "PUT", "/v3/projects/{project_id}/users/{user_id}/roles/{role_id}"),
+        ("RevokeRoleFromUserOnProject", "DELETE", "/v3/projects/{project_id}/users/{user_id}/roles/{role_id}"),
+        ("ListUserRoleAssignments", "GET", "/v3/projects/{project_id}/users/{user_id}/roles"),
+        ("GrantRoleToGroupOnProject", "PUT", "/v3/projects/{project_id}/groups/{group_id}/roles/{role_id}"),
+        ("RevokeRoleFromGroupOnProject", "DELETE", "/v3/projects/{project_id}/groups/{group_id}/roles/{role_id}"),
+        ("ListGroupRoleAssignments", "GET", "/v3/projects/{project_id}/groups/{group_id}/roles"),
+        ("ListDomains", "GET", "/v3/domains"),
+    ],
+    "ECS": [
+        ("UpdateServerTags", "PUT", "/v1/{pid}/cloudservers/{server_id}/tags"),
+        ("DeleteServerTags", "DELETE", "/v1/{pid}/cloudservers/{server_id}/tags"),
+    ],
+    "EIP": [
+        ("UpdateBandwidth", "PUT", "/v2.0/{pid}/bandwidths/{bandwidth_id}"),
+    ],
+    "RDS": [
+        ("ListParameterTemplates", "GET", "/v3/{pid}/configurations"),
+        ("CreateParameterTemplate", "POST", "/v3/{pid}/configurations"),
+        ("ShowParameterTemplate", "GET", "/v3/{pid}/configurations/{configuration_id}"),
+        ("UpdateParameterTemplate", "PUT", "/v3/{pid}/configurations/{configuration_id}"),
+        ("DeleteParameterTemplate", "DELETE", "/v3/{pid}/configurations/{configuration_id}"),
+    ],
+    "DNS": [
+        ("ListAllRecordsets", "GET", "/v2/recordsets"),
+    ],
+    "KMS": [
+        ("UpdateKeyAlias", "POST", "/v1/{pid}/kms/update-key-alias"),
+    ],
+    "ELB": [
+        ("ShowHealthMonitor", "GET", "/v2/{pid}/elb/healthmonitors/{healthmonitor_id}"),
+        ("DeleteHealthMonitor", "DELETE", "/v2/{pid}/elb/healthmonitors/{healthmonitor_id}"),
+        ("DeleteMember", "DELETE", "/v2/{pid}/elb/pools/{pool_id}/members/{member_id}"),
+    ],
+    "CCE": [
+        ("ShowNodePool", "GET", "/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}"),
+        ("DeleteNodePool", "DELETE", "/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}"),
+    ],
+    "SMN": [
+        ("DeleteMessageTemplate", "DELETE", "/v2/{pid}/notifications/message_templates/{message_template_id}"),
+    ],
+    "SWR": [
+        ("DeleteRepo", "DELETE", "/v2/manage/namespaces/{namespace}/repos/{repo}"),
+    ],
+    "IoTDA": [
+        ("ShowProduct", "GET", "/v5/iot/{pid}/products/{product_id}"),
+        ("DeleteProduct", "DELETE", "/v5/iot/{pid}/products/{product_id}"),
+    ],
+    "OBS": [
+        ("ListMultipartUploads", "GET", "/{bucket}?uploads"),
+        ("AbortMultipartUpload", "DELETE", "/{bucket}/{key}?uploadId"),
+        ("BatchDeleteObjects", "POST", "/{bucket}?delete"),
+        ("GetObjectMetadata", "HEAD", "/{bucket}/{key}"),
+        ("CopyObject", "PUT", "/{bucket}/{key}"),
+    ],
+    "LTS": [
+        ("DeleteLogStream", "DELETE", "/v2/{pid}/log-groups/{group_id}/log-streams/{stream_id}"),
+    ],
+    "BMS": [
+        ("UpdateBmsServer", "PUT", "/v1/{pid}/baremetalservers/{server_id}"),
+    ],
+    "AS": [
+        ("ShowScalingPolicy", "GET", "/v1/{pid}/scaling_policy/{policy_id}"),
+        ("DeleteScalingPolicy", "DELETE", "/v1/{pid}/scaling_policy/{policy_id}"),
+    ],
+    "EPS": [
+        ("UpdateEnterpriseProject", "PUT", "/v1.0/enterprise-projects/{eps_id}"),
+    ],
+    "DLI": [
+        ("DeleteDatabase", "DELETE", "/v1.0/{pid}/databases/{database_name}"),
+    ],
+    "DWS": [
+        ("DeleteSnapshot", "DELETE", "/v1.0/{pid}/snapshots/{snapshot_id}"),
+    ],
+    "IEF": [
+        ("ShowDeployment", "GET", "/v2/{pid}/edgemgr/deployments/{deployment_id}"),
+    ],
+    "Peering": [
+        ("UpdatePeering", "PUT", "/v2.0/{pid}/vpc-peerings/{peering_id}"),
+    ],
+    "ACL": [
+        ("UpdateAcl", "PUT", "/v3/{pid}/vpc/acls/{acl_id}"),
+    ],
+    "VPC-Routes": [
+        ("UpdateRouteTable", "PUT", "/v1/{pid}/vpc/routetables/{rt_id}"),
+    ],
+}
+
+for _svc, _ops in REGISTRY_TIER3.items():
+    REGISTRY.setdefault(_svc, []).extend(_ops)
+
 if __name__ == "__main__":
     run()
