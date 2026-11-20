@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from .core.signing import verify_sdk_hmac_sha256
 from .core.envelopes import apigw_error
 
-logger = logging.getLogger("huawei_sim")
+logger = logging.getLogger("larrot")
 
 
 async def gateway_middleware(request: Request, call_next) -> Response:

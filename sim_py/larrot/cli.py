@@ -1,4 +1,4 @@
-"""hcli — the huawei-sim CLI. Table output by default, --json for raw, --wait for async."""
+"""larrot — the Larrot CLI. Table output by default, --json for raw, --wait for async."""
 
 import argparse
 import hashlib
@@ -124,7 +124,8 @@ def table(headers, rows, title=""):
 # ---------------------------------------------------------------------------
 
 def main():
-    p = argparse.ArgumentParser(prog="hcli", description="Huawei Cloud simulator CLI")
+    p = argparse.ArgumentParser(prog="larrot",
+                                description="Larrot — repeats Huawei Cloud. Perfectly.")
     p.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
     p.add_argument("--obs-endpoint", default=DEFAULT_OBS)
     p.add_argument("--ak", default=DEFAULT_AK)

@@ -3,14 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "huawei-sim"
+name = "larrot"
 version = "1.0.0"
-description = "Local Huawei Cloud API simulator — like LocalStack, but for Huawei Cloud"
+description = "Larrot repeats Huawei Cloud. Perfectly. — a local Huawei Cloud API simulator (like LocalStack, but for Huawei Cloud)"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.11"
-authors = [{ name = "huawei-sim contributors" }]
-keywords = ["huawei", "cloud", "simulator", "localstack", "testing", "mock"]
+authors = [{ name = "Larbi Ishak (larbizyo)" }]
+keywords = ["huawei", "cloud", "simulator", "localstack", "testing", "mock", "larrot"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -34,9 +34,15 @@ dev = [
     "ruff>=0.8",
 ]
 
+[project.urls]
+Homepage = "https://github.com/larbizyo/larrot"
+
 [project.scripts]
-huawei-sim = "huawei_sim.__main__:main"
-hcli = "huawei_sim.cli:main"
+larrot = "larrot.cli:main"
+larrot-server = "larrot.__main__:main"
+# deprecated aliases (kept so existing installs keep working)
+huawei-sim = "larrot.__main__:main"
+hcli = "larrot.cli:main"
 
 [tool.ruff]
 line-length = 120

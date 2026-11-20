@@ -1,4 +1,7 @@
-# huawei-sim — Decision Layout (D1–D30)
+# Larrot 🦜 — Decision Layout (D1–D31)
+
+> The project was named `huawei-sim` during development (D3);
+> renamed to **Larrot** in D31.
 
 Every design decision made while building the simulator, why it was made, where it
 lives in the code, and how confident we are in it. This is the readable companion
@@ -24,7 +27,7 @@ to `DEVLOG.md` (the raw, chronological journal) — same numbering, organized by
 |---|---|---|---|
 | D1 | layout | code lives in `sim/`, isolated from docs | settled |
 | D2 | endpoints | single REST gateway port 8200, path routing | settled (amended by D25) |
-| D3 | naming | `huawei-sim` | settled |
+| D3 | naming | `huawei-sim` | superseded by D31 |
 | D4 | stack | Rust 2021, axum + tokio | settled |
 | D5 | state | in-memory `Arc<DashMap>`, no persistence | settled |
 | D6 | signing | accept-and-check: verify + log, never reject | settled |
@@ -265,3 +268,14 @@ backend scripts get replayed (plan Phase 7), diff these against captured respons
 
 Everything else in the simulator is backed by an observation (EMPIRICAL_SPEC) or
 the official docs (API_DOCS_RESEARCH), and is pinned by an automated check.
+
+### D31 — Rename to **Larrot** 🦜
+
+The project (formerly `huawei-sim`) is renamed **Larrot** — Larbi (the author) + parrot
+(the mascot). The parrot *repeats the cloud perfectly*, which is the product: a local
+simulator indistinguishable from the real Huawei Cloud APIs, quirks included.
+
+- Package: `larrot` (PyPI), CLI: `larrot`, server: `larrot-server`
+- Old names (`huawei-sim`, `hcli`) kept as deprecated aliases
+- Internal Python package renamed `huawei_sim` → `larrot`
+- Branding avoids the "Huawei" trademark in the project name (like LocalStack avoids "AWS")

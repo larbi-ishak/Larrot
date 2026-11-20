@@ -5,7 +5,7 @@ async job engine completing, as it would on a live server after 1-3s delay.
 """
 import pytest
 from fastapi.testclient import TestClient
-from huawei_sim.app import create_app
+from larrot.app import create_app
 
 PID = "79814d675f6142d9b4a8ee417b924444"
 HCS_PID = "93c9dfbe6c9e45409fac947d042e6676"

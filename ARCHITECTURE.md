@@ -1,4 +1,6 @@
-# huawei-sim — Architecture & Code Guide
+# Larrot 🦜 — Architecture & Code Guide
+
+(Formerly known as `huawei-sim`.)
 
 How the simulator is built, how a request flows through it, and where every piece
 lives in the code. Companion docs: `EMPIRICAL_SPEC.md` (what the real cloud does),

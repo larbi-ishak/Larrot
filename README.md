@@ -1,19 +1,38 @@
-# huawei-sim
+<div align="center">
 
-**A local Huawei Cloud API simulator — like LocalStack, but for Huawei Cloud.**
+# Larrot 🦜
 
-Runs the REST APIs of Huawei Cloud's international site (`*.myhuaweicloud.com`) on your
-machine: IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, and OBS — including the undocumented
-quirks we observed in production.
+**Larrot repeats Huawei Cloud. Perfectly.**
+
+*A local Huawei Cloud API simulator — like LocalStack, but for Huawei Cloud.*
+
+[![CI](https://github.com/larbizyo/larrot/actions/workflows/ci.yml/badge.svg)](../../actions)
+
+</div>
+
+---
+
+Larrot is a parrot. Larrot listens to Huawei Cloud and repeats it — every endpoint,
+every error envelope, every async job, every quirk we observed in production.
+*Yes, even `Ecs.0005 "device is illegal"`.*
+
+**Can your SDK tell the difference? That's the point.**
+
+It runs the REST APIs of Huawei Cloud's international site (`*.myhuaweicloud.com`)
+on your machine: 59 services — IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, OBS, CCE,
+ModelArts + MaaS, and 50 more — on ports 8200/8201.
+
+> The name: **Larbi** (the author) + **parrot** (the mascot) = **Larrot**.
+> The parrot that repeats the cloud.
 
 ## Quick start
 
 ```bash
 # Install
-pip install huawei-sim
+pip install larrot
 
 # Run
-huawei-sim
+larrot-server
 # → REST on http://127.0.0.1:8200, OBS on http://127.0.0.1:8201
 
 # Or with Docker
@@ -22,20 +41,20 @@ docker compose up
 # Or from source
 cd sim_py
 pip install -e .
-python -m huawei_sim
+python -m larrot
 ```
 
 ## CLI
 
 ```bash
-hcli projects
-hcli ecs list
-hcli --wait ecs create --image <id> --flavor s6.large.2 --name myvm
-hcli --wait ecs stop <server-id>
-hcli evs list
-hcli cbr vaults
-hcli obs buckets
-hcli --json ecs list
+larrot projects
+larrot ecs list
+larrot --wait ecs create --image <id> --flavor s6.large.2 --name myvm
+larrot --wait ecs stop <server-id>
+larrot evs list
+larrot cbr vaults
+larrot obs buckets
+larrot --json ecs list
 ```
 
 ## Wire real SDKs

@@ -1,7 +1,7 @@
 """Tests for enhanced compute services: keypairs, server groups, quotas, metadata, NICs, console, resize, OS change, batch, HPC."""
 import pytest
 from fastapi.testclient import TestClient
-from huawei_sim.app import create_app
+from larrot.app import create_app
 
 PID = "79814d675f6142d9b4a8ee417b924444"
 IMAGE = "1ce5800a-e487-4c1b-b264-3353a39e2b4b"

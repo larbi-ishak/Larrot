@@ -3,16 +3,16 @@ import hashlib
 import hmac
 import time
 import pytest
-from huawei_sim.core.signing import (
+from larrot.core.signing import (
     sign_sdk_request, verify_sdk_hmac_sha256,
     sign_obs_request, verify_obs_v2,
     SignatureCheck, ALGORITHM, EMPTY_PAYLOAD_HASH,
 )
-from huawei_sim.core.jobs import JobEngine, Job, mark_sub_jobs_success, new_job_id
-from huawei_sim.core.profiles import Profile
-from huawei_sim.core.envelopes import ecs_error, evs_error, vpc_error, apigw_error
-from huawei_sim.core.ratelimit import RateLimiter
-from huawei_sim.core.state import SimState
+from larrot.core.jobs import JobEngine, Job, mark_sub_jobs_success, new_job_id
+from larrot.core.profiles import Profile
+from larrot.core.envelopes import ecs_error, evs_error, vpc_error, apigw_error
+from larrot.core.ratelimit import RateLimiter
+from larrot.core.state import SimState
 
 
 # ---------------------------------------------------------------------------

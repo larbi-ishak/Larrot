@@ -1,26 +1,26 @@
-# Contributing to huawei-sim
+# Contributing to Larrot 🦜
 
 Thank you for your interest in contributing! This document covers the basics.
 
 ## Getting started
 
 ```bash
-git clone https://github.com/your-org/huawei-sim.git
-cd huawei-sim/sim_py
+git clone https://github.com/larbizyo/larrot.git
+cd larrot/sim_py
 pip install -e ".[dev]"
-python -m huawei_sim  # starts on :8200 (REST) and :8201 (OBS)
+python -m larrot  # starts on :8200 (REST) and :8201 (OBS)
 ```
 
 ## Project structure
 
 ```
 sim_py/
-├── huawei_sim/
+├── larrot/
 │   ├── core/           # signing, state, jobs, profiles, envelopes, ratelimit
 │   ├── services/       # one file per service (iam, ecs, evs, vpc, ims, cbr, obs, rds)
 │   ├── app.py          # FastAPI app factory + dashboard
 │   ├── middleware.py   # rate limit + signature verification
-│   └── cli.py          # hcli CLI
+│   └── cli.py          # larrot CLI
 ├── tools/
 │   ├── smoke.py        # end-to-end smoke suite
 │   └── start.sh        # dev server launcher
@@ -29,7 +29,7 @@ sim_py/
 
 ## Adding a new service
 
-1. Create `huawei_sim/services/<name>.py` with an `APIRouter`
+1. Create `larrot/services/<name>.py` with an `APIRouter`
 2. Register it in `app.py`:
    ```python
    from .services import <name>

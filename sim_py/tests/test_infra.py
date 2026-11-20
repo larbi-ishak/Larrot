@@ -4,8 +4,8 @@ import threading
 
 import pytest
 from fastapi.testclient import TestClient
-from huawei_sim.app import create_app, create_obs_app
-from huawei_sim.core.signing import sign_sdk_request
+from larrot.app import create_app, create_obs_app
+from larrot.core.signing import sign_sdk_request
 
 PID = "79814d675f6142d9b4a8ee417b924444"
 IMAGE = "1ce5800a-e487-4c1b-b264-3353a39e2b4b"
@@ -228,7 +228,7 @@ class TestSignedRequests:
         path = f"/v1/{PID}/cloudservers/detail"
         headers = sign_sdk_request("GET", path, None, "testserver", b"", AK, SK)
         headers["Content-Type"] = "application/json"  # SDK always signs content-type
-        with caplog.at_level(logging.INFO, logger="huawei_sim"):
+        with caplog.at_level(logging.INFO, logger="larrot"):
             r = client.get(path, headers=headers)
         assert r.status_code == 200
         assert any("signature OK" in rec.message for rec in caplog.records)
@@ -240,7 +240,7 @@ class TestSignedRequests:
         path = f"/v1.1/{PID}/cloudservers"
         headers = sign_sdk_request("POST", path, None, "testserver", body, AK, SK)
         headers["Content-Type"] = "application/json"
-        with caplog.at_level(logging.INFO, logger="huawei_sim"):
+        with caplog.at_level(logging.INFO, logger="larrot"):
             r = client.post(path, content=body, headers=headers)
         assert r.status_code == 200
         assert any("signature OK" in rec.message for rec in caplog.records)
@@ -250,7 +250,7 @@ class TestSignedRequests:
         path = f"/v1/{PID}/cloudservers/detail"
         headers = sign_sdk_request("GET", path, None, "testserver", b"", AK, SK)
         headers["Authorization"] = headers["Authorization"][:-4] + "beef"
-        with caplog.at_level(logging.INFO, logger="huawei_sim"):
+        with caplog.at_level(logging.INFO, logger="larrot"):
             r = client.get(path, headers=headers)
         assert r.status_code == 200  # accepted anyway
         assert any("SIGNATURE INVALID" in rec.message for rec in caplog.records)
@@ -259,13 +259,13 @@ class TestSignedRequests:
         path = f"/v1/{PID}/cloudservers/detail"
         headers = sign_sdk_request("GET", path, None, "testserver", b"",
                                    "UNKNOWNAK", "whatever")
-        with caplog.at_level(logging.INFO, logger="huawei_sim"):
+        with caplog.at_level(logging.INFO, logger="larrot"):
             r = client.get(path, headers=headers)
         assert r.status_code == 200
         assert any("SIGNATURE INVALID" in rec.message for rec in caplog.records)
 
     def test_unsigned_request_accepted(self, client, caplog):
-        with caplog.at_level(logging.INFO, logger="huawei_sim"):
+        with caplog.at_level(logging.INFO, logger="larrot"):
             r = client.get(f"/v1/{PID}/cloudservers/detail")
         assert r.status_code == 200
         assert any("no signature" in rec.message for rec in caplog.records)

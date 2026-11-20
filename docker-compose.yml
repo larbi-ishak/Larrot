@@ -1,10 +1,10 @@
 services:
-  huawei-sim:
+  larrot:
     build:
       context: ./sim_py
       dockerfile: Dockerfile
     ports:
-      - "8200:8200"   # REST (IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS)
+      - "8200:8200"   # REST (IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, ...)
       - "8201:8201"   # OBS (object storage)
     environment:
       SIM_PROFILE: public

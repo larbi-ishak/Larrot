@@ -57,10 +57,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker image
-        run: docker build -t huawei-sim ./sim_py
+        run: docker build -t larrot ./sim_py
       - name: Smoke test in Docker
         run: |
-          docker run -d -p 8200:8200 -p 8201:8201 huawei-sim
+          docker run -d -p 8200:8200 -p 8201:8201 larrot
           sleep 5
           curl -s http://127.0.0.1:8200/v3/projects | grep -q "ap-southeast-1"
           curl -s http://127.0.0.1:8201/ | grep -q "ListAllMyBucketsResult"

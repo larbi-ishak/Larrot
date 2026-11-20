@@ -22,14 +22,14 @@ from .services import (
 )
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-logger = logging.getLogger("huawei_sim")
+logger = logging.getLogger("larrot")
 
 
 def create_app() -> FastAPI:
     """Create the REST app (port 8200)."""
     app = FastAPI(
-        title="huawei-sim",
-        description="Local Huawei Cloud API simulator — like LocalStack, but for Huawei Cloud",
+        title="Larrot",
+        description="Larrot repeats Huawei Cloud. Perfectly. — a local Huawei Cloud API simulator (like LocalStack, but for Huawei Cloud)",
         version="1.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
@@ -176,7 +176,7 @@ def create_app() -> FastAPI:
 
 def create_obs_app() -> FastAPI:
     """Create the OBS app (port 8201) — separate endpoint, like the real cloud."""
-    app = FastAPI(title="huawei-sim OBS", version="1.0.0", docs_url=None, redoc_url=None)
+    app = FastAPI(title="Larrot OBS", version="1.0.0", docs_url=None, redoc_url=None)
     state = SimState()
     app.state.sim = state
 

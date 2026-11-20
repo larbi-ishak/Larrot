@@ -1,7 +1,7 @@
 """Integration tests — full app via httpx ASGI transport (no live server needed)."""
 import pytest
 from fastapi.testclient import TestClient
-from huawei_sim.app import create_app
+from larrot.app import create_app
 
 
 @pytest.fixture
