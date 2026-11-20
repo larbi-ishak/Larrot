@@ -212,8 +212,12 @@ def main():
     st, body = call("POST", f"{BASE}/v3/{pid_pub}/checkpoints",
                     jbytes({"checkpoint": {"resources": [{"id": sid, "type": "OS::Nova::Server"}]}}))
     check("checkpoint created (protecting)", st == 200 and body["checkpoint"]["status"] == "protecting")
-    time.sleep(2)
-    st, body = call("GET", f"{BASE}/v3/{pid_pub}/backups?resource_id={sid}")
+    # poll like a real client: the backup flips to available via the async job engine (1-3s)
+    for _ in range(10):
+        time.sleep(0.5)
+        st, body = call("GET", f"{BASE}/v3/{pid_pub}/backups?resource_id={sid}")
+        if st == 200 and body.get("backups") and body["backups"][0]["status"] == "available":
+            break
     check("backup available", st == 200 and len(body["backups"]) >= 1
           and body["backups"][0]["status"] == "available")
 
