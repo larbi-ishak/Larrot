@@ -60,7 +60,7 @@ async def list_functions(request: Request, pid: str):
 @router.get("/v2/{pid}/fg/functions/{func_id}")
 async def show_function(request: Request, pid: str, func_id: str):
     state = request.app.state.sim
-    f = state.fg_functions.get(func_id)
+    f = getattr(state, "fg_functions", {}).get(func_id)
     if not f or f["project_id"] != pid:
         return JSONResponse({"error_msg": "Function not found", "error_code": "FG.0101"}, status_code=404)
     return {"func_info": _func_json(f)}
@@ -79,7 +79,7 @@ async def delete_function(request: Request, pid: str, func_id: str):
 async def invoke_function(request: Request, pid: str, func_id: str):
     """Invoke a function — simulates execution and returns a result."""
     state = request.app.state.sim
-    f = state.fg_functions.get(func_id)
+    f = getattr(state, "fg_functions", {}).get(func_id)
     if not f or f["project_id"] != pid:
         return JSONResponse({"error_msg": "Function not found", "error_code": "FG.0101"}, status_code=404)
 

@@ -55,7 +55,7 @@ async def create_cluster(request: Request, pid: str):
     import asyncio
     async def _flip():
         await asyncio.sleep(2.0)
-        c = state.cce_clusters.get(cluster_id)
+        c = getattr(state, "cce_clusters", {}).get(cluster_id)
         if c:
             c["status"] = "Available"
             c["updated_at"] = now_millis()
@@ -76,7 +76,7 @@ async def list_clusters(request: Request, pid: str):
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}")
 async def show_cluster(request: Request, pid: str, cluster_id: str):
     state = request.app.state.sim
-    c = state.cce_clusters.get(cluster_id)
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
         return JSONResponse({"error_msg": "Cluster not found", "error_code": "CCE.0101"}, status_code=404)
     return {"cluster": _cluster_json(c)}
@@ -85,7 +85,7 @@ async def show_cluster(request: Request, pid: str, cluster_id: str):
 @router.delete("/api/v3/projects/{pid}/clusters/{cluster_id}")
 async def delete_cluster(request: Request, pid: str, cluster_id: str):
     state = request.app.state.sim
-    c = state.cce_clusters.get(cluster_id)
+    c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
         return JSONResponse({"error_msg": "Cluster not found", "error_code": "CCE.0101"}, status_code=404)
     del state.cce_clusters[cluster_id]
@@ -95,7 +95,7 @@ async def delete_cluster(request: Request, pid: str, cluster_id: str):
 @router.post("/api/v3/projects/{pid}/clusters/{cluster_id}/nodes")
 async def create_node(request: Request, pid: str, cluster_id: str):
     state = request.app.state.sim
-    cluster = state.cce_clusters.get(cluster_id)
+    cluster = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not cluster or cluster["project_id"] != pid:
         return JSONResponse({"error_msg": "Cluster not found", "error_code": "CCE.0101"}, status_code=404)
     body = await request.json()
@@ -129,7 +129,7 @@ async def create_node(request: Request, pid: str, cluster_id: str):
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodes")
 async def list_nodes(request: Request, pid: str, cluster_id: str):
     state = request.app.state.sim
-    cluster = state.cce_clusters.get(cluster_id)
+    cluster = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not cluster or cluster["project_id"] != pid:
         return JSONResponse({"error_msg": "Cluster not found", "error_code": "CCE.0101"}, status_code=404)
     return {"nodes": [_node_json(n) for n in cluster["nodes"]], "count": len(cluster["nodes"])}

@@ -250,7 +250,11 @@ async def create_servers(request: Request, pid: str):
 
     if not state.project(pid):
         return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+    if "imageRef" not in spec or not spec.get("imageRef"):
+        return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
     if spec["imageRef"] not in state.images:
+        return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
+    if "flavorRef" not in spec or not spec.get("flavorRef"):
         return JSONResponse(ecs_error("Ecs.0005", "request body is illegal."), status_code=400)
     region = state.project(pid)["name"]
     if not any(f["id"] == spec["flavorRef"] and region in f["regions"] for f in state.flavors):
@@ -299,6 +303,9 @@ async def delete_servers(request: Request, pid: str):
     body = await request.json()
     ids = [s["id"] for s in body.get("servers", [])]
     delete_volume = body.get("delete_volume", False)
+
+    if not ids:
+        return JSONResponse(ecs_error("Common.0002", "The request body cannot be left blank."), status_code=400)
 
     for sid in ids:
         s = state.servers.get(sid)

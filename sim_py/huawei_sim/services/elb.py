@@ -95,7 +95,7 @@ async def list_loadbalancers(request: Request, pid: str):
 @router.get("/v2/{pid}/elb/loadbalancers/{lb_id}")
 async def show_loadbalancer(request: Request, pid: str, lb_id: str):
     state = request.app.state.sim
-    lb = state.elb_loadbalancers.get(lb_id)
+    lb = getattr(state, "elb_loadbalancers", {}).get(lb_id)
     if not lb or lb["project_id"] != pid:
         return JSONResponse({"error_msg": "Load balancer not found", "error_code": "ELB.0101"}, status_code=404)
     return {"loadbalancer": _lb_json(lb)}
@@ -104,7 +104,7 @@ async def show_loadbalancer(request: Request, pid: str, lb_id: str):
 @router.delete("/v2/{pid}/elb/loadbalancers/{lb_id}")
 async def delete_loadbalancer(request: Request, pid: str, lb_id: str):
     state = request.app.state.sim
-    lb = state.elb_loadbalancers.get(lb_id)
+    lb = getattr(state, "elb_loadbalancers", {}).get(lb_id)
     if not lb or lb["project_id"] != pid:
         return JSONResponse({"error_msg": "Load balancer not found", "error_code": "ELB.0101"}, status_code=404)
     del state.elb_loadbalancers[lb_id]
@@ -122,7 +122,7 @@ async def create_listener(request: Request, pid: str):
         state.elb_listeners = {}
     body = await request.json()
     spec = body.get("listener", body)
-    lb = state.elb_loadbalancers.get(spec.get("loadbalancer_id", ""))
+    lb = getattr(state, "elb_loadbalancers", {}).get(spec.get("loadbalancer_id", ""))
     if not lb:
         return JSONResponse({"error_msg": "Load balancer not found", "error_code": "ELB.0101"}, status_code=404)
     lis_id = new_id()
@@ -155,7 +155,7 @@ async def delete_listener(request: Request, pid: str, listener_id: str):
     if listener_id not in state.elb_listeners:
         return JSONResponse({"error_msg": "Listener not found", "error_code": "ELB.0102"}, status_code=404)
     listener = state.elb_listeners.pop(listener_id)
-    lb = state.elb_loadbalancers.get(listener["loadbalancer_id"])
+    lb = getattr(state, "elb_loadbalancers", {}).get(listener["loadbalancer_id"])
     if lb:
         lb["listeners"] = [l for l in lb["listeners"] if l["id"] != listener_id]
     return Response(status_code=204)

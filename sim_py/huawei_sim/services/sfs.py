@@ -46,7 +46,7 @@ async def create_share(request: Request, pid: str):
     import asyncio
     async def _flip():
         await asyncio.sleep(1.5)
-        s = state.sfs_shares.get(share_id)
+        s = getattr(state, "sfs_shares", {}).get(share_id)
         if s:
             s["status"] = "available"
             s["updated_at"] = now_millis()
@@ -67,7 +67,7 @@ async def list_shares(request: Request, pid: str):
 @router.get("/v2/{pid}/shares/{share_id}")
 async def show_share(request: Request, pid: str, share_id: str):
     state = request.app.state.sim
-    s = state.sfs_shares.get(share_id)
+    s = getattr(state, "sfs_shares", {}).get(share_id)
     if not s or s["project_id"] != pid:
         return JSONResponse({"error_msg": "Share not found", "error_code": "SFS.0101"}, status_code=404)
     return {"share": _share_json(s)}
@@ -76,7 +76,7 @@ async def show_share(request: Request, pid: str, share_id: str):
 @router.delete("/v2/{pid}/shares/{share_id}")
 async def delete_share(request: Request, pid: str, share_id: str):
     state = request.app.state.sim
-    s = state.sfs_shares.get(share_id)
+    s = getattr(state, "sfs_shares", {}).get(share_id)
     if not s or s["project_id"] != pid:
         return JSONResponse({"error_msg": "Share not found", "error_code": "SFS.0101"}, status_code=404)
     del state.sfs_shares[share_id]
@@ -86,7 +86,7 @@ async def delete_share(request: Request, pid: str, share_id: str):
 @router.post("/v2/{pid}/shares/{share_id}/action")
 async def share_action(request: Request, pid: str, share_id: str):
     state = request.app.state.sim
-    s = state.sfs_shares.get(share_id)
+    s = getattr(state, "sfs_shares", {}).get(share_id)
     if not s or s["project_id"] != pid:
         return JSONResponse({"error_msg": "Share not found", "error_code": "SFS.0101"}, status_code=404)
     body = await request.json()
