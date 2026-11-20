@@ -6,7 +6,7 @@
 
 *A local Huawei Cloud API simulator — like LocalStack, but for Huawei Cloud.*
 
-[![CI](https://github.com/larbizyo/larrot/actions/workflows/ci.yml/badge.svg)](../../actions)
+[![CI](https://github.com/larbi-ishak/Larrot/actions/workflows/ci.yml/badge.svg)](../../actions)
 
 </div>
 

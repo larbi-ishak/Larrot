@@ -35,7 +35,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/larbizyo/larrot"
+Homepage = "https://github.com/larbi-ishak/Larrot"
 
 [project.scripts]
 larrot = "larrot.cli:main"

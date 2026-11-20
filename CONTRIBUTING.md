@@ -5,7 +5,7 @@ Thank you for your interest in contributing! This document covers the basics.
 ## Getting started
 
 ```bash
-git clone https://github.com/larbizyo/larrot.git
+git clone https://github.com/larbi-ishak/Larrot.git
 cd larrot/sim_py
 pip install -e ".[dev]"
 python -m larrot  # starts on :8200 (REST) and :8201 (OBS)
