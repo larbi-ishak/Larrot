@@ -35,17 +35,12 @@ jobs:
 
       - name: Start server + smoke suite
         run: |
-          PYTHONPATH=. python -c "
-          import threading, uvicorn, time
-          from larrot.app import create_app, create_obs_app
-          app = create_app()
-          obs_app = create_obs_app()
-          threading.Thread(target=lambda: uvicorn.run(app, host='127.0.0.1', port=8200, log_level='error'), daemon=True).start()
-          threading.Thread(target=lambda: uvicorn.run(obs_app, host='127.0.0.1', port=8201, log_level='error'), daemon=True).start()
-          time.sleep(2)
-          print('READY')
-          " &
-          sleep 4
+          python -m larrot &
+          for i in $(seq 1 30); do
+            curl -s -o /dev/null http://127.0.0.1:8200/health && break
+            sleep 1
+          done
+          curl -s http://127.0.0.1:8200/health | grep -q '"status": "ok"' || (echo "server failed to start" && exit 1)
           python3 tools/smoke.py
 
   docker:
