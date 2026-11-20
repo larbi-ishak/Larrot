@@ -204,11 +204,10 @@ def create_app() -> FastAPI:
 
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon():
-        from fastapi.responses import Response
-        import base64
-        svg = ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
-               "<path d='M20 44a12 12 0 1 1 2.4-23.7A16 16 0 0 1 52 26a10 10 0 0 1-2 19.7H20z' fill='#e60012'/></svg>")
-        return Response(content=svg, media_type="image/svg+xml")
+        from fastapi.responses import FileResponse
+        import os
+        logo = os.path.join(os.path.dirname(__file__), "static", "logo-64.png")
+        return FileResponse(logo, media_type="image/png")
 
     @app.get("/", include_in_schema=False, response_class=HTMLResponse)
     async def dashboard():
