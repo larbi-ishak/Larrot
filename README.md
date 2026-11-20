@@ -22,9 +22,6 @@ It runs the REST APIs of Huawei Cloud's international site (`*.myhuaweicloud.com
 on your machine: 59 services — IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, OBS, CCE,
 ModelArts + MaaS, and 50 more — on ports 8200/8201.
 
-> The name: **Larbi** (the author) + **parrot** (the mascot) = **Larrot**.
-> The parrot that repeats the cloud.
-
 ## Quick start
 
 ```bash
@@ -39,7 +36,6 @@ larrot-server
 docker compose up
 
 # Or from source
-cd sim_py
 pip install -e .
 python -m larrot
 ```
@@ -137,7 +133,6 @@ Open `http://127.0.0.1:8200/docs` for auto-generated API documentation.
 ## Testing
 
 ```bash
-cd sim_py
 python3 tools/smoke.py        # 23-check smoke suite
 python3 -m pytest tests/      # unit tests
 ```

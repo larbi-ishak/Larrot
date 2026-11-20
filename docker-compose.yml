@@ -1,7 +1,7 @@
 services:
   larrot:
     build:
-      context: ./sim_py
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8200:8200"   # REST (IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS, ...)

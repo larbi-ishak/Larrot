@@ -12,7 +12,7 @@ For each service, tests:
   8. State guard violations → 400
 """
 import sys, os, json
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(__file__))
 from fastapi.testclient import TestClient
 from larrot.app import create_app
 

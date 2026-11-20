@@ -6,7 +6,7 @@ Thank you for your interest in contributing! This document covers the basics.
 
 ```bash
 git clone https://github.com/larbi-ishak/Larrot.git
-cd larrot/sim_py
+cd larrot
 pip install -e ".[dev]"
 python -m larrot  # starts on :8200 (REST) and :8201 (OBS)
 ```
@@ -14,7 +14,7 @@ python -m larrot  # starts on :8200 (REST) and :8201 (OBS)
 ## Project structure
 
 ```
-sim_py/
+larrot/
 ├── larrot/
 │   ├── core/           # signing, state, jobs, profiles, envelopes, ratelimit
 │   ├── services/       # one file per service (iam, ecs, evs, vpc, ims, cbr, obs, rds)

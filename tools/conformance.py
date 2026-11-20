@@ -7,8 +7,8 @@ Validates:
   3. Error envelope correctness (per-service shapes)
 """
 import sys, os, json, time
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-os.environ.setdefault("PYTHONPATH", os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(__file__))
+os.environ.setdefault("PYTHONPATH", os.path.dirname(__file__))
 
 from fastapi.testclient import TestClient
 from larrot.app import create_app
