@@ -96,7 +96,7 @@ def _build_server(state, pid, spec, suffix=None):
         "OS-EXT-AZ:availability_zone": az,
         "metadata": {},
         "tags": [],
-        "security_groups": [{"name": "default"}],
+        "security_groups": spec.get("security_groups") or [{"name": "default"}],
         "os-extended-volumes:volumes_attached": [{
             "id": vol_id, "delete_on_termination": "false",
             "bootIndex": "0", "device": "/dev/vda", "size": root_size,

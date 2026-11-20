@@ -1,5 +1,6 @@
-"""Gateway middleware: rate limit → signature verify (accept-and-check) → logging."""
+"""Gateway middleware: rate limit, chaos injection, signature verify, logging."""
 
+import asyncio
 import logging
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
@@ -25,6 +26,22 @@ async def gateway_middleware(request: Request, call_next) -> Response:
         logger.warning("THROTTLED ak=%s", ak)
         status, body = state.limiter.error_response()
         return JSONResponse(body, status_code=status)
+
+    # --- Chaos fault injection (ROADMAP 1.2) ---
+    if getattr(state, "chaos", None) and state.chaos.rules:
+        # clear any stale flag from a request that submitted no job
+        state.chaos.consume_job_failure()
+        injection = state.chaos.maybe_inject(request.method, request.url.path)
+        if injection:
+            status, body, latency_ms = injection
+            logger.warning("CHAOS injected %s %s -> %s (rule %s)",
+                           request.method, request.url.path, status,
+                           body.get("chaos_rule_id"))
+            if latency_ms:
+                await asyncio.sleep(latency_ms / 1000)
+            return JSONResponse(body, status_code=status)
+        if request.method in ("POST", "PUT", "DELETE"):
+            state.chaos.maybe_mark_job_failure(request.method, request.url.path)
 
     # --- Signature verification (accept-and-check) ---
     body = b""

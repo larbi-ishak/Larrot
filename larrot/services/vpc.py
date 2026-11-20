@@ -98,10 +98,21 @@ async def show_vpc(request: Request, pid: str, vpc_id: str):
 async def create_vpc(request: Request, pid: str):
     state = request.app.state.sim
     body = await request.json()
+    spec = body.get("vpc") or {}
+    name = spec.get("name")
+    if not isinstance(name, str) or not name:
+        return JSONResponse(vpc_error("VPC.0004",
+            "Invalid VPC name: must be a non-empty string."), status_code=400)
+    cidr = spec.get("cidr", "192.168.0.0/16")
+    import re
+    if not isinstance(cidr, str) or not re.match(
+            r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}$", cidr):
+        return JSONResponse(vpc_error("VPC.0004",
+            "Invalid VPC CIDR format."), status_code=400)
     now = now_millis()
-    vpc = {"id": new_id(), "name": body["vpc"]["name"],
-           "description": body["vpc"].get("description", ""),
-           "cidr": body["vpc"].get("cidr", "192.168.0.0/16"),
+    vpc = {"id": new_id(), "name": name,
+           "description": spec.get("description", ""),
+           "cidr": cidr,
            "status": "OK", "created_at": now, "updated_at": now, "project_id": pid}
     state.vpcs[vpc["id"]] = vpc
     return {"vpc": _vpc_json(vpc)}
@@ -199,6 +210,9 @@ async def delete_subnet(request: Request, pid: str, subnet_id: str, vpc_id: str 
     s = state.subnets.get(subnet_id)
     if not s or s["project_id"] != pid:
         return JSONResponse(vpc_error("VPC.0201", "Subnet is not exist."), status_code=404)
+    if any(p.get("subnet_id") == subnet_id for p in state.ports.values()):
+        return JSONResponse(vpc_error("VPC.0203",
+            "Subnet has ports in it. Delete the ports first."), status_code=409)
     del state.subnets[subnet_id]
     return Response(status_code=204)
 
@@ -391,6 +405,13 @@ async def delete_sg(request: Request, pid: str, sg_id: str):
     g = state.security_groups.get(sg_id)
     if not g or g["project_id"] != pid:
         return JSONResponse(vpc_error("VPC.0603", "Security group does not exist."), status_code=404)
+    # Servers reference security groups by name (real cloud behavior)
+    in_use = any(
+        g["name"] in [x["name"] for x in srv.get("security_groups", [])]
+        for srv in state.servers.values() if srv["project_id"] == pid)
+    if in_use:
+        return JSONResponse(vpc_error("VPC.0604",
+            "Security group is in use. Remove it from the instances first."), status_code=409)
     del state.security_groups[sg_id]
     return Response(status_code=204)
 

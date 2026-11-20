@@ -50,14 +50,14 @@ async def create_token(request: Request):
     state = request.app.state.sim
     body = await request.json()
 
-    methods = body.get("auth", {}).get("identity", {}).get("methods", [])
+    methods = ((body.get("auth") or {}).get("identity") or {}).get("methods") or []
     if "password" not in methods:
         return JSONResponse(
             apigw_error("APIGW.0301", "Incorrect IAM authentication information: verify aksk signature fail"),
             status_code=401,
         )
 
-    scope = body.get("auth", {}).get("scope", {})
+    scope = ((body.get("auth") or {}).get("scope") or {})
     project_part = None
     if "project" in scope:
         proj = scope["project"]

@@ -39,6 +39,7 @@ class Job:
     error_code: str | None = None
     fail_reason: str | None = None
     effect: Callable | None = None  # internal: never serialized
+    chaos_fail: object = None  # internal: chaos rule that forces this job to FAIL
 
     def to_json(self) -> dict:
         return {
@@ -68,6 +69,11 @@ class JobEngine:
     ) -> str:
         """Submit a job. The effect returns None on success or (error_code, fail_reason)."""
         job_id = new_job_id()
+        # Chaos hook (ROADMAP 1.2): a job-mode rule marked during this request
+        # forces the submitted job to FAIL instead of running its effect.
+        chaos_fail = None
+        if getattr(self, "chaos", None):
+            chaos_fail = self.chaos.consume_job_failure()
         self.jobs[job_id] = Job(
             status="RUNNING",
             entities=entities,
@@ -75,6 +81,7 @@ class JobEngine:
             job_type=job_type,
             begin_time=now_millis(),
             effect=effect,
+            chaos_fail=chaos_fail,
         )
         asyncio.create_task(self._run(job_id))
         return job_id
@@ -85,6 +92,9 @@ class JobEngine:
         job = self.jobs.get(job_id)
         if job is None or job.status != "RUNNING":
             return  # already force-completed via complete_now()
+        if job.chaos_fail is not None:
+            self._apply_result(job, (job.chaos_fail.error_code, job.chaos_fail.error_msg))
+            return
         result = job.effect()
         if inspect.iscoroutine(result):
             result = await result
@@ -108,6 +118,9 @@ class JobEngine:
         job = self.jobs.get(job_id)
         if job is None or job.status != "RUNNING":
             return False
+        if job.chaos_fail is not None:
+            self._apply_result(job, (job.chaos_fail.error_code, job.chaos_fail.error_msg))
+            return True
         result = job.effect()
         if inspect.iscoroutine(result):
             result = asyncio.run(result)

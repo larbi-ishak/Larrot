@@ -1,7 +1,7 @@
 """FastAPI app factory: assembles all services with middleware."""
 
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from .core.state import SimState
 from .core.envelopes import apigw_error
@@ -36,6 +36,11 @@ def create_app() -> FastAPI:
     )
     state = SimState()
     app.state.sim = state
+
+    # Chaos engine (ROADMAP 1.2) + job engine hook
+    from .core.chaos import ChaosEngine
+    state.chaos = ChaosEngine()
+    state.jobs.chaos = state.chaos
 
     # Mount service routers
     app.include_router(iam.router)
@@ -170,6 +175,82 @@ def create_app() -> FastAPI:
             return JSONResponse({"error": "no saved state"}, status_code=404)
         load_state(state, path)
         return {"loaded": path}
+
+    # ------------------------------------------------------------------
+    # Chaos fault injection (ROADMAP 1.2)
+    # ------------------------------------------------------------------
+    @app.post("/admin/chaos", include_in_schema=False)
+    async def chaos_add(request: Request):
+        try:
+            spec = await request.json()
+            rule = state.chaos.add(spec)
+            return {"rule": rule}
+        except ValueError as e:
+            return JSONResponse({"error": str(e)}, status_code=400)
+
+    @app.get("/admin/chaos", include_in_schema=False)
+    async def chaos_list():
+        return {"rules": state.chaos.list()}
+
+    @app.delete("/admin/chaos/{rule_id}", include_in_schema=False)
+    async def chaos_delete(rule_id: str):
+        if not state.chaos.remove(rule_id):
+            return JSONResponse({"error": "rule not found"}, status_code=404)
+        return Response(status_code=204)
+
+    @app.post("/admin/chaos/reset", include_in_schema=False)
+    async def chaos_reset():
+        return {"removed": state.chaos.reset()}
+
+    # ------------------------------------------------------------------
+    # Resource explorer (ROADMAP 1.3)
+    # ------------------------------------------------------------------
+    @app.get("/admin/resources", include_in_schema=False)
+    async def resources(request: Request):
+        from .core import explorer
+        params = request.query_params
+        items = explorer.inventory(
+            state,
+            rid=params.get("id"),
+            rtype=params.get("type"),
+            project=params.get("project"),
+            name=params.get("name"),
+        )
+        return {"total": len(items), "resources": items}
+
+    @app.get("/admin/resources/{rid}", include_in_schema=False)
+    async def resource_show(rid: str):
+        from .core import explorer
+        hit = explorer.find(state, rid)
+        if not hit:
+            return JSONResponse({"error": "resource not found"}, status_code=404)
+        return hit
+
+    @app.get("/admin/graph/{rid}", include_in_schema=False)
+    async def resource_graph(rid: str):
+        from .core import explorer
+        g = explorer.graph(state, rid)
+        if not g:
+            return JSONResponse({"error": "resource not found"}, status_code=404)
+        return g
+
+    # ------------------------------------------------------------------
+    # Preset environments (ROADMAP 2.2)
+    # ------------------------------------------------------------------
+    @app.get("/admin/preset", include_in_schema=False)
+    async def preset_list():
+        from .core.presets import PRESETS
+        return {"presets": [{"name": k, "description": v["description"]}
+                            for k, v in PRESETS.items()]}
+
+    @app.post("/admin/preset/{name}", include_in_schema=False)
+    async def preset_deploy(name: str):
+        from .core.presets import PRESETS, deploy
+        if name not in PRESETS:
+            return JSONResponse({"error": f"unknown preset '{name}'",
+                                 "available": sorted(PRESETS)}, status_code=404)
+        result = deploy(state, name)
+        return {"deployed": name, **result}
 
     return app
 
