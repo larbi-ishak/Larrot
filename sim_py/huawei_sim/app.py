@@ -12,6 +12,7 @@ from .services import (
     iam, ecs, evs, vpc, ims, cbr, obs, rds, dns, kms, elb, sfs, cce, functiongraph,
     bms, as_, smn, ces, lts, dcs, dms, dds, waf, tms, eps, apig, swr, modelarts,
     iotda, gaussdb, aom, dli, antiddos, bss,
+    nat, peering, acl, routes, vpn,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -64,6 +65,11 @@ def create_app() -> FastAPI:
     app.include_router(dli.router)
     app.include_router(antiddos.router)
     app.include_router(bss.router)
+    app.include_router(nat.router)
+    app.include_router(peering.router)
+    app.include_router(acl.router)
+    app.include_router(routes.router)
+    app.include_router(vpn.router)
 
     # Middleware (outermost first: rate limit → signature → logging)
     app.middleware("http")(gateway_middleware)
@@ -86,7 +92,7 @@ def create_app() -> FastAPI:
     @app.get("/health", include_in_schema=False)
     async def health():
         return {"status": "ok", "version": "1.0.0",
-                "services": ["iam", "ecs", "evs", "vpc", "eip", "ims", "cbr", "rds", "dns", "kms", "elb", "sfs", "cce", "functiongraph", "bms", "as", "smn", "ces", "lts", "dcs", "dms", "dds", "waf", "tms", "eps", "apig", "swr", "modelarts", "iotda", "gaussdb", "aom", "dli", "antiddos", "bss", "obs"]}
+                "services": ["iam", "ecs", "evs", "vpc", "eip", "ims", "cbr", "rds", "dns", "kms", "elb", "sfs", "cce", "functiongraph", "bms", "as", "smn", "ces", "lts", "dcs", "dms", "dds", "waf", "tms", "eps", "apig", "swr", "modelarts", "iotda", "gaussdb", "aom", "dli", "antiddos", "bss", "nat", "peering", "acl", "routes", "vpn", "obs"]}
 
     # Metrics
     @app.get("/metrics", include_in_schema=False)
