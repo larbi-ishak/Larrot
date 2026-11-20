@@ -1,0 +1,14 @@
+services:
+  huawei-sim:
+    build:
+      context: ./sim_py
+      dockerfile: Dockerfile
+    ports:
+      - "8200:8200"   # REST (IAM, ECS, EVS, VPC, EIP, IMS, CBR, RDS)
+      - "8201:8201"   # OBS (object storage)
+    environment:
+      SIM_PROFILE: public
+      SIM_AK: HWYSIMAK00000001
+      SIM_SK: HWYSIMSK00000001
+      SIM_RATE_LIMIT: "100"
+      SIM_RATE_COOLDOWN_MS: "30000"

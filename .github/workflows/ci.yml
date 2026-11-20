@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          cd sim_py
+          pip install fastapi uvicorn pydantic pytest pytest-asyncio httpx ruff
+
+      - name: Lint
+        run: |
+          cd sim_py
+          ruff check huawei_sim/
+
+      - name: Unit + integration tests
+        run: |
+          cd sim_py
+          PYTHONPATH=. python -m pytest tests/ -v --tb=short
+
+      - name: Start server + smoke suite
+        run: |
+          cd sim_py
+          PYTHONPATH=. python -c "
+          import threading, uvicorn, time
+          from huawei_sim.app import create_app, create_obs_app
+          app = create_app()
+          obs_app = create_obs_app()
+          threading.Thread(target=lambda: uvicorn.run(app, host='127.0.0.1', port=8200, log_level='error'), daemon=True).start()
+          threading.Thread(target=lambda: uvicorn.run(obs_app, host='127.0.0.1', port=8201, log_level='error'), daemon=True).start()
+          time.sleep(2)
+          print('READY')
+          " &
+          sleep 4
+          python3 sim_py/tools/smoke.py
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t huawei-sim ./sim_py
+      - name: Smoke test in Docker
+        run: |
+          docker run -d -p 8200:8200 -p 8201:8201 huawei-sim
+          sleep 5
+          curl -s http://127.0.0.1:8200/v3/projects | grep -q "ap-southeast-1"
+          curl -s http://127.0.0.1:8201/ | grep -q "ListAllMyBucketsResult"
+          echo "Docker smoke test passed"

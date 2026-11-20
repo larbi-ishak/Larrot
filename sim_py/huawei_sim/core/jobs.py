@@ -1,0 +1,109 @@
+"""Async job engine — every mutating op returns job_id, completes after jittered delay."""
+
+import asyncio
+import random
+import uuid
+from dataclasses import dataclass, field
+from typing import Any, Callable, Coroutine
+
+
+def new_id() -> str:
+    """Hyphenated UUID v4 — resource IDs."""
+    return str(uuid.uuid4())
+
+
+def new_job_id() -> str:
+    """32-char hex — job IDs (real ones look like ff80808288d41e1b018990260955686a)."""
+    return uuid.uuid4().hex
+
+
+def new_request_id() -> str:
+    return uuid.uuid4().hex.upper()
+
+
+def now_millis() -> str:
+    """RFC 3339 with milliseconds, UTC."""
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+
+@dataclass
+class Job:
+    status: str = "RUNNING"  # RUNNING | SUCCESS | FAIL | INIT | PENDING_PAYMENT
+    entities: dict = field(default_factory=dict)
+    job_id: str = ""
+    job_type: str = ""
+    begin_time: str = ""
+    end_time: str | None = None
+    error_code: str | None = None
+    fail_reason: str | None = None
+
+    def to_json(self) -> dict:
+        return {
+            "status": self.status,
+            "entities": self.entities,
+            "job_id": self.job_id,
+            "job_type": self.job_type,
+            "begin_time": self.begin_time,
+            "end_time": self.end_time,
+            "error_code": self.error_code,
+            "fail_reason": self.fail_reason,
+        }
+
+
+class JobEngine:
+    """Shared async job engine — submit effects that mutate state after a delay."""
+
+    def __init__(self, delay_range: tuple[float, float] = (1.0, 3.0)):
+        self.jobs: dict[str, Job] = {}
+        self.delay_range = delay_range
+
+    async def submit(
+        self,
+        job_type: str,
+        entities: dict,
+        effect: Callable[[], Coroutine[Any, Any, tuple[str, str] | None]],
+    ) -> str:
+        """Submit a job. The effect returns None on success or (error_code, fail_reason)."""
+        job_id = new_job_id()
+        self.jobs[job_id] = Job(
+            status="RUNNING",
+            entities=entities,
+            job_id=job_id,
+            job_type=job_type,
+            begin_time=now_millis(),
+        )
+        asyncio.create_task(self._run(job_id, effect))
+        return job_id
+
+    async def _run(self, job_id: str, effect):
+        delay = random.uniform(*self.delay_range)
+        await asyncio.sleep(delay)
+        result = effect()
+        import inspect
+        if inspect.iscoroutine(result):
+            result = await result
+        job = self.jobs.get(job_id)
+        if job:
+            job.end_time = now_millis()
+            if result is None:
+                job.status = "SUCCESS"
+            else:
+                job.status = "FAIL"
+                job.error_code, job.fail_reason = result
+
+    def get(self, job_id: str) -> Job | None:
+        return self.jobs.get(job_id)
+
+    def patch(self, job_id: str, fn: Callable[[Job], None]):
+        job = self.jobs.get(job_id)
+        if job:
+            fn(job)
+
+
+def mark_sub_jobs_success(job: Job):
+    """Flip entities.sub_jobs[*] to SUCCESS — the real ShowJob behavior."""
+    subs = job.entities.get("sub_jobs", [])
+    for sj in subs:
+        sj["status"] = "SUCCESS"
+        sj["end_time"] = now_millis()
