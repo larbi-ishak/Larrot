@@ -4,6 +4,11 @@
 
 **Larrot repeats Huawei Cloud. Perfectly.**
 
+<p>
+  <img src="https://raw.githubusercontent.com/larbi-ishak/Larrot/main/docs/huawei-cloud-logo.png" alt="Huawei Cloud" width="280">
+</p>
+<sub>the cloud Larrot repeats</sub>
+
 *A local Huawei Cloud API simulator: like LocalStack, but for Huawei Cloud.*
 
 [![CI](https://github.com/larbi-ishak/Larrot/actions/workflows/ci.yml/badge.svg)](../../actions)
@@ -145,3 +150,10 @@ Apache 2.0: see [LICENSE](LICENSE)
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Trademark notice
+
+Huawei Cloud and the Huawei Cloud logo are trademarks of Huawei Technologies
+Co., Ltd. Larrot is an independent, community project and is not affiliated
+with, endorsed by, or sponsored by Huawei. The logo is used here only to
+identify the service whose APIs this project simulates.
