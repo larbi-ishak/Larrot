@@ -148,7 +148,7 @@ def dashboard_html(state) -> str:
 
 <div class="wrap">
   <div class="hero">
-    <h1>Larrot <span class="accent">repeats</span> Huawei Cloud</h1>
+    <h1>Larrot 🦜 <span class="accent">repeats</span> Huawei Cloud</h1>
     <p>59 services &middot; 720 documented operations &middot; running locally</p>
   </div>
 
@@ -168,7 +168,7 @@ def dashboard_html(state) -> str:
 </div>
 
 <footer>
-  Larrot &middot; repeats Huawei Cloud &middot;
+  Larrot 🦜 &middot; repeats Huawei Cloud &middot;
   <a href="/console">console</a> &middot;
   <a href="https://github.com/larbi-ishak/Larrot">GitHub</a> &middot; Apache 2.0 &middot;
   not affiliated with Huawei Technologies
