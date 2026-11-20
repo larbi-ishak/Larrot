@@ -40,8 +40,9 @@ async def subscribe(request: Request, pid: str, topic_urn: str):
             body = await request.json()
             sub = {"id": new_id(), "endpoint": body.get("endpoint", ""),
                    "protocol": body.get("protocol", "email"), "remark": body.get("remark", "")}
+            sub["subscription_urn"] = f"urn:smn:sim:{pid}:{sub['id']}"
             t["subscriptions"].append(sub)
-            return {"subscription_urn": f"urn:smn:sim:{pid}:{sub['id']}", "request_id": new_id()}
+            return {"subscription_urn": sub["subscription_urn"], "request_id": new_id()}
     return JSONResponse({"error_msg": "Topic not found", "error_code": "SMN.0001"}, status_code=404)
 
 @router.post("/v2/{pid}/notifications/topics/{topic_urn}/publish")
@@ -49,3 +50,46 @@ async def publish(request: Request, pid: str, topic_urn: str):
     body = await request.json()
     return {"message_id": new_id(), "request_id": new_id(),
             "subject": body.get("subject", ""), "message": body.get("message", "")}
+
+
+# ---------------------------------------------------------------------------
+# sub-APIs: subscription management + topic details
+# ---------------------------------------------------------------------------
+
+@router.get("/v2/{pid}/notifications/topics/{topic_urn}/subscriptions")
+async def list_subscriptions(request: Request, pid: str, topic_urn: str):
+    s = request.app.state.sim
+    t = next((x for x in getattr(s, "smn_topics", {}).values()
+              if x["topic_urn"] == topic_urn or x["name"] == topic_urn), None)
+    if not t or t["project_id"] != pid:
+        return JSONResponse({"error_code": "SMN.0001", "error_msg": "topic not found"},
+                            status_code=404)
+    return {"subscriptions": t.get("subscriptions", [])}
+
+
+@router.delete("/v2/{pid}/notifications/topics/{topic_urn}/subscriptions/{sub_urn}")
+async def delete_subscription(request: Request, pid: str, topic_urn: str, sub_urn: str):
+    s = request.app.state.sim
+    t = next((x for x in getattr(s, "smn_topics", {}).values()
+              if x["topic_urn"] == topic_urn or x["name"] == topic_urn), None)
+    if not t or t["project_id"] != pid:
+        return JSONResponse({"error_code": "SMN.0001", "error_msg": "topic not found"},
+                            status_code=404)
+    before = len(t.get("subscriptions", []))
+    t["subscriptions"] = [x for x in t.get("subscriptions", [])
+                          if x.get("subscription_urn") != sub_urn]
+    if len(t["subscriptions"]) == before:
+        return JSONResponse({"error_code": "SMN.0002",
+                             "error_msg": "subscription not found"}, status_code=404)
+    return Response(status_code=204)
+
+
+@router.get("/v2/{pid}/notifications/topics/{topic_urn}")
+async def show_topic(request: Request, pid: str, topic_urn: str):
+    s = request.app.state.sim
+    t = next((x for x in getattr(s, "smn_topics", {}).values()
+              if x["topic_urn"] == topic_urn or x["name"] == topic_urn), None)
+    if not t or t["project_id"] != pid:
+        return JSONResponse({"error_code": "SMN.0001", "error_msg": "topic not found"},
+                            status_code=404)
+    return t

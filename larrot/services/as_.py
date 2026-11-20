@@ -48,6 +48,7 @@ async def create_as_policy(request: Request, pid: str):
     s.as_policies[p_id] = {"id": p_id, "name": body.get("scaling_policy_name", f"policy-{p_id[:8]}"),
         "type": body.get("scaling_policy_type", "ALARM"),
         "scaling_group_id": body.get("scaling_group_id", ""),
+        "action": body.get("scaling_policy_action", {}) or body.get("action", {}),
         "created_at": now_millis(), "project_id": pid}
     return {"scaling_policy_id": p_id}
 
@@ -56,3 +57,33 @@ async def list_as_policies(request: Request, pid: str):
     s = request.app.state.sim
     policies = [p for p in getattr(s, "as_policies", {}).values() if p["project_id"] == pid]
     return {"total_number": len(policies), "scaling_policies": policies}
+
+
+# ---------------------------------------------------------------------------
+# sub-APIs: policy execution + group instances
+# ---------------------------------------------------------------------------
+
+@router.post("/v1/{pid}/scaling_policy/{policy_id}/execute")
+async def execute_policy(request: Request, pid: str, policy_id: str):
+    s = request.app.state.sim
+    pol = getattr(s, "as_policies", {}).get(policy_id)
+    if not pol or pol["project_id"] != pid:
+        return JSONResponse({"error_code": "AS.0001", "error_msg": "policy not found"},
+                            status_code=404)
+    group = getattr(s, "as_groups", {}).get(pol.get("scaling_group_id", ""))
+    if group:
+        group["desire_instance_number"] = max(0, group.get("desire_instance_number", 0) +
+                                              pol.get("action", {}).get("instance_num", 1))
+    return {"scaling_policy_id": policy_id, "executed": True}
+
+
+@router.get("/v1/{pid}/scaling_group/{group_id}/instances")
+async def list_group_instances(request: Request, pid: str, group_id: str):
+    s = request.app.state.sim
+    group = getattr(s, "as_groups", {}).get(group_id)
+    if not group or group["project_id"] != pid:
+        return JSONResponse({"error_code": "AS.0002", "error_msg": "group not found"},
+                            status_code=404)
+    return {"instances": [{"id": new_id(), "name": f"{group['name']}-i{n}",
+                             "status": "INSERVICE"}
+                           for n in range(group.get("desire_instance_number", 0))]}

@@ -45,3 +45,74 @@ async def list_waf_policies(request: Request, pid: str):
     s = request.app.state.sim
     policies = [p for p in getattr(s, "waf_policies", {}).values() if p["project_id"] == pid]
     return {"total": len(policies), "items": policies}
+
+
+# ---------------------------------------------------------------------------
+# sub-APIs: host/policy details, policy binding, rules
+# ---------------------------------------------------------------------------
+
+@router.get("/v1/{pid}/waf/hosts/{domain_id}")
+async def show_waf_host(request: Request, pid: str, domain_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "waf_domains", {}).get(domain_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "WAF.0001", "error_msg": "domain not found"},
+                            status_code=404)
+    return d
+
+
+@router.get("/v1/{pid}/waf/policies/{policy_id}")
+async def show_waf_policy(request: Request, pid: str, policy_id: str):
+    s = request.app.state.sim
+    p = getattr(s, "waf_policies", {}).get(policy_id)
+    if not p or p["project_id"] != pid:
+        return JSONResponse({"error_code": "WAF.0002", "error_msg": "policy not found"},
+                            status_code=404)
+    return p
+
+
+@router.put("/v1/{pid}/waf/hosts/{domain_id}")
+async def bind_waf_policy(request: Request, pid: str, domain_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "waf_domains", {}).get(domain_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "WAF.0001", "error_msg": "domain not found"},
+                            status_code=404)
+    body = await request.json()
+    pol_id = body.get("policy_id", "")
+    if pol_id and pol_id not in getattr(s, "waf_policies", {}):
+        return JSONResponse({"error_code": "WAF.0002", "error_msg": "policy not found"},
+                            status_code=404)
+    d["policy_id"] = pol_id
+    return d
+
+
+@router.post("/v1/{pid}/waf/policies/{policy_id}/rules")
+async def create_waf_rule(request: Request, pid: str, policy_id: str):
+    s = request.app.state.sim
+    p = getattr(s, "waf_policies", {}).get(policy_id)
+    if not p or p["project_id"] != pid:
+        return JSONResponse({"error_code": "WAF.0002", "error_msg": "policy not found"},
+                            status_code=404)
+    if not hasattr(s, "waf_rules"):
+        s.waf_rules = {}
+    body = await request.json()
+    rid = new_id()
+    s.waf_rules[rid] = {"id": rid, "policy_id": policy_id,
+                          "type": body.get("type", "white_ip"),
+                          "conditions": body.get("conditions", []),
+                          "status": 1, "project_id": pid, "created_at": now_millis()}
+    p.setdefault("rules", []).append(rid)
+    return s.waf_rules[rid]
+
+
+@router.get("/v1/{pid}/waf/policies/{policy_id}/rules")
+async def list_waf_rules(request: Request, pid: str, policy_id: str):
+    s = request.app.state.sim
+    p = getattr(s, "waf_policies", {}).get(policy_id)
+    if not p or p["project_id"] != pid:
+        return JSONResponse({"error_code": "WAF.0002", "error_msg": "policy not found"},
+                            status_code=404)
+    rules = [r for r in getattr(s, "waf_rules", {}).values()
+             if r["project_id"] == pid and r["policy_id"] == policy_id]
+    return {"rules": rules, "total": len(rules)}

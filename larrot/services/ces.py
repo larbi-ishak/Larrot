@@ -1,5 +1,6 @@
 """CES: Cloud Eye Service: metrics, alarms."""
 from fastapi import APIRouter, Request, Response
+from fastapi.responses import JSONResponse
 from ..core.jobs import new_id, now_millis
 router = APIRouter()
 
@@ -47,3 +48,30 @@ async def list_metrics(request: Request, pid: str):
         {"namespace": "SYS.EVS", "metric_name": "disk_util", "unit": "%"},
         {"namespace": "SYS.RDS", "metric_name": "rds_cpu_util", "unit": "%"},
     ]}
+
+
+# ---------------------------------------------------------------------------
+# sub-APIs: alarm history + metric datapoints
+# ---------------------------------------------------------------------------
+
+@router.get("/v1/{pid}/alarms/{alarm_id}/history")
+async def alarm_history(request: Request, pid: str, alarm_id: str):
+    s = request.app.state.sim
+    a = getattr(s, "ces_alarms", {}).get(alarm_id)
+    if not a or a["project_id"] != pid:
+        return JSONResponse({"error_code": "CES.0001", "error_msg": "alarm not found"},
+                            status_code=404)
+    return {"history": [{"alarm_id": alarm_id, "status": "alarm",
+                          "timestamp": now_millis(), "level": 2}]}
+
+
+@router.post("/v1.0/{pid}/batch-query/metric-data")
+async def batch_metric_data(request: Request, pid: str):
+    body = await request.json()
+    out = []
+    for m in body.get("metrics", []):
+        dims = m.get("dim_0", "")
+        out.append({"metric": m.get("metric_name", ""),
+                     "data_points": [{"timestamp": now_millis(), "value": 42.0}],
+                     "dim_0": dims})
+    return {"metric_data_results": out}
