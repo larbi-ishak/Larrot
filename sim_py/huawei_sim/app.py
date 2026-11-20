@@ -8,7 +8,11 @@ from .core.envelopes import apigw_error
 from .persistence import save_state, load_state
 from .dashboard import dashboard_html
 from .middleware import gateway_middleware
-from .services import iam, ecs, evs, vpc, ims, cbr, obs, rds, dns, kms, elb, sfs, cce, functiongraph
+from .services import (
+    iam, ecs, evs, vpc, ims, cbr, obs, rds, dns, kms, elb, sfs, cce, functiongraph,
+    bms, as_, smn, ces, lts, dcs, dms, dds, waf, tms, eps, apig, swr, modelarts,
+    iotda, gaussdb, aom, dli, antiddos, bss,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("huawei_sim")
@@ -40,6 +44,26 @@ def create_app() -> FastAPI:
     app.include_router(sfs.router)
     app.include_router(cce.router)
     app.include_router(functiongraph.router)
+    app.include_router(bms.router)
+    app.include_router(as_.router)
+    app.include_router(smn.router)
+    app.include_router(ces.router)
+    app.include_router(lts.router)
+    app.include_router(dcs.router)
+    app.include_router(dms.router)
+    app.include_router(dds.router)
+    app.include_router(waf.router)
+    app.include_router(tms.router)
+    app.include_router(eps.router)
+    app.include_router(apig.router)
+    app.include_router(swr.router)
+    app.include_router(modelarts.router)
+    app.include_router(iotda.router)
+    app.include_router(gaussdb.router)
+    app.include_router(aom.router)
+    app.include_router(dli.router)
+    app.include_router(antiddos.router)
+    app.include_router(bss.router)
 
     # Middleware (outermost first: rate limit → signature → logging)
     app.middleware("http")(gateway_middleware)
@@ -62,7 +86,7 @@ def create_app() -> FastAPI:
     @app.get("/health", include_in_schema=False)
     async def health():
         return {"status": "ok", "version": "1.0.0",
-                "services": ["iam", "ecs", "evs", "vpc", "eip", "ims", "cbr", "rds", "dns", "kms", "elb", "sfs", "cce", "functiongraph", "obs"]}
+                "services": ["iam", "ecs", "evs", "vpc", "eip", "ims", "cbr", "rds", "dns", "kms", "elb", "sfs", "cce", "functiongraph", "bms", "as", "smn", "ces", "lts", "dcs", "dms", "dds", "waf", "tms", "eps", "apig", "swr", "modelarts", "iotda", "gaussdb", "aom", "dli", "antiddos", "bss", "obs"]}
 
     # Metrics
     @app.get("/metrics", include_in_schema=False)
