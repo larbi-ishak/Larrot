@@ -1,4 +1,4 @@
-"""Unit tests for huawei-sim core modules."""
+"""Unit tests for larrot core modules."""
 import hashlib
 import hmac
 import time

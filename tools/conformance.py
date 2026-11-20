@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""huawei-sim conformance suite: tests EVERY endpoint across ALL services.
+"""larrot conformance suite: tests EVERY endpoint across ALL services.
 
 Validates:
   1. HTTP status codes against expectations

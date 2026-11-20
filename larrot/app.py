@@ -175,7 +175,7 @@ def create_app() -> FastAPI:
 
     # Persistence
     import os
-    persist_dir = os.environ.get("SIM_PERSIST_DIR", "/tmp/huawei-sim")
+    persist_dir = os.environ.get("SIM_PERSIST_DIR", "/tmp/larrot")
 
     @app.post("/admin/save", include_in_schema=False)
     async def save():
@@ -310,7 +310,7 @@ def _dashboard_html(state) -> str:
         for p in state.projects
     )
     return f"""<!DOCTYPE html>
-<html><head><title>huawei-sim dashboard</title>
+<html><head><title>larrot dashboard</title>
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
 body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;padding:2rem}}
@@ -328,7 +328,7 @@ th{{color:#58a6ff;font-weight:600}}
 .yellow{{background:#3a311a;color:#d29922}}
 a{{color:#58a6ff;text-decoration:none}}
 </style></head><body>
-<h1>huawei-sim</h1>
+<h1>larrot</h1>
 <p class="sub">Local Huawei Cloud API simulator · <a href="/docs">API Docs</a> · OBS on :8201</p>
 <div class="grid">{cards}</div>
 <h2>Projects</h2>

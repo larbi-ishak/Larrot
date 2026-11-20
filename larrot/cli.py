@@ -338,7 +338,7 @@ def _dispatch(c, args):
                    for e in r["publicips"]], "EIPs")
         elif args.action == "allocate":
             body = {"publicip": {"type": "5_bgp"},
-                    "bandwidth": {"name": "hcli-bw", "size": args.size, "share_type": "PER",
+                    "bandwidth": {"name": "larrot-bw", "size": args.size, "share_type": "PER",
                                   "charge_mode": "traffic"}}
             r = c.post(f"/v1/{pid}/publicips", body)
             print(f"Allocated: {r['publicip']['public_ip_address']}")
@@ -394,7 +394,7 @@ def _dispatch(c, args):
             print(f"Bound {args.server} to vault {args.vault}")
         elif args.action == "backup":
             body = {"checkpoint": {"resources": [{"id": args.server, "type": "OS::Nova::Server"}],
-                                    "name": "hcli-backup"}}
+                                    "name": "larrot-backup"}}
             r = c.post(f"/v3/{pid}/checkpoints", body)
             print(f"Checkpoint: {r['checkpoint']['id']} ({r['checkpoint']['status']})")
         elif args.action == "backups":

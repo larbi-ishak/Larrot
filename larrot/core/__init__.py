@@ -1,1 +1,1 @@
-"""Core modules for huawei-sim."""
+"""Core modules for larrot."""

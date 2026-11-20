@@ -66,7 +66,7 @@ def dashboard_html(state) -> str:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="refresh" content="5">
-<title>huawei-sim dashboard</title>
+<title>larrot dashboard</title>
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
 body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
@@ -94,7 +94,7 @@ td{{padding:0.5rem 0.8rem;border-bottom:1px solid #21262d;font-size:0.85rem}}
 .footer{{margin-top:2rem;padding-top:1rem;border-top:1px solid #21262d;color:#484f58;font-size:0.75rem}}
 </style>
 </head><body>
-<h1>⚡ huawei-sim</h1>
+<h1>⚡ larrot</h1>
 <p class="sub">Local Huawei Cloud API simulator ·
 <a href="/docs">API Docs</a> ·
 <a href="/health">Health</a> ·

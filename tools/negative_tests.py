@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""huawei-sim NEGATIVE testing suite: tests EVERY service with wrong requests.
+"""larrot NEGATIVE testing suite: tests EVERY service with wrong requests.
 
 For each service, tests:
   1. Missing required fields → 400

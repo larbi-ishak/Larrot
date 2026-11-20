@@ -133,7 +133,7 @@ def verify_sdk_hmac_sha256(
 
 
 # ---------------------------------------------------------------------------
-# SDK-HMAC-SHA256: client-side signing (for hcli)
+# SDK-HMAC-SHA256: client-side signing (for the larrot CLI)
 # ---------------------------------------------------------------------------
 
 def sign_sdk_request(

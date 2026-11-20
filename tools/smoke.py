@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""huawei-sim smoke suite: tests every service with signed requests."""
+"""larrot smoke suite: tests every service with signed requests."""
 import hashlib
 import hmac
 import json

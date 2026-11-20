@@ -130,7 +130,7 @@ async def get_console_log(request: Request, pid: str, server_id: str):
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
         return JSONResponse({"error": {"code": "Ecs.0114", "message": "The ECS does not exist"}}, status_code=404)
-    log = f"""[    0.000000] Linux version 5.10.0 (sim@huawei-sim)
+    log = f"""[    0.000000] Linux version 5.10.0 (sim@larrot)
 [    0.000000] Command line: BOOT_IMAGE=/vmlinuz root=/dev/vda1
 [    0.100000] BIOS-provided physical RAM map
 [    0.500000] Memory: {server["flavor"]["ram"]}K available

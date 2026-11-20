@@ -9,7 +9,7 @@ import uvicorn
 
 
 def main():
-    """Run huawei-sim: REST on :8200, OBS on :8201."""
+    """Run larrot: REST on :8200, OBS on :8201."""
     port = int(os.environ.get("SIM_PORT", "8200"))
     obs_port = int(os.environ.get("SIM_OBS_PORT", "8201"))
     host = os.environ.get("SIM_HOST", "127.0.0.1")

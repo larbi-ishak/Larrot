@@ -305,7 +305,7 @@ async def maas_chat_completions(request: Request):
             status_code=400)
     prompt = messages[-1].get("content", "") if messages else ""
     reply = (f"[sim:{model}] You said: {prompt}. This is a deterministic "
-             f"simulated completion from huawei-sim MaaS.")
+             f"simulated completion from larrot MaaS.")
     prompt_tokens = sum(len(str(m.get("content", ""))) for m in messages) // 4 + 1
     completion_tokens = len(reply) // 4 + 1
     return {

@@ -14,7 +14,7 @@ async def create_keypair(request: Request, pid: str):
     body = await request.json()
     kp_name = body.get("keypair", {}).get("name", f"key-{new_id()[:8]}")
     # Generate a fake SSH public key
-    fake_pub = f"ssh-rsa {base64.b64encode(hashlib.sha256(kp_name.encode()).digest()).decode()} sim@huawei-sim"
+    fake_pub = f"ssh-rsa {base64.b64encode(hashlib.sha256(kp_name.encode()).digest()).decode()} sim@larrot"
     kp_id = new_id()
     s.ecs_keypairs[kp_name] = {
         "name": kp_name, "public_key": fake_pub,
