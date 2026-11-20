@@ -1,7 +1,7 @@
 # EMPIRICAL SPEC: Real Huawei Cloud Behaviors (source material for the simulator)
 
-Every item below was **observed first-hand** during the cloud-explorer / HyperDR / EVS-experiments
-tr-west-1, ap-southeast-1). This file is the simulator's
+Every item below was **observed first-hand** against real Huawei Cloud deployments
+(regions tr-west-1, ap-southeast-1). This file is the simulator's
 source of truth for "how the real thing actually behaves": including where it CONTRADICTS the
 official docs. Append-only: new findings get added, never silently edited.
 
@@ -9,6 +9,7 @@ Scope note (2026-11-19): v1 targets the **unified international-site core only**
 (`*.myhuaweicloud.com`). Sovereign-plane / alternate-domain findings are out of scope for v1
 and will be revisited in a future phase.
 
+Sources: first-hand API captures and SDK replays from real deployments.
 
 ---
 

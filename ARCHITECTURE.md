@@ -5,7 +5,7 @@
 How the simulator is built, how a request flows through it, and where every piece
 lives in the code. Companion docs: `docs/EMPIRICAL_SPEC.md` (what the real cloud does),
 `API_DOCS_RESEARCH.md` (what the official docs say), `DECISIONS.md` (why it's built
-this way), `docs/DEVLOG.md` (the build journal).
+this way), `ROADMAP.md` (the build journal).
 
 ---
 

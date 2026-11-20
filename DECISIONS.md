@@ -5,14 +5,14 @@
 
 Every design decision made while building the simulator, why it was made, where it
 lives in the code, and how confident we are in it. This is the readable companion
-to `DEVLOG.md` (the raw, chronological journal): same numbering, organized by theme.
+organized by theme.
 
 ---
 
 ## How the decision log works
 
 - **Numbering**: `D<n>` assigned in the order decisions were made, never reused.
-  Cross-referenced from code comments, `DEVLOG.md` steps (`S<n>`), and the plan.
+  Cross-referenced from code comments and the roadmap.
 - **Status** of each decision is one of:
   - **settled**: safe to rely on; backed by docs or observation.
   - **reversible**: a default chosen for convenience; cheap to change (config-level).

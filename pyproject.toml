@@ -53,3 +53,6 @@ select = ["E", "F", "I", "W", "UP"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.hatch.build.targets.sdist]
+include = ["larrot", "README.md", "LICENSE"]
