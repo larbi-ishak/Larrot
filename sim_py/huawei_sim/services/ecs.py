@@ -194,6 +194,23 @@ async def list_flavors(request: Request, pid: str):
     return {"flavors": flavors}
 
 
+@router.get("/v1/{pid}/cloudservers/limits")
+async def get_quotas(request: Request, pid: str):
+    state = request.app.state.sim
+    server_count = len([x for x in state.servers.values() if x["project_id"] == pid])
+    return {
+        "absolute": {
+            "maxTotalInstances": 100, "totalInstancesUsed": server_count,
+            "maxTotalCores": 400, "totalCoresUsed": server_count * 2,
+            "maxTotalRAMSize": 819200, "totalRAMUsed": server_count * 4096,
+            "maxTotalVolumeGigabytes": 32768, "totalVolumeGigabytesUsed": server_count * 40,
+            "maxServerGroups": 10, "totalServerGroupsUsed": 0,
+            "maxSecurityGroups": 100, "totalSecurityGroupsUsed": len(state.security_groups),
+            "maxFloatingIps": 50, "totalFloatingIpsUsed": len(state.eips),
+        }
+    }
+
+
 @router.get("/v1/{pid}/cloudservers/{server_id}")
 async def show_server(request: Request, pid: str, server_id: str):
     state = request.app.state.sim
