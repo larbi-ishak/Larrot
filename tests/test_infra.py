@@ -187,9 +187,21 @@ class TestInfraEndpoints:
     def test_openapi_docs(self, client):
         r = client.get("/docs")
         assert r.status_code == 200
+        assert "/docs/swagger" in r.text  # branded wrapper embeds Swagger UI
+        r = client.get("/docs/swagger")
+        assert r.status_code == 200
+        assert "swagger-ui" in r.text.lower()
         r = client.get("/openapi.json")
         assert r.status_code == 200
         assert len(r.json()["paths"]) > 50  # 50 services wired
+
+    def test_unified_navbar(self, client):
+        """Dashboard, console, and API docs share the same navbar + theme."""
+        for path in ("/", "/console", "/docs"):
+            r = client.get(path)
+            assert r.status_code == 200
+            assert "topbar" in r.text, f"navbar missing on {path}"
+            assert "data:image/png" in r.text, f"logo missing on {path}"
 
 
 class TestPersistence:

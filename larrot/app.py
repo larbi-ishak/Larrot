@@ -92,7 +92,8 @@ def create_app() -> FastAPI:
         title="Larrot",
         description="Larrot repeats Huawei Cloud. A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud",
         version="1.0.0",
-        docs_url="/docs",
+        # Custom branded docs: /docs wraps /docs/swagger with the shared navbar
+        docs_url=None,
         redoc_url="/redoc",
     )
     state = SimState()
@@ -196,15 +197,12 @@ def create_app() -> FastAPI:
         )
 
     # Web dashboard + console
-    from fastapi.responses import HTMLResponse
+    from fastapi.responses import FileResponse, HTMLResponse
 
     from .console import console_html
 
-    from fastapi.responses import FileResponse
-
     @app.get("/favicon.ico", include_in_schema=False)
     async def favicon():
-        from fastapi.responses import FileResponse
         import os
         logo = os.path.join(os.path.dirname(__file__), "static", "logo-64.png")
         return FileResponse(logo, media_type="image/png")
@@ -216,6 +214,24 @@ def create_app() -> FastAPI:
     @app.get("/console", include_in_schema=False, response_class=HTMLResponse)
     async def console():
         return HTMLResponse(console_html(state))
+
+    # Branded API docs: navbar wrapper + raw Swagger UI (served separately
+    # so the wrapper page can embed it in an iframe)
+    from .ui import api_docs_html
+
+    @app.get("/docs", include_in_schema=False, response_class=HTMLResponse)
+    async def api_docs():
+        return HTMLResponse(api_docs_html())
+
+    @app.get("/docs/swagger", include_in_schema=False)
+    async def docs_swagger():
+        from fastapi.openapi.docs import get_swagger_ui_html
+        return get_swagger_ui_html(
+            openapi_url=app.openapi_url,
+            title=app.title + " API",
+            # 445+ paths: collapse the 66 service tags by default
+            swagger_ui_parameters={"docExpansion": "none"},
+        )
 
     # Health check
     @app.get("/health", include_in_schema=False)
