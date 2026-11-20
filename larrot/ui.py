@@ -41,7 +41,10 @@ def navbar(active: str = "") -> str:
 <header class="topbar">
   <div class="logo">
     <img src="{LOGO}" alt="Larrot">
-    <span class="name">Larrot</span>
+    <div>
+      <span class="name">Larrot</span>
+      <div class="sub">local Huawei Cloud</div>
+    </div>
   </div>
   <span class="spacer"></span>
   <span class="region">ap-southeast-1</span>
@@ -84,13 +87,6 @@ def sidebar(active_svc: str = "") -> str:
         tree += f'<div class="nav-group"><div class="nav-cat">{cat}</div>{items}</div>'
     return f"""
 <aside class="sidebar">
-  <div class="sidebar-header">
-    <img src="{LOGO}" alt="Larrot">
-    <div>
-      <div class="name">Larrot</div>
-      <div class="sub">local Huawei Cloud</div>
-    </div>
-  </div>
   <nav class="sidebar-nav">{tree}</nav>
   <div class="sidebar-footer">
     <a href="/">Dashboard</a> &middot;
@@ -123,9 +119,11 @@ SHARED_CSS = """
             gap: 12px; position: sticky; top: 0; z-index: 50; }
   .topbar .logo { display: flex; align-items: center; gap: 8px; }
   .topbar .logo img { width: 28px; height: 28px; }
-  .topbar .logo .name { font-size: 16px; font-weight: 700;
+  .topbar .logo .name { font-size: 15px; font-weight: 700; line-height: 1.1;
                           background: linear-gradient(135deg, #ff4757, #e60012);
                           -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .topbar .logo .sub { font-size: 9px; color: var(--text-faint); line-height: 1.2;
+                        letter-spacing: .3px; }
   .topbar .spacer { flex: 1; }
   .topbar .region { background: var(--accent-bg); color: var(--accent);
                     padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
@@ -139,12 +137,7 @@ SHARED_CSS = """
   .sidebar { width: 230px; background: var(--sidebar-bg); color: var(--sidebar-text);
               display: flex; flex-direction: column; position: fixed; top: 48px; bottom: 0;
               left: 0; overflow-y: auto; z-index: 100; }
-  .sidebar-header { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.08);
-                     display: flex; align-items: center; gap: 10px; }
-  .sidebar-header img { width: 30px; height: 30px; }
-  .sidebar-header .name { color: #fff; font-size: 16px; font-weight: 700; }
-  .sidebar-header .sub { font-size: 10px; color: var(--sidebar-text); }
-  .sidebar-nav { padding: 6px 0; flex: 1; }
+  .sidebar-nav { padding: 10px 0 6px; flex: 1; }
   .nav-group { margin-bottom: 2px; }
   .nav-cat { padding: 10px 16px 3px; font-size: 10px; text-transform: uppercase;
               letter-spacing: 1px; color: var(--text-faint); font-weight: 600; }

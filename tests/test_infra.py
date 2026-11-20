@@ -202,6 +202,11 @@ class TestInfraEndpoints:
             assert r.status_code == 200
             assert "topbar" in r.text, f"navbar missing on {path}"
             assert "data:image/png" in r.text, f"logo missing on {path}"
+            assert "local Huawei Cloud" in r.text, f"tagline missing on {path}"
+        # Branding lives in the navbar only - no duplicate sidebar header
+        console = client.get("/console").text
+        assert "sidebar-header" not in console
+        assert console.count("local Huawei Cloud") == 1
 
 
 class TestPersistence:
