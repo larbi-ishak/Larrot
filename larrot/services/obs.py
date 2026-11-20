@@ -99,13 +99,15 @@ async def _bucket_handler(state, request, bucket, method, query):
             body_bytes = await request.body()
             b["versioning"] = b"Enabled" in body_bytes
             return PlainTextResponse("", status_code=200)
-        if any(k in query for k in ("acl", "tagging", "policy", "cors", "lifecycle")):
+        if any(k in query for k in ("acl", "tagging", "policy", "cors", "lifecycle",
+                                     "website", "encryption")):
             b = state.obs_buckets.get(bucket)
             if not b:
                 return _error("NoSuchBucket", "The specified bucket does not exist",
                               extra={"BucketName": bucket}, status=404)
             body_bytes = await request.body()
-            key = next(k for k in ("acl", "tagging", "policy", "cors", "lifecycle")
+            key = next(k for k in ("acl", "tagging", "policy", "cors", "lifecycle",
+                                    "website", "encryption")
                        if k in query)
             b[key] = body_bytes.decode(errors="replace")[:2048]
             return PlainTextResponse("", status_code=200)
@@ -148,6 +150,14 @@ async def _bucket_handler(state, request, bucket, method, query):
                      '<Code>NoSuchKey</Code></Error>\n')
         body += '</DeleteResult>'
         return PlainTextResponse(body, media_type="application/xml")
+
+    if method == "DELETE" and "tagging" in query:
+        b = state.obs_buckets.get(bucket)
+        if not b:
+            return _error("NoSuchBucket", "The specified bucket does not exist",
+                          extra={"BucketName": bucket}, status=404)
+        b.pop("tagging", None)
+        return PlainTextResponse("", status_code=204)
 
     if method == "DELETE":
         has_objects = any(k.startswith(f"{bucket}/") for k in state.obs_objects)
@@ -214,6 +224,34 @@ async def _bucket_handler(state, request, bucket, method, query):
                     '<LifecycleConfiguration '
                     'xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
                     + (stored if stored else "") + '</LifecycleConfiguration>')
+            return PlainTextResponse(body, media_type="application/xml")
+        if "website" in query:
+            if not b:
+                return _error("NoSuchBucket", "The specified bucket does not exist",
+                              extra={"BucketName": bucket}, status=404)
+            stored = b.get("website", "")
+            if not stored:
+                return _error("NoSuchWebsiteConfiguration",
+                              "The specified bucket does not have a website configuration",
+                              extra={"BucketName": bucket}, status=404)
+            body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                    '<WebsiteConfiguration '
+                    'xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
+                    + stored + '</WebsiteConfiguration>')
+            return PlainTextResponse(body, media_type="application/xml")
+        if "encryption" in query:
+            if not b:
+                return _error("NoSuchBucket", "The specified bucket does not exist",
+                              extra={"BucketName": bucket}, status=404)
+            stored = b.get("encryption", "")
+            if not stored:
+                return _error("NoSuchEncryptionConfiguration",
+                              "The specified bucket does not have an encryption configuration",
+                              extra={"BucketName": bucket}, status=404)
+            body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+                    '<GetBucketEncryptionResult '
+                    'xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
+                    + stored + '</GetBucketEncryptionResult>')
             return PlainTextResponse(body, media_type="application/xml")
         if "versions" in query:
             if not b:
@@ -329,6 +367,14 @@ async def _object_handler(state, request, bucket, key, method, query):
     store_key = f"{bucket}/{key}"
 
     if method == "PUT":
+        if "acl" in query:
+            if store_key not in state.obs_objects:
+                return _error("NoSuchKey", "The resource you requested does not exist",
+                              extra={"Key": key})
+            data = await request.body()
+            obj = state.obs_objects[store_key]
+            obj["acl"] = data.decode(errors="replace")[:512]
+            return PlainTextResponse("", status_code=200)
         if "partNumber" in query and "uploadId" in query:
             return await _upload_part(state, request, bucket, key, query)
         copy_source = request.headers.get("x-obs-copy-source", "")
@@ -381,9 +427,13 @@ async def _object_handler(state, request, bucket, key, method, query):
         if "uploadId" in query:
             return _list_parts(state, bucket, key, query)
         if "acl" in query:
-            if store_key not in state.obs_objects:
+            obj = state.obs_objects.get(store_key)
+            if not obj:
                 return _error("NoSuchKey", "The resource you requested does not exist",
                               extra={"Key": key})
+            stored = obj.get("acl", "")
+            if stored:
+                return PlainTextResponse(stored, media_type="application/xml")
             body = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
                     '<AccessControlPolicy xmlns="http://obs.myhuaweicloud.com/doc/2015-06-30/">'
                     '<Owner><ID>' + state.account["domain_id"] + '</ID></Owner>'
@@ -445,6 +495,13 @@ async def _object_handler(state, request, bucket, key, method, query):
             return _initiate_upload(state, bucket, key)
         if "uploadId" in query:
             return await _complete_upload(state, request, bucket, key, query)
+        if "restore" in query:
+            obj = state.obs_objects.get(store_key)
+            if not obj:
+                return _error("NoSuchKey", "The resource you requested does not exist",
+                              extra={"Key": key})
+            obj["restore"] = {"ongoing": False, "expiry": now_millis()}
+            return PlainTextResponse("", status_code=202)
 
     return _error("MethodNotAllowed", "The specified method is not allowed against this resource.", status=405)
 

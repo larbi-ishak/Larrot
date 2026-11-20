@@ -484,3 +484,101 @@ async def revoke_token(request: Request):
         return JSONResponse(apigw_error("IAM.0010", "X-Subject-Token is required"),
                             status_code=401)
     return Response(status_code=204)
+
+
+# ---------------------------------------------------------------------------
+# federation mappings and protocols (tier-6)
+# ---------------------------------------------------------------------------
+
+@router.put("/v3.0/OS-FEDERATION/mappings")
+async def create_mapping(request: Request):
+    state = request.app.state.sim
+    if not hasattr(state, "iam_mappings"):
+        state.iam_mappings = {}
+    body = await request.json()
+    mid = body.get("id", "")
+    if not mid:
+        return JSONResponse(apigw_error("IAM.0001", "id is required"), status_code=400)
+    if mid in state.iam_mappings:
+        return JSONResponse(apigw_error("IAM.0011", "mapping already exists"), status_code=409)
+    state.iam_mappings[mid] = {
+        "id": mid, "rules": body.get("rules", []),
+        "links": {"self": f"/v3.0/OS-FEDERATION/mappings/{mid}"},
+    }
+    return JSONResponse({"mapping": state.iam_mappings[mid]}, status_code=201)
+
+
+@router.get("/v3.0/OS-FEDERATION/mappings")
+async def list_mappings(request: Request):
+    state = request.app.state.sim
+    return {"mappings": list(getattr(state, "iam_mappings", {}).values())}
+
+
+@router.get("/v3.0/OS-FEDERATION/mappings/{mapping_id}")
+async def show_mapping(request: Request, mapping_id: str):
+    state = request.app.state.sim
+    m = getattr(state, "iam_mappings", {}).get(mapping_id)
+    if not m:
+        return JSONResponse(apigw_error("IAM.0012", "mapping not found"), status_code=404)
+    return {"mapping": m}
+
+
+@router.delete("/v3.0/OS-FEDERATION/mappings/{mapping_id}")
+async def delete_mapping(request: Request, mapping_id: str):
+    state = request.app.state.sim
+    if mapping_id not in getattr(state, "iam_mappings", {}):
+        return JSONResponse(apigw_error("IAM.0012", "mapping not found"), status_code=404)
+    del state.iam_mappings[mapping_id]
+    return Response(status_code=204)
+
+
+@router.put("/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}")
+async def create_protocol(request: Request, provider_id: str, protocol_id: str):
+    state = request.app.state.sim
+    idp = getattr(state, "iam_idps", {}).get(provider_id)
+    if not idp:
+        return JSONResponse(apigw_error("IAM.0009", "identity provider not found"),
+                            status_code=404)
+    if not hasattr(state, "iam_protocols"):
+        state.iam_protocols = {}
+    key = f"{provider_id}/{protocol_id}"
+    if key in state.iam_protocols:
+        return JSONResponse(apigw_error("IAM.0013", "protocol already exists"), status_code=409)
+    body = await request.json()
+    state.iam_protocols[key] = {
+        "id": protocol_id, "provider_id": provider_id,
+        "mapping_id": body.get("mapping_id", ""),
+        "links": {"self": f"/v3.0/OS-FEDERATION/identity_providers/"
+                           f"{provider_id}/protocols/{protocol_id}"},
+    }
+    return JSONResponse({"protocol": state.iam_protocols[key]}, status_code=201)
+
+
+@router.get("/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols")
+async def list_protocols(request: Request, provider_id: str):
+    state = request.app.state.sim
+    if provider_id not in getattr(state, "iam_idps", {}):
+        return JSONResponse(apigw_error("IAM.0009", "identity provider not found"),
+                            status_code=404)
+    protos = [p for p in getattr(state, "iam_protocols", {}).values()
+              if p["provider_id"] == provider_id]
+    return {"protocols": protos}
+
+
+@router.get("/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}")
+async def show_protocol(request: Request, provider_id: str, protocol_id: str):
+    state = request.app.state.sim
+    p = getattr(state, "iam_protocols", {}).get(f"{provider_id}/{protocol_id}")
+    if not p:
+        return JSONResponse(apigw_error("IAM.0014", "protocol not found"), status_code=404)
+    return {"protocol": p}
+
+
+@router.delete("/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}")
+async def delete_protocol(request: Request, provider_id: str, protocol_id: str):
+    state = request.app.state.sim
+    key = f"{provider_id}/{protocol_id}"
+    if key not in getattr(state, "iam_protocols", {}):
+        return JSONResponse(apigw_error("IAM.0014", "protocol not found"), status_code=404)
+    del state.iam_protocols[key]
+    return Response(status_code=204)

@@ -164,6 +164,20 @@ async def create_node_pool(request: Request, pid: str, cluster_id: str):
     return {"nodepool": state.cce_node_pools[npid]}
 
 
+@router.put("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}")
+async def update_node_pool(request: Request, pid: str, cluster_id: str, nodepool_id: str):
+    state = request.app.state.sim
+    np_ = getattr(state, "cce_node_pools", {}).get(nodepool_id)
+    if not np_ or np_["project_id"] != pid or np_["cluster_id"] != cluster_id:
+        return JSONResponse({"error": {"code": "CCE.0102",
+                                        "message": "node pool not found"}}, status_code=404)
+    body = await request.json()
+    spec = body.get("spec", {})
+    if "initialNodeCount" in spec:
+        np_["spec"]["initialNodeCount"] = spec["initialNodeCount"]
+    return {"nodepool": np_}
+
+
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}")
 async def show_node_pool(request: Request, pid: str, cluster_id: str, nodepool_id: str):
     state = request.app.state.sim
@@ -216,6 +230,21 @@ async def create_addon(request: Request, pid: str, cluster_id: str):
              "cluster_id": cluster_id, "project_id": pid, "id": aid}
     state.cce_addons[aid] = addon
     return {"addon": addon}
+
+
+@router.put("/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}")
+async def update_addon(request: Request, pid: str, cluster_id: str, addon_id: str):
+    state = request.app.state.sim
+    a = getattr(state, "cce_addons", {}).get(addon_id)
+    if not a or a["project_id"] != pid or a["cluster_id"] != cluster_id:
+        return JSONResponse({"error": {"code": "CCE.0104",
+                                        "message": "addon not found"}}, status_code=404)
+    body = await request.json()
+    spec = body.get("spec", {})
+    if "version" in spec:
+        a["spec"]["version"] = spec["version"]
+    a["status"] = {"state": "running"}
+    return {"addon": a}
 
 
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}")

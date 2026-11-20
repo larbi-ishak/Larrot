@@ -1185,5 +1185,55 @@ REGISTRY_TIER5 = {
 for _svc, _ops in REGISTRY_TIER5.items():
     REGISTRY.setdefault(_svc, []).extend(_ops)
 
+
+# ---------------------------------------------------------------------------
+# Tier-6 registries: federation mappings, app-auths, export tasks, website
+# ---------------------------------------------------------------------------
+
+REGISTRY_TIER6 = {
+    "IAM": [
+        ("CreateMapping", "PUT", "/v3.0/OS-FEDERATION/mappings"),
+        ("ListMappings", "GET", "/v3.0/OS-FEDERATION/mappings"),
+        ("ShowMapping", "GET", "/v3.0/OS-FEDERATION/mappings/{mapping_id}"),
+        ("DeleteMapping", "DELETE", "/v3.0/OS-FEDERATION/mappings/{mapping_id}"),
+        ("CreateProtocol", "PUT", "/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}"),
+        ("ListProtocols", "GET", "/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols"),
+        ("ShowProtocol", "GET", "/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}"),
+        ("DeleteProtocol", "DELETE", "/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}"),
+    ],
+    "APIG": [
+        ("CreateAppAuth", "POST", "/v2/{pid}/apigw/app-auths"),
+        ("ListAppAuths", "GET", "/v2/{pid}/apigw/app-auths"),
+        ("ShowThrottle", "GET", "/v2/{pid}/apigw/throttles/{throttle_id}"),
+        ("DeleteThrottle", "DELETE", "/v2/{pid}/apigw/throttles/{throttle_id}"),
+        ("ShowApp", "GET", "/v2/{pid}/apigw/apps/{app_id}"),
+        ("DeleteApp", "DELETE", "/v2/{pid}/apigw/apps/{app_id}"),
+    ],
+    "ModelArts": [
+        ("CreateExportTask", "POST", "/v2/{pid}/datasets/{dataset_id}/export-tasks"),
+        ("ListExportTasks", "GET", "/v2/{pid}/datasets/{dataset_id}/export-tasks"),
+        ("UpdateDataset", "PUT", "/v2/{pid}/datasets/{dataset_id}"),
+    ],
+    "CCE": [
+        ("UpdateAddon", "PUT", "/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}"),
+        ("UpdateNodePool", "PUT", "/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}"),
+    ],
+    "OBS": [
+        ("SetBucketWebsite", "PUT", "/{bucket}?website"),
+        ("GetBucketWebsite", "GET", "/{bucket}?website"),
+        ("SetBucketEncryption", "PUT", "/{bucket}?encryption"),
+        ("GetBucketEncryption", "GET", "/{bucket}?encryption"),
+        ("DeleteBucketTagging", "DELETE", "/{bucket}?tagging"),
+        ("SetObjectAcl", "PUT", "/{bucket}/{key}?acl"),
+        ("RestoreObject", "POST", "/{bucket}/{key}?restore"),
+    ],
+    "KMS": [
+        ("CreateDataKey", "POST", "/v1/{pid}/kms/create-datakey"),
+    ],
+}
+
+for _svc, _ops in REGISTRY_TIER6.items():
+    REGISTRY.setdefault(_svc, []).extend(_ops)
+
 if __name__ == "__main__":
     run()

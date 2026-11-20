@@ -160,3 +160,25 @@ async def update_key_alias(request: Request, pid: str):
     k["alias"] = alias
     k["updated_at"] = now_millis()
     return {"key_id": k["id"], "key_alias": alias}
+
+
+@router.post("/v1/{pid}/kms/create-datakey")
+async def create_data_key(request: Request, pid: str):
+    """Generate a data key (returns plain + encrypted data key)."""
+    import base64 as _b64
+    import os as _os
+    s = request.app.state.sim
+    body = await request.json()
+    k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
+    if not k:
+        return JSONResponse({"error": {"code": "KMS.0101", "message": "key not found"}},
+                            status_code=404)
+    if k.get("state", "2") != "2":
+        return JSONResponse({"error": {"code": "KMS.1002",
+                                        "message": "key is disabled, operation failed"}},
+                            status_code=400)
+    key_spec = body.get("datakey_length", 256)
+    plain = _b64.b64encode(_os.urandom(key_spec // 8)).decode()
+    cipher = _b64.b64encode(f"sim-encrypted:{plain}".encode()).decode()
+    return {"data_key_length": key_spec, "plain_text": plain,
+            "cipher_text": cipher, "key_id": k["id"]}

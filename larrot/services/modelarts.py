@@ -633,3 +633,54 @@ async def delete_dataset_version(request: Request, pid: str, dataset_id: str, ve
         return JSONResponse({"error_code": "MA.0015", "error_msg": "version not found"},
                             status_code=404)
     return Response(status_code=204)
+
+
+@router.post("/v2/{pid}/datasets/{dataset_id}/export-tasks")
+async def create_export_task(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    body = await request.json()
+    tid = new_id()
+    task = {"task_id": tid, "task_type": body.get("task_type", "export"),
+             "status": "RUNNING", "dataset_id": dataset_id,
+             "export_path": body.get("export_path", ""),
+             "exported_sample": 0, "project_id": pid, "created_at": now_millis()}
+    d.setdefault("export_tasks", []).append(task)
+
+    async def effect():
+        t = next((x for x in d.get("export_tasks", []) if x["task_id"] == tid), None)
+        if t:
+            t["status"] = "COMPLETED"
+            t["exported_sample"] = d.get("samples", 0)
+        return None
+
+    await s.jobs.submit("runExportTask", {"task_id": tid}, effect)
+    return {"task_id": tid, "status": "RUNNING"}
+
+
+@router.get("/v2/{pid}/datasets/{dataset_id}/export-tasks")
+async def list_export_tasks(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    return {"export_tasks": d.get("export_tasks", []),
+            "total": len(d.get("export_tasks", []))}
+
+
+@router.put("/v2/{pid}/datasets/{dataset_id}")
+async def update_dataset(request: Request, pid: str, dataset_id: str):
+    s = request.app.state.sim
+    d = getattr(s, "ma_datasets", {}).get(dataset_id)
+    if not d or d["project_id"] != pid:
+        return JSONResponse({"error_code": "MA.0010", "error_msg": "dataset not found"},
+                            status_code=404)
+    body = await request.json()
+    for field in ("dataset_name", "description", "data_source"):
+        if field in body:
+            d[field] = body[field]
+    return d

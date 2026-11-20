@@ -194,6 +194,7 @@ test references it, **missing** = documented but not implemented.
 | GenRandom | `POST` | `/v1/{pid}/kms/gen-random` | OK |
 | GetPublicKey | `GET` | `/v1/{pid}/kms/get-publickey/{key_id}` | OK |
 | UpdateKeyAlias | `POST` | `/v1/{pid}/kms/update-key-alias` | OK |
+| CreateDataKey | `POST` | `/v1/{pid}/kms/create-datakey` | OK |
 
 ## ELB (100% of documented operations implemented)
 
@@ -247,6 +248,8 @@ test references it, **missing** = documented but not implemented.
 | DeleteNode | `DELETE` | `/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}` | OK |
 | ShowAddon | `GET` | `/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}` | OK |
 | DeleteAddon | `DELETE` | `/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}` | OK |
+| UpdateAddon | `PUT` | `/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}` | OK |
+| UpdateNodePool | `PUT` | `/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}` | OK |
 
 ## IAM (100% of documented operations implemented)
 
@@ -288,6 +291,14 @@ test references it, **missing** = documented but not implemented.
 | DeleteIdentityProvider | `DELETE` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}` | OK |
 | ValidateToken | `HEAD` | `/v3/auth/tokens` | OK |
 | RevokeToken | `DELETE` | `/v3/auth/tokens` | OK |
+| CreateMapping | `PUT` | `/v3.0/OS-FEDERATION/mappings` | OK |
+| ListMappings | `GET` | `/v3.0/OS-FEDERATION/mappings` | OK |
+| ShowMapping | `GET` | `/v3.0/OS-FEDERATION/mappings/{mapping_id}` | OK |
+| DeleteMapping | `DELETE` | `/v3.0/OS-FEDERATION/mappings/{mapping_id}` | OK |
+| CreateProtocol | `PUT` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}` | OK |
+| ListProtocols | `GET` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols` | OK |
+| ShowProtocol | `GET` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}` | OK |
+| DeleteProtocol | `DELETE` | `/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}` | OK |
 
 ## FG (100% of documented operations implemented)
 
@@ -340,6 +351,13 @@ test references it, **missing** = documented but not implemented.
 | GetBucketLifecycle | `GET` | `/{bucket}?lifecycle` | OK |
 | GetObjectAcl | `GET` | `/{bucket}/{key}?acl` | OK |
 | ListObjectVersions | `GET` | `/{bucket}?versions` | OK |
+| SetBucketWebsite | `PUT` | `/{bucket}?website` | OK |
+| GetBucketWebsite | `GET` | `/{bucket}?website` | OK |
+| SetBucketEncryption | `PUT` | `/{bucket}?encryption` | OK |
+| GetBucketEncryption | `GET` | `/{bucket}?encryption` | OK |
+| DeleteBucketTagging | `DELETE` | `/{bucket}?tagging` | OK |
+| SetObjectAcl | `PUT` | `/{bucket}/{key}?acl` | OK |
+| RestoreObject | `POST` | `/{bucket}/{key}?restore` | OK |
 
 ## BMS (100% of documented operations implemented)
 
@@ -507,6 +525,12 @@ test references it, **missing** = documented but not implemented.
 | CreateApp | `POST` | `/v2/{pid}/apigw/apps` | OK |
 | ListApps | `GET` | `/v2/{pid}/apigw/apps` | OK |
 | ShowEnvironment | `GET` | `/v2/{pid}/apigw/environments/{env_id}` | OK |
+| CreateAppAuth | `POST` | `/v2/{pid}/apigw/app-auths` | OK |
+| ListAppAuths | `GET` | `/v2/{pid}/apigw/app-auths` | OK |
+| ShowThrottle | `GET` | `/v2/{pid}/apigw/throttles/{throttle_id}` | OK |
+| DeleteThrottle | `DELETE` | `/v2/{pid}/apigw/throttles/{throttle_id}` | OK |
+| ShowApp | `GET` | `/v2/{pid}/apigw/apps/{app_id}` | OK |
+| DeleteApp | `DELETE` | `/v2/{pid}/apigw/apps/{app_id}` | OK |
 
 ## SWR (100% of documented operations implemented)
 
@@ -560,6 +584,9 @@ test references it, **missing** = documented but not implemented.
 | CreateImportTask | `POST` | `/v2/{pid}/datasets/{dataset_id}/import-tasks` | OK |
 | ListImportTasks | `GET` | `/v2/{pid}/datasets/{dataset_id}/import-tasks` | OK |
 | DeleteDatasetVersion | `DELETE` | `/v2/{pid}/datasets/{dataset_id}/versions/{version_id}` | OK |
+| CreateExportTask | `POST` | `/v2/{pid}/datasets/{dataset_id}/export-tasks` | OK |
+| ListExportTasks | `GET` | `/v2/{pid}/datasets/{dataset_id}/export-tasks` | OK |
+| UpdateDataset | `PUT` | `/v2/{pid}/datasets/{dataset_id}` | OK |
 
 ## IoTDA (100% of documented operations implemented)
 
@@ -1013,13 +1040,13 @@ deep/shallow lists in the README's Known limitations.
 | CBR | 13 | 13 | 0 | 0 | 100% |
 | RDS | 11 | 11 | 0 | 0 | 100% |
 | DNS | 10 | 10 | 0 | 0 | 100% |
-| KMS | 10 | 10 | 0 | 0 | 100% |
+| KMS | 11 | 11 | 0 | 0 | 100% |
 | ELB | 18 | 18 | 0 | 0 | 100% |
 | SFS | 4 | 4 | 0 | 0 | 100% |
-| CCE | 16 | 16 | 0 | 0 | 100% |
-| IAM | 36 | 36 | 0 | 0 | 100% |
+| CCE | 18 | 18 | 0 | 0 | 100% |
+| IAM | 44 | 44 | 0 | 0 | 100% |
 | FG | 5 | 5 | 0 | 0 | 100% |
-| OBS | 37 | 37 | 0 | 0 | 100% |
+| OBS | 44 | 44 | 0 | 0 | 100% |
 | BMS | 8 | 8 | 0 | 0 | 100% |
 | AS | 10 | 10 | 0 | 0 | 100% |
 | SMN | 13 | 13 | 0 | 0 | 100% |
@@ -1031,9 +1058,9 @@ deep/shallow lists in the README's Known limitations.
 | WAF | 10 | 10 | 0 | 0 | 100% |
 | TMS | 4 | 4 | 0 | 0 | 100% |
 | EPS | 5 | 5 | 0 | 0 | 100% |
-| APIG | 19 | 19 | 0 | 0 | 100% |
+| APIG | 25 | 25 | 0 | 0 | 100% |
 | SWR | 7 | 7 | 0 | 0 | 100% |
-| ModelArts | 36 | 36 | 0 | 0 | 100% |
+| ModelArts | 39 | 39 | 0 | 0 | 100% |
 | IoTDA | 10 | 10 | 0 | 0 | 100% |
 | GaussDB | 4 | 4 | 0 | 0 | 100% |
 | AOM | 5 | 5 | 0 | 0 | 100% |
@@ -1068,6 +1095,6 @@ deep/shallow lists in the README's Known limitations.
 | DSC | 6 | 6 | 0 | 0 | 100% |
 | VOD | 10 | 10 | 0 | 0 | 100% |
 | IEF | 8 | 8 | 0 | 0 | 100% |
-| **OVERALL** | **672** | **672** | **0** | **0** | **100%** |
+| **OVERALL** | **699** | **699** | **0** | **0** | **100%** |
 
 Run `python3 tools/coverage.py` to regenerate.

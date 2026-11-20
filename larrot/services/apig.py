@@ -208,3 +208,74 @@ async def show_apig_environment(request: Request, pid: str, env_id: str):
     if not e or e.get("project_id") != pid:
         return JSONResponse({"error_msg": "Environment not found", "error_code": "APIG.0005"}, status_code=404)
     return e
+
+
+@router.post("/v2/{pid}/apigw/app-auths")
+async def create_app_auth(request: Request, pid: str):
+    s = request.app.state.sim
+    if not hasattr(s, "apig_app_auths"):
+        s.apig_app_auths = {}
+    body = await request.json()
+    app_id = body.get("app_id", "")
+    api_id = body.get("api_id", "")
+    if not app_id or not api_id:
+        return JSONResponse({"error_msg": "app_id and api_id are required",
+                             "error_code": "APIG.0001"}, status_code=400)
+    if app_id not in getattr(s, "apig_apps", {}):
+        return JSONResponse({"error_msg": "App not found", "error_code": "APIG.0006"}, status_code=404)
+    if api_id not in getattr(s, "apig_apis", {}):
+        return JSONResponse({"error_msg": "API not found", "error_code": "APIG.0002"}, status_code=404)
+    aid = new_id()
+    s.apig_app_auths[aid] = {
+        "id": aid, "app_id": app_id, "api_id": api_id,
+        "env_id": body.get("env_id", ""),
+        "auth_type": body.get("auth_type", "APP"),
+        "project_id": pid, "created_at": now_millis(),
+    }
+    return {"id": aid, "app_id": app_id, "api_id": api_id}
+
+
+@router.get("/v2/{pid}/apigw/app-auths")
+async def list_app_auths(request: Request, pid: str):
+    s = request.app.state.sim
+    auths = [a for a in getattr(s, "apig_app_auths", {}).values()
+             if a["project_id"] == pid]
+    return {"app_auths": auths, "total": len(auths)}
+
+
+@router.get("/v2/{pid}/apigw/throttles/{throttle_id}")
+async def show_throttle(request: Request, pid: str, throttle_id: str):
+    s = request.app.state.sim
+    t = getattr(s, "apig_throttles", {}).get(throttle_id)
+    if not t or t.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Throttle not found", "error_code": "APIG.0007"}, status_code=404)
+    return t
+
+
+@router.delete("/v2/{pid}/apigw/throttles/{throttle_id}")
+async def delete_throttle(request: Request, pid: str, throttle_id: str):
+    s = request.app.state.sim
+    t = getattr(s, "apig_throttles", {}).get(throttle_id)
+    if not t or t.get("project_id") != pid:
+        return JSONResponse({"error_msg": "Throttle not found", "error_code": "APIG.0007"}, status_code=404)
+    del s.apig_throttles[throttle_id]
+    return Response(status_code=204)
+
+
+@router.get("/v2/{pid}/apigw/apps/{app_id}")
+async def show_app(request: Request, pid: str, app_id: str):
+    s = request.app.state.sim
+    a = getattr(s, "apig_apps", {}).get(app_id)
+    if not a or a.get("project_id") != pid:
+        return JSONResponse({"error_msg": "App not found", "error_code": "APIG.0006"}, status_code=404)
+    return a
+
+
+@router.delete("/v2/{pid}/apigw/apps/{app_id}")
+async def delete_app(request: Request, pid: str, app_id: str):
+    s = request.app.state.sim
+    a = getattr(s, "apig_apps", {}).get(app_id)
+    if not a or a.get("project_id") != pid:
+        return JSONResponse({"error_msg": "App not found", "error_code": "APIG.0006"}, status_code=404)
+    del s.apig_apps[app_id]
+    return Response(status_code=204)
