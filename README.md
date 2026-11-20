@@ -1,5 +1,9 @@
 <div align="center">
 
+<p>
+  <img src="https://raw.githubusercontent.com/larbi-ishak/Larrot/main/docs/larrot-logo-red.png" alt="Larrot" width="160">
+</p>
+
 # Larrot 🦜
 
 **Larrot repeats Huawei Cloud.**
