@@ -40,9 +40,6 @@ Homepage = "https://github.com/larbi-ishak/Larrot"
 [project.scripts]
 larrot = "larrot.cli:main"
 larrot-server = "larrot.__main__:main"
-# deprecated aliases (kept so existing installs keep working)
-huawei-sim = "larrot.__main__:main"
-hcli = "larrot.cli:main"
 
 [tool.ruff]
 line-length = 120

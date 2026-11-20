@@ -33,9 +33,12 @@ larrot/
 │   ├── middleware.py   # rate limit + signature verification
 │   └── cli.py          # larrot CLI
 ├── tools/
-│   ├── smoke.py        # end-to-end smoke suite
-│   └── start.sh        # dev server launcher
-└── tests/
+│   ├── smoke.py         # end-to-end smoke suite (needs a running server)
+│   ├── conformance.py   # per-service conformance + scorecard
+│   ├── negative_tests.py# adversarial request suite
+│   ├── coverage.py      # documented-op coverage matrix -> COVERAGE.md
+│   └── differential.py  # sim-vs-real diff harness
+└── tests/               # 523 pytest checks incl. 50 scenarios + fuzzing
 ```
 
 ## Adding a new service

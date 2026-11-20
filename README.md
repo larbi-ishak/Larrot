@@ -29,10 +29,9 @@ How faithful is it? Measured, not claimed: **72/72 conformance checks green
 across 15 core services**, 339 unit/integration tests, 130 negative tests,
 and the example below runs unmodified against the official
 `huaweicloudsdk*` Python SDKs. Full numbers:
-**[CONFORMANCE_REPORT.md](CONFORMANCE_REPORT.md)**,
+**[CONFORMANCE_REPORT.md](CONFORMANCE_REPORT.md)** and
 **[COVERAGE.md](COVERAGE.md)** (operation-level: 720/720 documented
-operations across all 59 services), and
-**[ROADMAP.md](ROADMAP.md)**.
+operations across all 59 services).
 
 It runs the REST APIs of Huawei Cloud's international site
 (`*.myhuaweicloud.com`) on your machine: **59 services** on ports

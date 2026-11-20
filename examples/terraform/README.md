@@ -1,6 +1,6 @@
 # Terraform compatibility
 
-Goal (ROADMAP 3.2): deploy infrastructure against Larrot using the community
+Goal: deploy infrastructure against Larrot using the community
 `huaweicloud` Terraform provider, **unmodified**, via its `endpoints` block.
 
 ```bash
