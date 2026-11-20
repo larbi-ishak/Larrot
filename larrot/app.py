@@ -310,6 +310,9 @@ def create_app() -> FastAPI:
         hit = explorer.find(state, rid)
         if not hit:
             return JSONResponse({"error": "resource not found"}, status_code=404)
+        # Also return the raw object for the detail view
+        _, _, raw = explorer._raw(state, rid)
+        hit["_raw"] = raw
         return hit
 
     @app.get("/admin/graph/{rid}", include_in_schema=False)
