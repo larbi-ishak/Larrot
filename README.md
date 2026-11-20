@@ -8,13 +8,16 @@
 
 **Larrot repeats Huawei Cloud.**
 
-*A local Huawei Cloud API simulator: like LocalStack, but for Huawei Cloud.*
+*A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud.*
 
 [![CI](https://github.com/larbi-ishak/Larrot/actions/workflows/ci.yml/badge.svg)](../../actions)
 
 </div>
 
 ---
+
+> Larrot is an independent, community-developed open-source project.
+> It is not affiliated with, endorsed by, or sponsored by Huawei Technologies.
 
 Larrot is a parrot. It listens to Huawei Cloud and repeats the parts it
 implements: endpoints, per-service error envelopes, async jobs, and the
