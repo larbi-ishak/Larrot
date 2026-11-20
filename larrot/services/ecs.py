@@ -395,7 +395,7 @@ async def server_action(request: Request, pid: str, server_id: str):
 async def create_servers(request: Request, pid: str):
     state = request.app.state.sim
     body = await request.json()
-    spec = body["server"]
+    spec = body.get("server") or {}
     prepaid = "/v1/" in request.url.path
 
     if not state.project(pid):

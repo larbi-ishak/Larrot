@@ -42,6 +42,16 @@ def create_app() -> FastAPI:
     state.chaos = ChaosEngine()
     state.jobs.chaos = state.chaos
 
+    # A missing or malformed JSON body is a client error, never a 500
+    import json as _json
+
+    @app.exception_handler(_json.JSONDecodeError)
+    async def malformed_json_handler(request, exc):
+        return JSONResponse(
+            {"error_msg": "Invalid request body: expected JSON.",
+             "error_code": "Common.0001", "request_id": ""},
+            status_code=400)
+
     # Mount service routers
     app.include_router(iam.router)
     app.include_router(ecs.router)

@@ -548,8 +548,14 @@ def _initiate_upload(state, bucket, key):
 
 
 async def _upload_part(state, request, bucket, key, query):
-    upload_id = query["uploadId"]
-    part_no = int(query["partNumber"])
+    upload_id = query.get("uploadId", "")
+    try:
+        part_no = int(query.get("partNumber", ""))
+    except (TypeError, ValueError):
+        return _error("InvalidArgument", "partNumber must be an integer", status=400)
+    if not upload_id or part_no < 1 or part_no > 10000:
+        return _error("InvalidArgument",
+                      "partNumber and uploadId are required", status=400)
     upload = state.obs_uploads.get(upload_id)
     if not upload or upload["bucket"] != bucket or upload["key"] != key:
         return _error("NoSuchUpload", "The specified upload does not exist.")
