@@ -60,7 +60,10 @@ async def create_instance(request: Request, pid: str):
     if not hasattr(state, "rds_instances"):
         state.rds_instances = {}
     body = await request.json()
-    instance = body["instance"]
+    instance = body.get("instance") or {}
+    if not instance.get("name"):
+        return JSONResponse({"error_code": "DBS.0201",
+                             "error_msg": "instance.name is required"}, status_code=400)
 
     db_id = new_id()
     now = now_millis()
