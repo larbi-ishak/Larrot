@@ -580,6 +580,17 @@ async def show_job(request: Request, pid: str, job_id: str):
     return job.to_json()
 
 
+@router.get("/v2.1/{pid}/os-availability-zone")
+async def nova_list_availability_zones(request: Request, pid: str):
+    """Nova AZ list: what SDKs and Terraform call before placing servers."""
+    state = request.app.state.sim
+    region = next((p["name"] for p in state.projects if p["id"] == pid), "ap-southeast-1")
+    return {"availabilityZoneInfo": [
+        {"zoneName": f"{region}{sfx}", "zoneState": {"available": True}}
+        for sfx in ("a", "b", "c")
+    ]}
+
+
 @router.get("/v2.1/{pid}/servers")
 async def nova_list_brief(request: Request, pid: str):
     state = request.app.state.sim

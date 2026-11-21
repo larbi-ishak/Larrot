@@ -104,6 +104,50 @@ larrot obs buckets
 larrot --json ecs list
 ```
 
+## Compatibility with real clients
+
+Larrot is validated against **Huawei's official Python SDK** in CI
+(`tests/test_official_sdk.py`): IAM, ECS, VPC, EVS, EIP, and IMS clients
+work unchanged against `http://127.0.0.1:8200` with real signed requests.
+The `huaweicloud` Terraform provider works too (`tests/test_terraform.py`).
+
+### IAM enforcement
+
+By default signatures are verified and logged but never rejected
+(accept-and-check - frictionless local development). To test your
+credential handling, start with `SIM_IAM=enforce`: unsigned or invalid
+requests get Huawei's real APIGW errors (`APIGW.0301`, `APIGW.0305`).
+
+### Keeping state across restarts
+
+`SIM_PERSIST=1` saves every resource store on shutdown and restores it
+on start (`SIM_STATE_FILE`, default `~/.larrot/state.json`). The Docker
+image enables this with a `larrot-data` volume.
+
+### Proxy mode: zero client configuration
+
+```bash
+pip install larrot[proxy]
+larrot proxy            # MITM proxy on :8780
+export HTTPS_PROXY=http://127.0.0.1:8780
+```
+
+Clients keep Huawei Cloud's **real endpoints**
+(`ecs.ap-southeast-1.myhuaweicloud.com`, ...) and reach Larrot through
+the proxy - no endpoint overrides needed. KooCLI, the SDKs, and the
+Terraform provider work unchanged. Non-Huawei hosts are relayed as-is.
+
+### GitHub Action
+
+```yaml
+- uses: larbi-ishak/Larrot@v1
+- run: curl "$LARROT_ENDPOINT/v3/projects"
+```
+
+One line starts Larrot for the rest of the job, with
+`HUAWEICLOUD_SDK_AK/SK`, `HW_REGION_NAME`, and `HW_PROJECT_ID` exported
+for the SDKs and Terraform.
+
 ## End-to-end with the official SDKs
 
 This example runs **unmodified** against Larrot using the official

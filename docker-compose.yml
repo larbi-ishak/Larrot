@@ -15,3 +15,11 @@ services:
       SIM_SK: HWYSIMSK00000001
       SIM_RATE_LIMIT: "100"
       SIM_RATE_COOLDOWN_MS: "30000"
+      # Keep resources across container restarts (saved on shutdown).
+      SIM_PERSIST: "1"
+      SIM_STATE_FILE: /data/state.json
+    volumes:
+      - larrot-data:/data
+
+volumes:
+  larrot-data:

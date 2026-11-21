@@ -10,6 +10,39 @@ from .core.signing import verify_sdk_hmac_sha256
 
 logger = logging.getLogger("larrot")
 
+# Paths that never require a signature, even in enforce mode: the local
+# admin/UI surface, health/metrics, docs, and the password-based token
+# endpoint (a client has no signature before it has credentials).
+AUTH_EXEMPT_PREFIXES = (
+    "/admin", "/console", "/docs", "/redoc", "/openapi.json",
+    "/favicon.ico", "/metrics", "/health",
+)
+AUTH_EXEMPT_PATHS = {"/", "/v3/auth/tokens"}
+
+
+def _needs_auth(path: str) -> bool:
+    if path in AUTH_EXEMPT_PATHS:
+        return False
+    return not path.startswith(AUTH_EXEMPT_PREFIXES)
+
+
+def _iam_error(check) -> JSONResponse:
+    """Huawei's API gateway auth errors (api-sign-errorcode.html)."""
+    if check.absent:
+        # APIGW.0305: no credentials presented
+        return JSONResponse(
+            {"error_msg": "Incorrect authentication information.",
+             "error_code": "APIGW.0305", "request_id": ""},
+            status_code=401)
+    if "unknown AK" in check.reason:
+        msg = (f"Incorrect IAM authentication information: "
+               f"Get secretKey failed,ak:{check.ak},err:ak not exist")
+    else:
+        msg = "Incorrect IAM authentication information: verify aksk signature fail"
+    return JSONResponse(
+        {"error_msg": msg, "error_code": "APIGW.0301", "request_id": ""},
+        status_code=401)
+
 
 async def gateway_middleware(request: Request, call_next) -> Response:
     """Applied to all REST routes. OBS has its own middleware."""
@@ -64,6 +97,17 @@ async def gateway_middleware(request: Request, call_next) -> Response:
     else:
         logger.warning("%s %s SIGNATURE INVALID ak=%s: %s",
                        request.method, request.url.path, check.ak, check.reason)
+
+    # --- IAM enforcement (SIM_IAM=enforce) ---
+    # accept (default): log mismatches, never reject - frictionless local dev.
+    # enforce: reject unsigned/invalid requests with Huawei's real APIGW
+    # errors, so clients can test their signing and credential handling.
+    if getattr(state, "iam_mode", "accept") == "enforce" \
+            and _needs_auth(request.url.path) and not check.valid:
+        logger.warning("ENFORCE rejected %s %s (%s)",
+                       request.method, request.url.path,
+                       "no signature" if check.absent else check.reason)
+        return _iam_error(check)
 
     response = await call_next(request)
     response.headers["X-Request-Id"] = request.headers.get("X-Request-Id", "")

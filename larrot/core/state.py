@@ -14,6 +14,9 @@ class SimState:
         self.profile_default = Profile.parse(os.environ.get("SIM_PROFILE", "public"))
         self.jobs = JobEngine()
         self.limiter = RateLimiter()
+        # accept: log signature mismatches, never reject (default).
+        # enforce: reject with Huawei's APIGW auth errors (SIM_IAM=enforce).
+        self.iam_mode = os.environ.get("SIM_IAM", "accept").lower()
 
         # Account
         self.account = {

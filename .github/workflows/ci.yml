@@ -43,6 +43,61 @@ jobs:
           curl -s http://127.0.0.1:8200/health | grep -q '"ok"' || (echo "server failed to start" && exit 1)
           python3 tools/smoke.py
 
+  sdk-compat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install with SDK extras
+        run: pip install .[sdk] pytest pytest-asyncio httpx
+      - name: Official SDK compatibility tests
+        run: |
+          PYTHONPATH=. python -m pytest tests/test_official_sdk.py -v --tb=short
+
+  proxy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install with proxy extras
+        run: pip install .[proxy] .[dev] fastapi uvicorn pydantic
+      - name: Proxy tests
+        run: |
+          PYTHONPATH=. python -m pytest tests/test_proxy.py -v --tb=short
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: Install larrot
+        run: pip install . pytest pytest-asyncio httpx fastapi uvicorn pydantic
+      - name: Terraform apply/destroy against Larrot
+        run: |
+          PYTHONPATH=. python -m pytest tests/test_terraform.py -v --tb=short
+
+  action-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Larrot from this repo
+        uses: ./
+        with:
+          source: repo
+      - name: Verify the action left a running simulator
+        run: |
+          curl -fsS "$LARROT_ENDPOINT/health" | grep -q '"ok"'
+          curl -fsS "$LARROT_ENDPOINT/v3/projects" | grep -q "ap-southeast-1"
+
   docker:
     runs-on: ubuntu-latest
     steps:

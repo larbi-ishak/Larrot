@@ -1,6 +1,7 @@
 """FastAPI app factory: assembles all services with middleware."""
 
 import logging
+import os
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
@@ -98,6 +99,19 @@ def create_app() -> FastAPI:
     )
     state = SimState()
     app.state.sim = state
+
+    # State persistence (SIM_PERSIST=1): restore on start, save on shutdown
+    if os.environ.get("SIM_PERSIST", "").lower() in ("1", "true", "yes"):
+        from .persistence import state_path as _state_path
+        _path = _state_path()
+        _restored = load_state(state, _path)
+        if _restored:
+            logger.info("persist: restored %d stores from %s", _restored, _path)
+
+        @app.on_event("shutdown")
+        async def _persist_on_shutdown():
+            saved = save_state(state, _path)
+            logger.info("persist: saved %d stores to %s", saved, _path)
 
     # Chaos engine (ROADMAP 1.2) + job engine hook
     from .core.chaos import ChaosEngine
@@ -261,7 +275,6 @@ def create_app() -> FastAPI:
         }
 
     # Persistence
-    import os
     persist_dir = os.environ.get("SIM_PERSIST_DIR", "/tmp/larrot")
 
     @app.post("/admin/save", include_in_schema=False)

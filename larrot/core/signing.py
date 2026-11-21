@@ -143,8 +143,14 @@ def sign_sdk_request(
     date = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     payload_hash = hashlib.sha256(body).hexdigest() if body else EMPTY_PAYLOAD_HASH
 
-    canonical_headers = f"content-type:application/json\nhost:{host}\nx-sdk-date:{date}\n"
-    signed_headers = "content-type;host;x-sdk-date"
+    # Sign only what is actually sent: bodyless GETs carry no content-type,
+    # and the server builds the canonical block from the headers present.
+    pairs = [("host", host), ("x-sdk-date", date)]
+    if body:
+        pairs.append(("content-type", "application/json"))
+    pairs.sort()
+    canonical_headers = "".join(f"{k}:{v}\n" for k, v in pairs)
+    signed_headers = ";".join(k for k, _ in pairs)
 
     canonical_request = "\n".join([
         method.upper(),

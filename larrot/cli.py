@@ -137,6 +137,13 @@ def main():
     # projects
     sub.add_parser("projects")
 
+    # proxy (optional: pip install larrot[proxy])
+    proxy_p = sub.add_parser("proxy", help="run the MITM proxy (needs larrot[proxy])")
+    proxy_p.add_argument("--port", type=int, default=8780, help="proxy listen port")
+    proxy_p.add_argument("--rest-port", type=int, default=8200)
+    proxy_p.add_argument("--obs-port", type=int, default=8201)
+    proxy_p.add_argument("--host", default="127.0.0.1")
+
     # ecs
     ecs_p = sub.add_parser("ecs")
     ecs_sub = ecs_p.add_subparsers(dest="action", required=True)
@@ -215,6 +222,12 @@ def main():
 def _dispatch(c, args):
     j = args.json
     w = args.wait
+
+    if args.cmd == "proxy":
+        from .proxy import run_proxy
+        run_proxy(listen_port=args.port, rest_port=args.rest_port,
+                  obs_port=args.obs_port, listen_host=args.host)
+        return
 
     if args.cmd == "projects":
         r = c.get("/v3/projects")

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "larrot"
-version = "1.6.4"
+version = "1.7.0"
 description = "Larrot repeats Huawei Cloud. A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -32,6 +32,18 @@ dev = [
     "pytest-asyncio>=0.24",
     "httpx>=0.28",
     "ruff>=0.8",
+]
+proxy = [
+    "mitmproxy>=11.0",
+]
+sdk = [
+    "huaweicloudsdkcore>=3.1",
+    "huaweicloudsdkecs>=3.1",
+    "huaweicloudsdkvpc>=3.1",
+    "huaweicloudsdkevs>=3.1",
+    "huaweicloudsdkims>=3.1",
+    "huaweicloudsdkeip>=3.1",
+    "huaweicloudsdkiam>=3.1",
 ]
 
 [project.urls]

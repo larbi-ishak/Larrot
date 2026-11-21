@@ -1,0 +1,149 @@
+name: Larrot
+description: Start Larrot, a local Huawei Cloud API simulator, for the rest of the job, with credentials for the SDKs and Terraform.
+author: larbi-ishak
+branding:
+  icon: cloud
+  color: red
+
+inputs:
+  version:
+    description: "The larrot release to install from PyPI, such as 1.7.0. Latest when empty."
+    default: ""
+  source:
+    description: "pypi (install the published package) or repo (pip install . from the checkout)."
+    default: "pypi"
+  python-version:
+    description: "The Python version to install larrot with."
+    default: "3.11"
+  port:
+    description: "The port larrot-server listens on, on 127.0.0.1."
+    default: "8200"
+  region:
+    description: "The default region."
+    default: "ap-southeast-1"
+  project-id:
+    description: "The default project ID; Larrot's built-in one when empty."
+    default: ""
+  persist:
+    description: "Keep state across restarts (SIM_PERSIST=1)."
+    default: "false"
+  token:
+    description: "The token used to install from PyPI."
+    default: ${{ github.token }}
+
+outputs:
+  endpoint:
+    description: "Larrot's address, such as http://127.0.0.1:8200."
+    value: ${{ steps.ready.outputs.endpoint }}
+  region:
+    description: "The default region."
+    value: ${{ inputs.region }}
+  project-id:
+    description: "The default project ID."
+    value: ${{ steps.ready.outputs.project-id }}
+  access-key:
+    description: "The simulator's access key."
+    value: ${{ steps.ready.outputs.access-key }}
+  secret-key:
+    description: "The simulator's secret key (masked in logs)."
+    value: ${{ steps.ready.outputs.secret-key }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install Larrot
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_SOURCE: ${{ inputs.source }}
+        INPUT_PYTHON: ${{ inputs.python-version }}
+      run: |
+        set -euo pipefail
+        if [[ "$INPUT_SOURCE" == "repo" ]]; then
+          python -m pip install --quiet .
+        else
+          spec="larrot"
+          [[ -n "$INPUT_VERSION" ]] && spec="larrot==$INPUT_VERSION"
+          python -m pip install --quiet "$spec"
+        fi
+
+    - name: Start Larrot
+      if: runner.os != 'Windows'
+      shell: bash
+      env:
+        INPUT_PORT: ${{ inputs.port }}
+        INPUT_REGION: ${{ inputs.region }}
+        INPUT_PROJECT: ${{ inputs.project-id }}
+        INPUT_PERSIST: ${{ inputs.persist }}
+        RUNNER_TEMP: ${{ runner.temp }}
+      run: |
+        set -euo pipefail
+        export SIM_HOST=127.0.0.1 SIM_PORT="$INPUT_PORT" SIM_REGION="$INPUT_REGION"
+        [[ -n "$INPUT_PROJECT" ]] && export SIM_PROJECT_ID="$INPUT_PROJECT"
+        [[ "$INPUT_PERSIST" == true ]] && export SIM_PERSIST=1
+        mkdir -p "$RUNNER_TEMP/larrot"
+        nohup larrot-server >"$RUNNER_TEMP/larrot/server.log" 2>&1 &
+        echo $! >"$RUNNER_TEMP/larrot/server.pid"
+
+    - name: Start Larrot
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        INPUT_PORT: ${{ inputs.port }}
+        INPUT_REGION: ${{ inputs.region }}
+        INPUT_PROJECT: ${{ inputs.project-id }}
+        INPUT_PERSIST: ${{ inputs.persist }}
+        RUNNER_TEMP: ${{ runner.temp }}
+      run: |
+        $env:SIM_HOST = "127.0.0.1"; $env:SIM_PORT = "$env:INPUT_PORT"; $env:SIM_REGION = "$env:INPUT_REGION"
+        if ($env:INPUT_PROJECT) { $env:SIM_PROJECT_ID = "$env:INPUT_PROJECT" }
+        if ($env:INPUT_PERSIST -eq "true") { $env:SIM_PERSIST = "1" }
+        New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\larrot" | Out-Null
+        # The runner ends every process a step started when the step ends,
+        # so Windows starts Larrot through WMI: it then belongs to no step.
+        $cmd = "cmd.exe /d /c `"larrot-server > `"$env:RUNNER_TEMP\larrot\server.log`" 2>&1`""
+        $r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = $cmd }
+        if ($r.ReturnValue -ne 0) { throw "starting larrot-server failed: $($r.ReturnValue)" }
+        Set-Content -Path "$env:RUNNER_TEMP\larrot\server.pid" -Value $r.ProcessId
+
+    - name: Wait for Larrot
+      id: ready
+      shell: bash
+      env:
+        INPUT_PORT: ${{ inputs.port }}
+        INPUT_REGION: ${{ inputs.region }}
+        INPUT_PROJECT: ${{ inputs.project-id }}
+        RUNNER_TEMP: ${{ runner.temp }}
+      run: |
+        set -euo pipefail
+        endpoint="http://127.0.0.1:$INPUT_PORT"
+        for _ in $(seq 1 100); do
+          curl -fsS "$endpoint/health" >/dev/null 2>&1 && break
+          sleep 0.3
+        done
+        if ! curl -fsS "$endpoint/health" >/dev/null 2>&1; then
+          echo "::error::larrot-server did not start"
+          cat "$RUNNER_TEMP"/larrot/server.log || true
+          exit 1
+        fi
+        ak="HWYSIMAK00000001"
+        sk="HWYSIMSK00000001"
+        project="$INPUT_PROJECT"
+        [[ -z $project ]] && project="79814d675f6142d9b4a8ee417b924444"
+        echo "::add-mask::$sk"
+        {
+          echo "LARROT_ENDPOINT=$endpoint"
+          echo "HUAWEICLOUD_SDK_AK=$ak"
+          echo "HUAWEICLOUD_SDK_SK=$sk"
+          echo "HW_ACCESS_KEY=$ak"
+          echo "HW_SECRET_KEY=$sk"
+          echo "HW_REGION_NAME=$INPUT_REGION"
+          echo "HW_PROJECT_ID=$project"
+        } >>"$GITHUB_ENV"
+        {
+          echo "endpoint=$endpoint"
+          echo "project-id=$project"
+          echo "access-key=$ak"
+          echo "secret-key=$sk"
+        } >>"$GITHUB_OUTPUT"
+        echo "Larrot is running at $endpoint (project $project, region $INPUT_REGION)."
