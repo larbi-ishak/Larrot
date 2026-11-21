@@ -99,7 +99,10 @@ async def invoke_function(request: Request, pid: str, func_id: str):
         if m:
             val = m.group(1).strip().strip('"').strip("'")
             try:
-                val = eval(val)  # safe enough for the simulator
+                # literal_eval only: eval() here would let any web page that can
+                # reach localhost:8200 execute arbitrary code on the dev machine
+                import ast
+                val = ast.literal_eval(val)
             except Exception:
                 pass
             result["result"] = val

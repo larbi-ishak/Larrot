@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "larrot"
-version = "1.6.3"
+version = "1.6.4"
 description = "Larrot repeats Huawei Cloud. A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud"
 readme = "README.md"
 license = { text = "Apache-2.0" }
