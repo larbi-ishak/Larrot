@@ -34,7 +34,7 @@ provider "huaweicloud" {{
   access_key = "{ak}"
   secret_key = "{sk}"
   project_id = "{pid}"
-  endpoints {{
+  endpoints = {{
     vpc = "{endpoint}"
     ecs = "{endpoint}"
     evs = "{endpoint}"

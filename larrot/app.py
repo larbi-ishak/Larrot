@@ -79,6 +79,7 @@ from .services import (
     tms,
     vod,
     vpc,
+    vpc_v3,
     vpn,
     waf,
 )
@@ -133,6 +134,7 @@ def create_app() -> FastAPI:
     app.include_router(ecs.router, tags=["ECS"])
     app.include_router(evs.router, tags=["EVS"])
     app.include_router(vpc.router, tags=["VPC"])
+    app.include_router(vpc_v3.router, tags=["VPC"])
     app.include_router(ims.router, tags=["IMS"])
     app.include_router(cbr.router, tags=["CBR"])
     app.include_router(rds.router, tags=["RDS"])

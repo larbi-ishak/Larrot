@@ -4,7 +4,7 @@ Every operation Larrot serves, grouped by service. This page is
 generated from the OpenAPI spec by `tools/gen_coverage.py` and
 enforced by a test - it cannot drift from the code.
 
-**66 services - 731 operations**
+**66 services - 738 operations**
 
 ## AOM (5)
 
@@ -854,7 +854,7 @@ enforced by a test - it cannot drift from the code.
 - `POST` `/v1/{pid}/categories`
 - `POST` `/v1/{pid}/transcode-templates`
 
-## VPC (34)
+## VPC (41)
 
 - `DELETE` `/v1/{pid}/ports/{port_id}`
 - `DELETE` `/v1/{pid}/publicips/{eip_id}`
@@ -863,6 +863,7 @@ enforced by a test - it cannot drift from the code.
 - `DELETE` `/v1/{pid}/subnets/{subnet_id}`
 - `DELETE` `/v1/{pid}/vpcs/{vpc_id}/subnets/{subnet_id}`
 - `DELETE` `/v1/{pid}/vpcs/{vpc_id}`
+- `DELETE` `/v3/{pid}/vpc/vpcs/{vpc_id}`
 - `GET` `/v1/{pid}/ports/{port_id}`
 - `GET` `/v1/{pid}/ports`
 - `GET` `/v1/{pid}/publicips/{eip_id}`
@@ -877,6 +878,8 @@ enforced by a test - it cannot drift from the code.
 - `GET` `/v1/{pid}/vpcs`
 - `GET` `/v2.0/{pid}/bandwidths/{bandwidth_id}`
 - `GET` `/v2.0/{pid}/bandwidths`
+- `GET` `/v3/{pid}/vpc/vpcs/{vpc_id}`
+- `GET` `/v3/{pid}/vpc/vpcs`
 - `POST` `/v1/{pid}/ports`
 - `POST` `/v1/{pid}/publicips`
 - `POST` `/v1/{pid}/security-group-rules`
@@ -884,12 +887,16 @@ enforced by a test - it cannot drift from the code.
 - `POST` `/v1/{pid}/subnets`
 - `POST` `/v1/{pid}/vpcs/{vpc_id}/subnets`
 - `POST` `/v1/{pid}/vpcs`
+- `POST` `/v3/{pid}/vpc/vpcs`
 - `PUT` `/v1/{pid}/ports/{port_id}`
 - `PUT` `/v1/{pid}/publicips/{eip_id}`
 - `PUT` `/v1/{pid}/security-groups/{sg_id}`
 - `PUT` `/v1/{pid}/vpcs/{vpc_id}/subnets/{subnet_id}`
 - `PUT` `/v1/{pid}/vpcs/{vpc_id}`
 - `PUT` `/v2.0/{pid}/bandwidths/{bandwidth_id}`
+- `PUT` `/v3/{pid}/vpc/vpcs/{vpc_id}/add-extend-cidr`
+- `PUT` `/v3/{pid}/vpc/vpcs/{vpc_id}/remove-extend-cidr`
+- `PUT` `/v3/{pid}/vpc/vpcs/{vpc_id}`
 
 ## VPC Peering (7)
 
