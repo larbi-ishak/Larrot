@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v3/{pid}/instances")
 async def create_dds_instance(request: Request, pid: str):
+    """Create a DDS MongoDB instance: replica set or cluster (async: takes minutes)."""
     s = request.app.state.sim
     if not hasattr(s, "dds_instances"): s.dds_instances = {}
     body = await request.json()
@@ -24,12 +25,14 @@ async def create_dds_instance(request: Request, pid: str):
 
 @router.get("/v3/{pid}/instances")
 async def list_dds_instances(request: Request, pid: str):
+    """List DDS instances."""
     s = request.app.state.sim
     instances = [i for i in getattr(s, "dds_instances", {}).values() if i["project_id"] == pid]
     return {"instances": instances, "total_count": len(instances)}
 
 @router.get("/v3/{pid}/instances/{instance_id}")
 async def show_dds_instance(request: Request, pid: str, instance_id: str):
+    """Show one instance: its nodes, flavor, storage, and endpoints."""
     s = request.app.state.sim
     i = getattr(s, "dds_instances", {}).get(instance_id)
     if not i or i["project_id"] != pid:
@@ -38,6 +41,7 @@ async def show_dds_instance(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v3/{pid}/instances/{instance_id}")
 async def delete_dds_instance(request: Request, pid: str, instance_id: str):
+    """Delete a DDS instance (async)."""
     s = request.app.state.sim
     if instance_id not in getattr(s, "dds_instances", {}):
         return JSONResponse({"error_msg": "Instance not found", "error_code": "DDS.0001"}, status_code=404)

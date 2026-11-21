@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.get("/v1/{pid}/cloudservers/limits")
 async def get_quotas(request: Request, pid: str):
+    """Show the project's ECS quotas: max servers, cores, RAM, and security groups."""
     s = request.app.state.sim
     server_count = len([x for x in s.servers.values() if x["project_id"] == pid])
     return {
@@ -36,6 +37,7 @@ async def get_quotas(request: Request, pid: str):
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/metadata")
 async def get_metadata(request: Request, pid: str, server_id: str):
+    """Show the server's metadata: key-value pairs set by the user or the cloud."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -45,6 +47,7 @@ async def get_metadata(request: Request, pid: str, server_id: str):
 
 @router.put("/v1/{pid}/cloudservers/{server_id}/metadata")
 async def set_metadata(request: Request, pid: str, server_id: str):
+    """Set or update metadata key-value pairs on a server."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -56,6 +59,7 @@ async def set_metadata(request: Request, pid: str, server_id: str):
 
 @router.delete("/v1/{pid}/cloudservers/{server_id}/metadata/{key}")
 async def delete_metadata_key(request: Request, pid: str, server_id: str, key: str):
+    """Delete one metadata key from a server."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -70,6 +74,7 @@ async def delete_metadata_key(request: Request, pid: str, server_id: str, key: s
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/os-interface")
 async def list_nics(request: Request, pid: str, server_id: str):
+    """List the server's network interfaces with their port IDs and addresses."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -83,6 +88,7 @@ async def list_nics(request: Request, pid: str, server_id: str):
 
 @router.post("/v1/{pid}/cloudservers/{server_id}/os-interface")
 async def add_nic(request: Request, pid: str, server_id: str):
+    """Add a network interface to a server (async)."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -101,6 +107,7 @@ async def add_nic(request: Request, pid: str, server_id: str):
 
 @router.delete("/v1/{pid}/cloudservers/{server_id}/os-interface/{port_id}")
 async def remove_nic(request: Request, pid: str, server_id: str, port_id: str):
+    """Remove a network interface from a server (async)."""
     s = request.app.state.sim
     port = s.ports.get(port_id)
     if not port or port["device_id"] != server_id:
@@ -116,6 +123,7 @@ async def remove_nic(request: Request, pid: str, server_id: str, port_id: str):
 @router.get("/v1/{pid}/cloudservers/{server_id}/remote_console")
 @router.post("/v1/{pid}/cloudservers/{server_id}/remote_console")
 async def get_remote_console(request: Request, pid: str, server_id: str):
+    """Get a remote console URL: the noVNC terminal for the server."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -127,6 +135,7 @@ async def get_remote_console(request: Request, pid: str, server_id: str):
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/console_log")
 async def get_console_log(request: Request, pid: str, server_id: str):
+    """Show the server's console log: the boot and system output."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -150,6 +159,7 @@ async def get_console_log(request: Request, pid: str, server_id: str):
 
 @router.post("/v1/{pid}/cloudservers/{server_id}/resize")
 async def resize_server(request: Request, pid: str, server_id: str):
+    """Change a server's flavor: more or fewer vCPUs and RAM (async)."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -179,6 +189,7 @@ async def resize_server(request: Request, pid: str, server_id: str):
 
 @router.post("/v1/{pid}/cloudservers/{server_id}/changeos")
 async def change_os(request: Request, pid: str, server_id: str):
+    """Reinstall the server's operating system from an image (async: system disk data is lost)."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -209,6 +220,7 @@ async def change_os(request: Request, pid: str, server_id: str):
 
 @router.get("/v2.1/{pid}/servers/{server_id}/os-interface")
 async def nova_list_interfaces(request: Request, pid: str, server_id: str):
+    """List a server's interfaces (Nova v2.1): ports with their addresses."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -225,6 +237,7 @@ async def nova_list_interfaces(request: Request, pid: str, server_id: str):
 
 @router.put("/v2.1/{pid}/servers/{server_id}")
 async def nova_update_server(request: Request, pid: str, server_id: str):
+    """Update a server's name or metadata (Nova v2.1)."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -239,6 +252,7 @@ async def nova_update_server(request: Request, pid: str, server_id: str):
 
 @router.get("/v2.1/{pid}/servers/{server_id}")
 async def nova_show_server(request: Request, pid: str, server_id: str):
+    """Show one server (Nova v2.1): full details in the OpenStack format."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -248,6 +262,7 @@ async def nova_show_server(request: Request, pid: str, server_id: str):
 
 @router.post("/v2.1/{pid}/servers/{server_id}/action")
 async def nova_server_action(request: Request, pid: str, server_id: str):
+    """Server action (Nova v2.1): os-start, os-stop, reboot, or rebuild."""
     s = request.app.state.sim
     server = s.servers.get(server_id)
     if not server or server["project_id"] != pid:

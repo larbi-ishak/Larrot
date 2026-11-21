@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.post("/v2/projects/repositories")
 async def create_repo(request: Request):
+    """Create a code repository hosted by CodeArts Repo."""
     s = request.app.state.sim
     if not hasattr(s, "codearts_repos"):
         s.codearts_repos = {}
@@ -40,6 +41,7 @@ async def create_repo(request: Request):
 
 @router.get("/v2/projects/repositories")
 async def list_repos(request: Request):
+    """List code repositories."""
     s = request.app.state.sim
     repos = list(getattr(s, "codearts_repos", {}).values())
     return {"repositories": repos, "total": len(repos)}
@@ -47,6 +49,7 @@ async def list_repos(request: Request):
 
 @router.get("/v2/projects/repositories/{repo_id}")
 async def show_repo(request: Request, repo_id: str):
+    """Show one repository: default branch, HTTPS/SSH URLs."""
     s = request.app.state.sim
     r = getattr(s, "codearts_repos", {}).get(repo_id)
     if not r:
@@ -57,6 +60,7 @@ async def show_repo(request: Request, repo_id: str):
 
 @router.delete("/v2/projects/repositories/{repo_id}")
 async def delete_repo(request: Request, repo_id: str):
+    """Delete a repository."""
     s = request.app.state.sim
     if repo_id not in getattr(s, "codearts_repos", {}):
         return JSONResponse({"error_code": "CODEARTS.0003",
@@ -71,6 +75,7 @@ async def delete_repo(request: Request, repo_id: str):
 
 @router.post("/v2/{pid}/pipelines")
 async def create_pipeline(request: Request, pid: str):
+    """Create a deployment pipeline: stages of build, test, and deploy."""
     s = request.app.state.sim
     if not hasattr(s, "codearts_pipelines"):
         s.codearts_pipelines = {}
@@ -90,6 +95,7 @@ async def create_pipeline(request: Request, pid: str):
 
 @router.get("/v2/{pid}/pipelines")
 async def list_pipelines(request: Request, pid: str):
+    """List pipelines."""
     s = request.app.state.sim
     pipelines = [p for p in getattr(s, "codearts_pipelines", {}).values()
                  if p["project_id"] == pid]
@@ -120,6 +126,7 @@ async def run_pipeline(request: Request, pid: str, pipeline_id: str):
 
 @router.delete("/v2/{pid}/pipelines/{pipeline_id}")
 async def delete_pipeline(request: Request, pid: str, pipeline_id: str):
+    """Delete a pipeline."""
     s = request.app.state.sim
     p = getattr(s, "codearts_pipelines", {}).get(pipeline_id)
     if not p or p["project_id"] != pid:
@@ -135,6 +142,7 @@ async def delete_pipeline(request: Request, pid: str, pipeline_id: str):
 
 @router.post("/v2/{pid}/builds")
 async def create_build(request: Request, pid: str):
+    """Create a build task: the compile/test pipeline for a repository."""
     s = request.app.state.sim
     if not hasattr(s, "codearts_builds"):
         s.codearts_builds = {}
@@ -154,6 +162,7 @@ async def create_build(request: Request, pid: str):
 
 @router.get("/v2/{pid}/builds")
 async def list_builds(request: Request, pid: str):
+    """List build tasks."""
     s = request.app.state.sim
     builds = [b for b in getattr(s, "codearts_builds", {}).values()
               if b["project_id"] == pid]
@@ -162,6 +171,7 @@ async def list_builds(request: Request, pid: str):
 
 @router.post("/v2/{pid}/builds/{build_id}/run")
 async def run_build(request: Request, pid: str, build_id: str):
+    """Run a build task (async: returns the build number)."""
     s = request.app.state.sim
     b = getattr(s, "codearts_builds", {}).get(build_id)
     if not b or b["project_id"] != pid:

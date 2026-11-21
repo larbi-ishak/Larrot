@@ -23,6 +23,7 @@ def _domain_json(d):
 
 @router.post("/v1/domains")
 async def create_domain(request: Request):
+    """Add an acceleration domain to CDN: the website to cache at the edge."""
     s = request.app.state.sim
     if not hasattr(s, "cdn_domains"):
         s.cdn_domains = {}
@@ -47,6 +48,7 @@ async def create_domain(request: Request):
 
 @router.get("/v1/domains")
 async def list_domains(request: Request):
+    """List CDN domains with their CNAMEs and status."""
     s = request.app.state.sim
     domains = list(getattr(s, "cdn_domains", {}).values())
     state_f = request.query_params.get("domain_status")
@@ -57,6 +59,7 @@ async def list_domains(request: Request):
 
 @router.get("/v1/domains/{domain_id}")
 async def show_domain(request: Request, domain_id: str):
+    """Show one domain's configuration: origin, cache rules, HTTPS."""
     s = request.app.state.sim
     d = getattr(s, "cdn_domains", {}).get(domain_id)
     if not d:
@@ -67,6 +70,7 @@ async def show_domain(request: Request, domain_id: str):
 
 @router.put("/v1/domains/{domain_id}")
 async def update_domain(request: Request, domain_id: str):
+    """Update a domain's origin server or cache configuration."""
     s = request.app.state.sim
     d = getattr(s, "cdn_domains", {}).get(domain_id)
     if not d:
@@ -83,6 +87,7 @@ async def update_domain(request: Request, domain_id: str):
 
 @router.delete("/v1/domains/{domain_id}")
 async def delete_domain(request: Request, domain_id: str):
+    """Remove a domain from CDN."""
     s = request.app.state.sim
     if domain_id not in getattr(s, "cdn_domains", {}):
         return JSONResponse({"error_code": "CDN.0003", "error_msg": "domain not found"},
@@ -155,6 +160,7 @@ async def preheat(request: Request):
 
 @router.get("/v1.0/historytasks")
 async def list_history_tasks(request: Request):
+    """List the history of cache purge and preheat tasks with their URLs and statuses."""
     s = request.app.state.sim
     task_type = request.query_params.get("task_type")
     tasks = list(getattr(s, "cdn_tasks", {}).values())

@@ -29,6 +29,7 @@ def _func_json(f):
 
 @router.post("/v2/{pid}/fg/functions")
 async def create_function(request: Request, pid: str):
+    """Create a FunctionGraph function: the code, handler, memory, and timeout."""
     state = request.app.state.sim
     if not hasattr(state, "fg_functions"):
         state.fg_functions = {}
@@ -52,6 +53,7 @@ async def create_function(request: Request, pid: str):
 
 @router.get("/v2/{pid}/fg/functions")
 async def list_functions(request: Request, pid: str):
+    """List functions with their runtime and code sizes."""
     state = request.app.state.sim
     if not hasattr(state, "fg_functions"):
         state.fg_functions = {}
@@ -61,6 +63,7 @@ async def list_functions(request: Request, pid: str):
 
 @router.get("/v2/{pid}/fg/functions/{func_id}")
 async def show_function(request: Request, pid: str, func_id: str):
+    """Show one function: its handler, memory, timeout, and code location."""
     state = request.app.state.sim
     f = getattr(state, "fg_functions", {}).get(func_id)
     if not f or f["project_id"] != pid:
@@ -70,6 +73,7 @@ async def show_function(request: Request, pid: str, func_id: str):
 
 @router.delete("/v2/{pid}/fg/functions/{func_id}")
 async def delete_function(request: Request, pid: str, func_id: str):
+    """Delete a function."""
     state = request.app.state.sim
     if func_id not in state.fg_functions:
         return JSONResponse({"error_msg": "Function not found", "error_code": "FG.0101"}, status_code=404)

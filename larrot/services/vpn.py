@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/v5/{pid}/vpn-gateways")
 async def create_vpn_gateway(request: Request, pid: str):
+    """Create a VPN gateway: the VPC-side IPsec endpoint (async)."""
     s = request.app.state.sim
     if not hasattr(s, "vpn_gateways"): s.vpn_gateways = {}
     body = await request.json()
@@ -26,6 +27,7 @@ async def create_vpn_gateway(request: Request, pid: str):
 
 @router.get("/v5/{pid}/vpn-gateways")
 async def list_vpn_gateways(request: Request, pid: str):
+    """List VPN gateways."""
     s = request.app.state.sim
     gateways = [g for g in getattr(s, "vpn_gateways", {}).values() if g["project_id"] == pid]
     return {"vpn_gateways": gateways, "total": len(gateways)}
@@ -33,6 +35,7 @@ async def list_vpn_gateways(request: Request, pid: str):
 
 @router.delete("/v5/{pid}/vpn-gateways/{gateway_id}")
 async def delete_vpn_gateway(request: Request, pid: str, gateway_id: str):
+    """Delete a VPN gateway (async)."""
     s = request.app.state.sim
     if gateway_id not in getattr(s, "vpn_gateways", {}):
         return JSONResponse({"error_msg": "VPN gateway not found", "error_code": "VPN.0001"}, status_code=404)
@@ -42,6 +45,7 @@ async def delete_vpn_gateway(request: Request, pid: str, gateway_id: str):
 
 @router.post("/v5/{pid}/vpn-connections")
 async def create_vpn_connection(request: Request, pid: str):
+    """Create a VPN connection: the IPsec tunnel to a peer gateway (async)."""
     s = request.app.state.sim
     if not hasattr(s, "vpn_connections"): s.vpn_connections = {}
     body = await request.json()
@@ -59,6 +63,7 @@ async def create_vpn_connection(request: Request, pid: str):
 
 @router.get("/v5/{pid}/vpn-connections")
 async def list_vpn_connections(request: Request, pid: str):
+    """List VPN connections with their IKE/IPsec parameters."""
     s = request.app.state.sim
     conns = [c for c in getattr(s, "vpn_connections", {}).values() if c["project_id"] == pid]
     return {"vpn_connections": conns, "total": len(conns)}
@@ -66,6 +71,7 @@ async def list_vpn_connections(request: Request, pid: str):
 
 @router.get("/v5/{pid}/vpn-gateways/{gateway_id}")
 async def show_vpn_gateway(request: Request, pid: str, gateway_id: str):
+    """Show one gateway: its EIP, subnet, and HA mode."""
     s = request.app.state.sim
     g = getattr(s, "vpn_gateways", {}).get(gateway_id)
     if not g or g.get("project_id") != pid:
@@ -76,6 +82,7 @@ async def show_vpn_gateway(request: Request, pid: str, gateway_id: str):
 
 @router.get("/v5/{pid}/vpn-connections/{connection_id}")
 async def show_vpn_connection(request: Request, pid: str, connection_id: str):
+    """Show one connection: its policies and tunnel status."""
     s = request.app.state.sim
     c = getattr(s, "vpn_connections", {}).get(connection_id)
     if not c or c.get("project_id") != pid:
@@ -86,6 +93,7 @@ async def show_vpn_connection(request: Request, pid: str, connection_id: str):
 
 @router.delete("/v5/{pid}/vpn-connections/{connection_id}")
 async def delete_vpn_connection(request: Request, pid: str, connection_id: str):
+    """Delete a VPN connection (async)."""
     s = request.app.state.sim
     c = getattr(s, "vpn_connections", {}).get(connection_id)
     if not c or c.get("project_id") != pid:

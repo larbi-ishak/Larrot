@@ -59,6 +59,7 @@ def _checkpoint_json(c):
 
 @router.post("/v3/{pid}/vaults")
 async def create_vault(request: Request, pid: str):
+    """Create a vault: the container that stores backups of servers or disks."""
     state = request.app.state.sim
     body = await request.json()
     spec = body["vault"]
@@ -86,6 +87,7 @@ async def create_vault(request: Request, pid: str):
 
 @router.get("/v3/{pid}/vaults")
 async def list_vaults(request: Request, pid: str):
+    """List vaults."""
     state = request.app.state.sim
     vaults = [v for v in state.vaults.values() if v["project_id"] == pid]
     return {"vaults": [_vault_json(v) for v in vaults],
@@ -94,6 +96,7 @@ async def list_vaults(request: Request, pid: str):
 
 @router.get("/v3/{pid}/vaults/{vault_id}")
 async def show_vault(request: Request, pid: str, vault_id: str):
+    """Show one vault: its resources, capacity, and bound policy."""
     state = request.app.state.sim
     v = state.vaults.get(vault_id)
     if not v or v["project_id"] != pid:
@@ -103,6 +106,7 @@ async def show_vault(request: Request, pid: str, vault_id: str):
 
 @router.put("/v3/{pid}/vaults/{vault_id}")
 async def update_vault(request: Request, pid: str, vault_id: str):
+    """Update a vault's name or capacity."""
     state = request.app.state.sim
     v = state.vaults.get(vault_id)
     if not v or v["project_id"] != pid:
@@ -116,6 +120,7 @@ async def update_vault(request: Request, pid: str, vault_id: str):
 
 @router.delete("/v3/{pid}/vaults/{vault_id}")
 async def delete_vault(request: Request, pid: str, vault_id: str):
+    """Delete a vault (must be empty)."""
     state = request.app.state.sim
     v = state.vaults.get(vault_id)
     if not v or v["project_id"] != pid:
@@ -126,6 +131,7 @@ async def delete_vault(request: Request, pid: str, vault_id: str):
 
 @router.post("/v3/{pid}/vaults/{vault_id}/addresources")
 async def add_resources(request: Request, pid: str, vault_id: str):
+    """Add servers or disks to a vault so they get backed up."""
     state = request.app.state.sim
     vault = state.vaults.get(vault_id)
     if not vault or vault["project_id"] != pid:
@@ -152,6 +158,7 @@ async def add_resources(request: Request, pid: str, vault_id: str):
 
 @router.post("/v3/{pid}/vaults/{vault_id}/removeresources")
 async def remove_resources(request: Request, pid: str, vault_id: str):
+    """Remove resources from a vault."""
     state = request.app.state.sim
     vault = state.vaults.get(vault_id)
     if not vault or vault["project_id"] != pid:
@@ -170,6 +177,7 @@ async def remove_resources(request: Request, pid: str, vault_id: str):
 
 @router.post("/v3/{pid}/policies")
 async def create_policy(request: Request, pid: str):
+    """Create a backup policy: schedule, retention, and replication."""
     state = request.app.state.sim
     body = await request.json()
     spec = body["policy"]
@@ -191,6 +199,7 @@ async def create_policy(request: Request, pid: str):
 
 @router.get("/v3/{pid}/policies")
 async def list_policies(request: Request, pid: str):
+    """List backup policies."""
     state = request.app.state.sim
     policies = [p for p in state.cbr_policies.values() if p["project_id"] == pid]
     return {"policies": [{**p, "policy_type": "disk"} for p in policies],
@@ -199,6 +208,7 @@ async def list_policies(request: Request, pid: str):
 
 @router.get("/v3/{pid}/policies/{policy_id}")
 async def show_policy(request: Request, pid: str, policy_id: str):
+    """Show one policy: when backups run and how long they are kept."""
     state = request.app.state.sim
     p = state.cbr_policies.get(policy_id)
     if not p or p["project_id"] != pid:
@@ -208,6 +218,7 @@ async def show_policy(request: Request, pid: str, policy_id: str):
 
 @router.put("/v3/{pid}/policies/{policy_id}")
 async def update_policy(request: Request, pid: str, policy_id: str):
+    """Update a backup policy."""
     state = request.app.state.sim
     p = state.cbr_policies.get(policy_id)
     if not p or p.get("project_id") != pid:
@@ -221,6 +232,7 @@ async def update_policy(request: Request, pid: str, policy_id: str):
 
 @router.delete("/v3/{pid}/policies/{policy_id}")
 async def delete_policy(request: Request, pid: str, policy_id: str):
+    """Delete a backup policy."""
     state = request.app.state.sim
     p = state.cbr_policies.get(policy_id)
     if not p or p["project_id"] != pid:
@@ -235,6 +247,7 @@ async def delete_policy(request: Request, pid: str, policy_id: str):
 
 @router.post("/v3/{pid}/checkpoints")
 async def create_checkpoint(request: Request, pid: str):
+    """Run a backup now: creates a checkpoint (the restore point) for a vault."""
     state = request.app.state.sim
     body = await request.json()
     resources = body["checkpoint"]["resources"]
@@ -303,6 +316,7 @@ async def create_checkpoint(request: Request, pid: str):
 
 @router.get("/v3/{pid}/checkpoints/{checkpoint_id}")
 async def show_checkpoint(request: Request, pid: str, checkpoint_id: str):
+    """Show one checkpoint: the point-in-time restore point."""
     state = request.app.state.sim
     c = state.checkpoints.get(checkpoint_id)
     if not c or c["project_id"] != pid:
@@ -316,6 +330,7 @@ async def show_checkpoint(request: Request, pid: str, checkpoint_id: str):
 
 @router.get("/v3/{pid}/backups")
 async def list_backups(request: Request, pid: str):
+    """List backups."""
     state = request.app.state.sim
     rid = request.query_params.get("resource_id")
     backups = [b for b in state.cbr_backups.values() if b["project_id"] == pid]
@@ -327,6 +342,7 @@ async def list_backups(request: Request, pid: str):
 
 @router.get("/v3/{pid}/backups/{backup_id}")
 async def show_backup(request: Request, pid: str, backup_id: str):
+    """Show one backup: its protected resource and size."""
     state = request.app.state.sim
     b = state.cbr_backups.get(backup_id)
     if not b or b["project_id"] != pid:
@@ -336,6 +352,7 @@ async def show_backup(request: Request, pid: str, backup_id: str):
 
 @router.delete("/v3/{pid}/backups/{backup_id}")
 async def delete_backup(request: Request, pid: str, backup_id: str):
+    """Delete a backup."""
     state = request.app.state.sim
     b = state.cbr_backups.get(backup_id)
     if not b or b["project_id"] != pid:
@@ -346,6 +363,7 @@ async def delete_backup(request: Request, pid: str, backup_id: str):
 
 @router.post("/v3/{pid}/backups/{backup_id}/restore")
 async def restore_backup(request: Request, pid: str, backup_id: str):
+    """Restore a backup: recreate the server or disk from the restore point (async)."""
     state = request.app.state.sim
     b = state.cbr_backups.get(backup_id)
     if not b or b["project_id"] != pid:

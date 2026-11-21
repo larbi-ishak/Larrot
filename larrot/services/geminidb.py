@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/v3/{pid}/gemini/instances")
 async def create_gemini_instance(request: Request, pid: str):
+    """Create a GeminiDB instance: the Cassandra/MongoDB/Redis-compatible wide table store (async)."""
     s = request.app.state.sim
     if not hasattr(s, "gemini_instances"): s.gemini_instances = {}
     body = await request.json()
@@ -30,6 +31,7 @@ async def create_gemini_instance(request: Request, pid: str):
 
 @router.get("/v3/{pid}/gemini/instances")
 async def list_gemini_instances(request: Request, pid: str):
+    """List GeminiDB instances."""
     s = request.app.state.sim
     instances = [i for i in getattr(s, "gemini_instances", {}).values() if i["project_id"] == pid]
     return {"instances": instances, "total": len(instances)}
@@ -37,6 +39,7 @@ async def list_gemini_instances(request: Request, pid: str):
 
 @router.get("/v3/{pid}/gemini/instances/{instance_id}")
 async def show_gemini_instance(request: Request, pid: str, instance_id: str):
+    """Show one instance: its mode, nodes, and endpoints."""
     s = request.app.state.sim
     i = getattr(s, "gemini_instances", {}).get(instance_id)
     if not i or i["project_id"] != pid:
@@ -46,6 +49,7 @@ async def show_gemini_instance(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v3/{pid}/gemini/instances/{instance_id}")
 async def delete_gemini_instance(request: Request, pid: str, instance_id: str):
+    """Delete a GeminiDB instance (async)."""
     s = request.app.state.sim
     if instance_id not in getattr(s, "gemini_instances", {}):
         return JSONResponse({"error_msg": "Instance not found", "error_code": "GDB.0101"}, status_code=404)
@@ -55,6 +59,7 @@ async def delete_gemini_instance(request: Request, pid: str, instance_id: str):
 
 @router.post("/v3/{pid}/gemini/instances/{instance_id}/action")
 async def gemini_instance_action(request: Request, pid: str, instance_id: str):
+    """Instance action: restart, resize, or change the password (async)."""
     body = await request.json()
     if "resize" in body:
         return {"job_id": new_id(), "action": "resize"}
@@ -65,6 +70,7 @@ async def gemini_instance_action(request: Request, pid: str, instance_id: str):
 
 @router.get("/v3/{pid}/gemini/flavors")
 async def list_gemini_flavors(request: Request, pid: str):
+    """List the GeminiDB instance specs available in the region."""
     return {"flavors": [
         {"id": "gemini.cassandra.large.2", "name": "2 vCPUs | 8 GB", "engine": "cassandra"},
         {"id": "gemini.cassandra.xlarge.4", "name": "4 vCPUs | 16 GB", "engine": "cassandra"},

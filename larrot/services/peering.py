@@ -18,6 +18,7 @@ def _peering_json(p):
 
 @router.post("/v2.0/{pid}/vpc-peerings")
 async def create_peering(request: Request, pid: str):
+    """Create a VPC peering connection: link two VPCs' networks."""
     s = request.app.state.sim
     if not hasattr(s, "vpc_peerings"): s.vpc_peerings = {}
     body = await request.json()
@@ -34,6 +35,7 @@ async def create_peering(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/vpc-peerings")
 async def list_peerings(request: Request, pid: str):
+    """List peering connections."""
     s = request.app.state.sim
     peerings = [p for p in getattr(s, "vpc_peerings", {}).values() if p["project_id"] == pid]
     return {"vpc_peerings": [_peering_json(p) for p in peerings], "count": len(peerings)}
@@ -41,6 +43,7 @@ async def list_peerings(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/vpc-peerings/{peering_id}")
 async def show_peering(request: Request, pid: str, peering_id: str):
+    """Show one peering: its two VPCs and acceptance status."""
     s = request.app.state.sim
     p = getattr(s, "vpc_peerings", {}).get(peering_id)
     if not p or p["project_id"] != pid:
@@ -50,6 +53,7 @@ async def show_peering(request: Request, pid: str, peering_id: str):
 
 @router.put("/v2.0/{pid}/vpc-peerings/{peering_id}/accept")
 async def accept_peering(request: Request, pid: str, peering_id: str):
+    """Accept a peering request from another account."""
     s = request.app.state.sim
     p = getattr(s, "vpc_peerings", {}).get(peering_id)
     if not p or p["project_id"] != pid:
@@ -61,6 +65,7 @@ async def accept_peering(request: Request, pid: str, peering_id: str):
 
 @router.put("/v2.0/{pid}/vpc-peerings/{peering_id}/reject")
 async def reject_peering(request: Request, pid: str, peering_id: str):
+    """Reject a peering request from another account."""
     s = request.app.state.sim
     p = getattr(s, "vpc_peerings", {}).get(peering_id)
     if not p or p["project_id"] != pid:
@@ -72,6 +77,7 @@ async def reject_peering(request: Request, pid: str, peering_id: str):
 
 @router.put("/v2.0/{pid}/vpc-peerings/{peering_id}")
 async def update_peering(request: Request, pid: str, peering_id: str):
+    """Update a peering connection's name or description."""
     s = request.app.state.sim
     p = getattr(s, "vpc_peerings", {}).get(peering_id)
     if not p or p.get("project_id") != pid:
@@ -85,6 +91,7 @@ async def update_peering(request: Request, pid: str, peering_id: str):
 
 @router.delete("/v2.0/{pid}/vpc-peerings/{peering_id}")
 async def delete_peering(request: Request, pid: str, peering_id: str):
+    """Delete a peering connection."""
     s = request.app.state.sim
     if peering_id not in getattr(s, "vpc_peerings", {}):
         return JSONResponse({"error_msg": "Peering not found", "error_code": "VPC.0301"}, status_code=404)

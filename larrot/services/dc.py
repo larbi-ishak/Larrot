@@ -24,6 +24,7 @@ def _conn_json(c):
 
 @router.post("/v2.0/{pid}/direct-connects")
 async def create_connection(request: Request, pid: str):
+    """Create a direct connect: the physical line into Huawei's network (async)."""
     s = request.app.state.sim
     if not hasattr(s, "dc_connections"):
         s.dc_connections = {}
@@ -54,6 +55,7 @@ async def create_connection(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/direct-connects")
 async def list_connections(request: Request, pid: str):
+    """List direct connects."""
     s = request.app.state.sim
     conns = [c for c in getattr(s, "dc_connections", {}).values()
              if c["project_id"] == pid]
@@ -62,6 +64,7 @@ async def list_connections(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/direct-connects/{conn_id}")
 async def show_connection(request: Request, pid: str, conn_id: str):
+    """Show one direct connect: bandwidth, port type, and status."""
     s = request.app.state.sim
     c = getattr(s, "dc_connections", {}).get(conn_id)
     if not c or c["project_id"] != pid:
@@ -72,6 +75,7 @@ async def show_connection(request: Request, pid: str, conn_id: str):
 
 @router.delete("/v2.0/{pid}/direct-connects/{conn_id}")
 async def delete_connection(request: Request, pid: str, conn_id: str):
+    """Delete a direct connect."""
     s = request.app.state.sim
     c = getattr(s, "dc_connections", {}).get(conn_id)
     if not c or c["project_id"] != pid:
@@ -87,6 +91,7 @@ async def delete_connection(request: Request, pid: str, conn_id: str):
 
 @router.post("/v2.0/{pid}/virtual-gateways")
 async def create_vgw(request: Request, pid: str):
+    """Create a virtual gateway: the VPC-side endpoint of a direct connect."""
     s = request.app.state.sim
     if not hasattr(s, "dc_virtual_gateways"):
         s.dc_virtual_gateways = {}
@@ -106,6 +111,7 @@ async def create_vgw(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/virtual-gateways")
 async def list_vgws(request: Request, pid: str):
+    """List virtual gateways."""
     s = request.app.state.sim
     vgws = [g for g in getattr(s, "dc_virtual_gateways", {}).values()
             if g["project_id"] == pid]
@@ -114,6 +120,7 @@ async def list_vgws(request: Request, pid: str):
 
 @router.delete("/v2.0/{pid}/virtual-gateways/{vgw_id}")
 async def delete_vgw(request: Request, pid: str, vgw_id: str):
+    """Delete a virtual gateway."""
     s = request.app.state.sim
     if vgw_id not in getattr(s, "dc_virtual_gateways", {}):
         return JSONResponse({"error_code": "DC.0004", "error_msg": "virtual gateway not found"},
@@ -128,6 +135,7 @@ async def delete_vgw(request: Request, pid: str, vgw_id: str):
 
 @router.post("/v2.0/{pid}/virtual-interfaces")
 async def create_vif(request: Request, pid: str):
+    """Create a virtual interface: the logical connection over a direct connect."""
     s = request.app.state.sim
     if not hasattr(s, "dc_virtual_interfaces"):
         s.dc_virtual_interfaces = {}
@@ -153,6 +161,7 @@ async def create_vif(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/virtual-interfaces")
 async def list_vifs(request: Request, pid: str):
+    """List virtual interfaces."""
     s = request.app.state.sim
     vifs = [v for v in getattr(s, "dc_virtual_interfaces", {}).values()
             if v["project_id"] == pid]
@@ -161,6 +170,7 @@ async def list_vifs(request: Request, pid: str):
 
 @router.delete("/v2.0/{pid}/virtual-interfaces/{vif_id}")
 async def delete_vif(request: Request, pid: str, vif_id: str):
+    """Delete a virtual interface."""
     s = request.app.state.sim
     if vif_id not in getattr(s, "dc_virtual_interfaces", {}):
         return JSONResponse({"error_code": "DC.0005",

@@ -15,6 +15,7 @@ VALID_TYPES = {"Teleport", "Disk"}
 
 @router.post("/v1/{pid}/des/tasks")
 async def create_task(request: Request, pid: str):
+    """Create a Data Express task: ship storage to the cloud by disk or teleport (async)."""
     s = request.app.state.sim
     if not hasattr(s, "des_tasks"):
         s.des_tasks = {}
@@ -48,6 +49,7 @@ async def create_task(request: Request, pid: str):
 
 @router.get("/v1/{pid}/des/tasks")
 async def list_tasks(request: Request, pid: str):
+    """List DES tasks."""
     s = request.app.state.sim
     tasks = [t for t in getattr(s, "des_tasks", {}).values() if t["project_id"] == pid]
     return {"tasks": tasks, "total": len(tasks)}
@@ -55,6 +57,7 @@ async def list_tasks(request: Request, pid: str):
 
 @router.get("/v1/{pid}/des/tasks/{task_id}")
 async def show_task(request: Request, pid: str, task_id: str):
+    """Show one task: its region, package type, and progress."""
     s = request.app.state.sim
     t = getattr(s, "des_tasks", {}).get(task_id)
     if not t or t["project_id"] != pid:
@@ -65,6 +68,7 @@ async def show_task(request: Request, pid: str, task_id: str):
 
 @router.delete("/v1/{pid}/des/tasks/{task_id}")
 async def delete_task(request: Request, pid: str, task_id: str):
+    """Delete a DES task."""
     s = request.app.state.sim
     t = getattr(s, "des_tasks", {}).get(task_id)
     if not t or t["project_id"] != pid:

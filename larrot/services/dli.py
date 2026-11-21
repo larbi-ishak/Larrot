@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v1.0/{pid}/databases")
 async def create_dli_database(request: Request, pid: str):
+    """Create a DLI database: the schema container for tables and SQL jobs."""
     s = request.app.state.sim
     if not hasattr(s, "dli_databases"):
         s.dli_databases = {}
@@ -22,12 +23,14 @@ async def create_dli_database(request: Request, pid: str):
 
 @router.get("/v1.0/{pid}/databases")
 async def list_dli_databases(request: Request, pid: str):
+    """List DLI databases."""
     s = request.app.state.sim
     dbs = [d for d in getattr(s, "dli_databases", {}).values() if d["project_id"] == pid]
     return {"databases": dbs, "total": len(dbs)}
 
 @router.delete("/v1.0/{pid}/databases/{database_name}")
 async def delete_dli_database(request: Request, pid: str, database_name: str):
+    """Delete a DLI database."""
     s = request.app.state.sim
     d = getattr(s, "dli_databases", {}).get(database_name)
     if not d or d["project_id"] != pid:
@@ -38,11 +41,13 @@ async def delete_dli_database(request: Request, pid: str, database_name: str):
 
 @router.post("/v1.0/{pid}/tables")
 async def create_dli_table(request: Request, pid: str):
+    """Create a table in a database: the schema for structured data."""
     body = await request.json()
     return {"table_name": body.get("table_name", "my_table"), "is_success": True}
 
 @router.post("/v1.0/{pid}/jobs/submit")
 async def submit_sql_job(request: Request, pid: str):
+    """Submit an SQL job for async execution on a queue (returns a job id)."""
     s = request.app.state.sim
     if not hasattr(s, "dli_jobs"):
         s.dli_jobs = {}
@@ -65,6 +70,7 @@ async def submit_sql_job(request: Request, pid: str):
 
 @router.get("/v1.0/{pid}/jobs/{job_id}")
 async def show_dli_job(request: Request, pid: str, job_id: str):
+    """Show one SQL job: its statement, progress, and results location."""
     s = request.app.state.sim
     j = getattr(s, "dli_jobs", {}).get(job_id)
     if not j or j["project_id"] != pid:
@@ -79,6 +85,7 @@ async def show_dli_job(request: Request, pid: str, job_id: str):
 
 @router.post("/v1.0/{pid}/queues")
 async def create_dli_queue(request: Request, pid: str):
+    """Create a DLI queue: the compute pool that runs SQL jobs."""
     s = request.app.state.sim
     if not hasattr(s, "dli_queues"):
         s.dli_queues = {}
@@ -97,6 +104,7 @@ async def create_dli_queue(request: Request, pid: str):
 
 @router.get("/v1.0/{pid}/queues")
 async def list_dli_queues(request: Request, pid: str):
+    """List DLI queues with their CU sizes."""
     s = request.app.state.sim
     queues = [q for q in getattr(s, "dli_queues", {}).values()
               if q["project_id"] == pid]
@@ -105,6 +113,7 @@ async def list_dli_queues(request: Request, pid: str):
 
 @router.delete("/v1.0/{pid}/queues/{queue_id}")
 async def delete_dli_queue(request: Request, pid: str, queue_id: str):
+    """Delete a DLI queue."""
     s = request.app.state.sim
     if queue_id not in getattr(s, "dli_queues", {}):
         return JSONResponse({"error_code": "DLI.0002", "error_msg": "queue not found"},
@@ -115,6 +124,7 @@ async def delete_dli_queue(request: Request, pid: str, queue_id: str):
 
 @router.get("/v1.0/{pid}/jobs")
 async def list_dli_jobs(request: Request, pid: str):
+    """List SQL jobs with their status and duration."""
     s = request.app.state.sim
     jobs = [j for j in getattr(s, "dli_jobs", {}).values() if j["project_id"] == pid]
     return {"jobs": jobs, "total": len(jobs)}

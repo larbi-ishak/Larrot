@@ -12,6 +12,7 @@ router = APIRouter()
 
 @router.post("/v1/{pid}/firewalls")
 async def create_firewall(request: Request, pid: str):
+    """Create a cloud firewall: protects internet-facing and inter-VPC traffic."""
     s = request.app.state.sim
     if not hasattr(s, "cfw_firewalls"):
         s.cfw_firewalls = {}
@@ -45,6 +46,7 @@ async def create_firewall(request: Request, pid: str):
 
 @router.get("/v1/{pid}/firewalls")
 async def list_firewalls(request: Request, pid: str):
+    """List cloud firewalls."""
     s = request.app.state.sim
     firewalls = [f for f in getattr(s, "cfw_firewalls", {}).values()
                  if f["project_id"] == pid]
@@ -53,6 +55,7 @@ async def list_firewalls(request: Request, pid: str):
 
 @router.get("/v1/{pid}/firewalls/{firewall_id}")
 async def show_firewall(request: Request, pid: str, firewall_id: str):
+    """Show one firewall: its protected VPCs and protection status."""
     s = request.app.state.sim
     f = getattr(s, "cfw_firewalls", {}).get(firewall_id)
     if not f or f["project_id"] != pid:
@@ -63,6 +66,7 @@ async def show_firewall(request: Request, pid: str, firewall_id: str):
 
 @router.delete("/v1/{pid}/firewalls/{firewall_id}")
 async def delete_firewall(request: Request, pid: str, firewall_id: str):
+    """Delete a firewall."""
     s = request.app.state.sim
     if firewall_id not in getattr(s, "cfw_firewalls", {}):
         return JSONResponse({"error_code": "CFW.0002", "error_msg": "firewall not found"},
@@ -78,6 +82,7 @@ async def delete_firewall(request: Request, pid: str, firewall_id: str):
 
 @router.post("/v1/{pid}/firewalls/{firewall_id}/rules")
 async def create_rule(request: Request, pid: str, firewall_id: str):
+    """Add a rule to a firewall: source, destination, port, and action."""
     s = request.app.state.sim
     f = getattr(s, "cfw_firewalls", {}).get(firewall_id)
     if not f or f["project_id"] != pid:
@@ -104,6 +109,7 @@ async def create_rule(request: Request, pid: str, firewall_id: str):
 
 @router.get("/v1/{pid}/firewalls/{firewall_id}/rules")
 async def list_rules(request: Request, pid: str, firewall_id: str):
+    """List a firewall's rules."""
     s = request.app.state.sim
     f = getattr(s, "cfw_firewalls", {}).get(firewall_id)
     if not f or f["project_id"] != pid:
@@ -115,6 +121,7 @@ async def list_rules(request: Request, pid: str, firewall_id: str):
 
 @router.delete("/v1/{pid}/firewalls/{firewall_id}/rules/{rule_id}")
 async def delete_rule(request: Request, pid: str, firewall_id: str, rule_id: str):
+    """Delete a firewall rule."""
     s = request.app.state.sim
     rules = s.cfw_rules.get(firewall_id, [])
     if not any(r["id"] == rule_id for r in rules):
@@ -155,6 +162,7 @@ async def record_hit(request: Request, pid: str, firewall_id: str):
 
 @router.get("/v1/{pid}/firewalls/{firewall_id}/hit-records")
 async def list_hits(request: Request, pid: str, firewall_id: str):
+    """List the hit records: traffic that matched a firewall rule."""
     s = request.app.state.sim
     f = getattr(s, "cfw_firewalls", {}).get(firewall_id)
     if not f or f["project_id"] != pid:

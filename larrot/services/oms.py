@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/tasks")
 async def create_task(request: Request, pid: str):
+    """Create an OMS migration task: move data from another cloud's object storage (async)."""
     s = request.app.state.sim
     if not hasattr(s, "oms_tasks"):
         s.oms_tasks = {}
@@ -49,6 +50,7 @@ async def create_task(request: Request, pid: str):
 
 @router.get("/v2/{pid}/tasks")
 async def list_tasks(request: Request, pid: str):
+    """List migration tasks with their progress."""
     s = request.app.state.sim
     status_f = request.query_params.get("status")
     tasks = [t for t in getattr(s, "oms_tasks", {}).values() if t["project_id"] == pid]
@@ -59,6 +61,7 @@ async def list_tasks(request: Request, pid: str):
 
 @router.get("/v2/{pid}/tasks/{task_id}")
 async def show_task(request: Request, pid: str, task_id: str):
+    """Show one task: its source, destination, and stats."""
     s = request.app.state.sim
     t = getattr(s, "oms_tasks", {}).get(task_id)
     if not t or t["project_id"] != pid:
@@ -69,6 +72,7 @@ async def show_task(request: Request, pid: str, task_id: str):
 
 @router.post("/v2/{pid}/tasks/{task_id}/stop")
 async def stop_task(request: Request, pid: str, task_id: str):
+    """Stop a running migration task (async)."""
     s = request.app.state.sim
     t = getattr(s, "oms_tasks", {}).get(task_id)
     if not t or t["project_id"] != pid:
@@ -83,6 +87,7 @@ async def stop_task(request: Request, pid: str, task_id: str):
 
 @router.delete("/v2/{pid}/tasks/{task_id}")
 async def delete_task(request: Request, pid: str, task_id: str):
+    """Delete a migration task."""
     s = request.app.state.sim
     t = getattr(s, "oms_tasks", {}).get(task_id)
     if not t or t["project_id"] != pid:

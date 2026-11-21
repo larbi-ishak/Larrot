@@ -14,6 +14,7 @@ VALID_CONN_TYPES = {"DWS", "DLI", "RDS", "OBS", "Kafka", "DIS", "MySQL", "Oracle
 
 @router.post("/v2/{pid}/connections")
 async def create_connection(request: Request, pid: str):
+    """Create a DataArts data connection: a link to a database or message queue."""
     s = request.app.state.sim
     if not hasattr(s, "dataarts_connections"):
         s.dataarts_connections = {}
@@ -38,6 +39,7 @@ async def create_connection(request: Request, pid: str):
 
 @router.get("/v2/{pid}/connections")
 async def list_connections(request: Request, pid: str):
+    """List data connections."""
     s = request.app.state.sim
     conns = [c for c in getattr(s, "dataarts_connections", {}).values()
              if c["project_id"] == pid]
@@ -46,6 +48,7 @@ async def list_connections(request: Request, pid: str):
 
 @router.get("/v2/{pid}/connections/{conn_id}")
 async def show_connection(request: Request, pid: str, conn_id: str):
+    """Show one data connection: type, endpoint, and credentials reference."""
     s = request.app.state.sim
     c = getattr(s, "dataarts_connections", {}).get(conn_id)
     if not c or c["project_id"] != pid:
@@ -56,6 +59,7 @@ async def show_connection(request: Request, pid: str, conn_id: str):
 
 @router.delete("/v2/{pid}/connections/{conn_id}")
 async def delete_connection(request: Request, pid: str, conn_id: str):
+    """Delete a data connection."""
     s = request.app.state.sim
     c = getattr(s, "dataarts_connections", {}).get(conn_id)
     if not c or c["project_id"] != pid:
@@ -71,6 +75,7 @@ async def delete_connection(request: Request, pid: str, conn_id: str):
 
 @router.post("/v2/{pid}/jobs")
 async def create_job(request: Request, pid: str):
+    """Create a data integration job: where data comes from and where it goes."""
     s = request.app.state.sim
     if not hasattr(s, "dataarts_jobs"):
         s.dataarts_jobs = {}
@@ -90,6 +95,7 @@ async def create_job(request: Request, pid: str):
 
 @router.get("/v2/{pid}/jobs")
 async def list_jobs(request: Request, pid: str):
+    """List data jobs."""
     s = request.app.state.sim
     jobs = [j for j in getattr(s, "dataarts_jobs", {}).values()
             if j["project_id"] == pid]
@@ -119,6 +125,7 @@ async def run_job(request: Request, pid: str, job_name: str):
 
 @router.delete("/v2/{pid}/jobs/{job_id}")
 async def delete_job(request: Request, pid: str, job_id: str):
+    """Delete a data job."""
     s = request.app.state.sim
     job = getattr(s, "dataarts_jobs", {}).get(job_id)
     if not job or job["project_id"] != pid:
@@ -134,6 +141,7 @@ async def delete_job(request: Request, pid: str, job_id: str):
 
 @router.post("/v2/{pid}/scripts")
 async def create_script(request: Request, pid: str):
+    """Create a SQL script saved in DataArts."""
     s = request.app.state.sim
     if not hasattr(s, "dataarts_scripts"):
         s.dataarts_scripts = {}
@@ -154,6 +162,7 @@ async def create_script(request: Request, pid: str):
 
 @router.get("/v2/{pid}/scripts")
 async def list_scripts(request: Request, pid: str):
+    """List saved scripts."""
     s = request.app.state.sim
     scripts = [x for x in getattr(s, "dataarts_scripts", {}).values()
                if x["project_id"] == pid]

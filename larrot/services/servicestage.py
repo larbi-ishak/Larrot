@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/cas/environments")
 async def create_environment(request: Request, pid: str):
+    """Create an environment: the deployment target (VPC, resources) for applications."""
     s = request.app.state.sim
     if not hasattr(s, "cas_environments"):
         s.cas_environments = {}
@@ -44,6 +45,7 @@ async def create_environment(request: Request, pid: str):
 
 @router.get("/v2/{pid}/cas/environments")
 async def list_environments(request: Request, pid: str):
+    """List environments."""
     s = request.app.state.sim
     envs = [e for e in getattr(s, "cas_environments", {}).values()
             if e["project_id"] == pid]
@@ -52,6 +54,7 @@ async def list_environments(request: Request, pid: str):
 
 @router.delete("/v2/{pid}/cas/environments/{env_id}")
 async def delete_environment(request: Request, pid: str, env_id: str):
+    """Delete an environment."""
     s = request.app.state.sim
     e = getattr(s, "cas_environments", {}).get(env_id)
     if not e or e["project_id"] != pid:
@@ -67,6 +70,7 @@ async def delete_environment(request: Request, pid: str, env_id: str):
 
 @router.post("/v2/{pid}/cas/applications")
 async def create_application(request: Request, pid: str):
+    """Create an application: the ServiceStage container for components and environments."""
     s = request.app.state.sim
     if not hasattr(s, "cas_applications"):
         s.cas_applications = {}
@@ -89,6 +93,7 @@ async def create_application(request: Request, pid: str):
 
 @router.get("/v2/{pid}/cas/applications")
 async def list_applications(request: Request, pid: str):
+    """List applications."""
     s = request.app.state.sim
     apps = [a for a in getattr(s, "cas_applications", {}).values()
             if a["project_id"] == pid]
@@ -97,6 +102,7 @@ async def list_applications(request: Request, pid: str):
 
 @router.get("/v2/{pid}/cas/applications/{app_id}")
 async def show_application(request: Request, pid: str, app_id: str):
+    """Show one application: its components and description."""
     s = request.app.state.sim
     a = getattr(s, "cas_applications", {}).get(app_id)
     if not a or a["project_id"] != pid:
@@ -107,6 +113,7 @@ async def show_application(request: Request, pid: str, app_id: str):
 
 @router.delete("/v2/{pid}/cas/applications/{app_id}")
 async def delete_application(request: Request, pid: str, app_id: str):
+    """Delete an application."""
     s = request.app.state.sim
     a = getattr(s, "cas_applications", {}).get(app_id)
     if not a or a["project_id"] != pid:
@@ -123,6 +130,7 @@ async def delete_application(request: Request, pid: str, app_id: str):
 
 @router.post("/v2/{pid}/cas/applications/{app_id}/components")
 async def create_component(request: Request, pid: str, app_id: str):
+    """Create a component: one deployable service inside an application."""
     s = request.app.state.sim
     app = getattr(s, "cas_applications", {}).get(app_id)
     if not app or app["project_id"] != pid:
@@ -160,6 +168,7 @@ async def create_component(request: Request, pid: str, app_id: str):
 
 @router.get("/v2/{pid}/cas/applications/{app_id}/components")
 async def list_components(request: Request, pid: str, app_id: str):
+    """List an application's components."""
     s = request.app.state.sim
     app = getattr(s, "cas_applications", {}).get(app_id)
     if not app or app["project_id"] != pid:

@@ -37,6 +37,7 @@ def _glance_json(img):
 @router.post("/v2.1/cloudimages/action")
 @router.post("/v2/cloudimages/quickimport/action")
 async def create_image_action(request: Request):
+    """Create an image from a server or snapshot (async: returns a job)."""
     state = request.app.state.sim
     body = await request.json()
     min_disk = body.get("min_disk", 40)
@@ -71,6 +72,7 @@ async def create_image_action(request: Request):
 
 @router.post("/v1/cloudimages/wholeimages/action")
 async def create_whole_image(request: Request):
+    """Create a whole image: server plus all its data disks (async)."""
     state = request.app.state.sim
     body = await request.json()
     instance_id = body.get("instance_id")
@@ -109,6 +111,7 @@ async def create_whole_image(request: Request):
 
 @router.post("/v1/cloudimages/{image_id}/upload")
 async def register_image(request: Request, image_id: str):
+    """Register an external image file as an IMS image (async)."""
     state = request.app.state.sim
     img = state.images.get(image_id)
     if not img:
@@ -134,6 +137,7 @@ async def register_image(request: Request, image_id: str):
 
 @router.post("/v2/images")
 async def create_image_metadata(request: Request):
+    """Create image metadata: register an image before uploading its file."""
     state = request.app.state.sim
     body = await request.json()
     img_id = new_id()
@@ -153,6 +157,7 @@ async def create_image_metadata(request: Request):
 
 @router.put("/v2/images/{image_id}/file")
 async def upload_image_file(request: Request, image_id: str):
+    """Upload the image file to the registered image."""
     state = request.app.state.sim
     img = state.images.get(image_id)
     if not img:
@@ -175,6 +180,7 @@ async def upload_image_file(request: Request, image_id: str):
 
 @router.get("/v2/images")
 async def list_images_glance(request: Request):
+    """List images (Glance v2): the available OS and custom images."""
     state = request.app.state.sim
     name = request.query_params.get("name")
     images = list(state.images.values())
@@ -185,6 +191,7 @@ async def list_images_glance(request: Request):
 
 @router.get("/v2/cloudimages")
 async def list_images_custom(request: Request):
+    """List images (IMS v2 API): public, private, and shared images."""
     state = request.app.state.sim
     name = request.query_params.get("name")
     limit = min(int(request.query_params.get("limit", 1000)), 1000)
@@ -200,6 +207,7 @@ async def list_images_custom(request: Request):
 
 @router.patch("/v2/images/{image_id}")
 async def update_image(request: Request, image_id: str):
+    """Update an image's name, description, or visibility."""
     s = request.app.state.sim
     img = s.images.get(image_id)
     if not img:
@@ -214,6 +222,7 @@ async def update_image(request: Request, image_id: str):
 
 @router.get("/v2/images/{image_id}")
 async def show_image(request: Request, image_id: str):
+    """Show one image: its OS, disk format, size, and status."""
     state = request.app.state.sim
     img = state.images.get(image_id)
     if not img:
@@ -223,6 +232,7 @@ async def show_image(request: Request, image_id: str):
 
 @router.delete("/v2/images/{image_id}")
 async def delete_image(request: Request, image_id: str):
+    """Delete an image."""
     state = request.app.state.sim
     if image_id not in state.images:
         return JSONResponse(ims_error("The image does not exist."), status_code=404)
@@ -232,6 +242,7 @@ async def delete_image(request: Request, image_id: str):
 
 @router.get("/v1/cloudimages/job/{job_id}")
 async def show_job_progress(request: Request, job_id: str):
+    """Show an image job's progress (the async polling endpoint)."""
     state = request.app.state.sim
     job = state.jobs.get(job_id)
     if not job:

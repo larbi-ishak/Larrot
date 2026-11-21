@@ -83,12 +83,14 @@ def _rule_json(r):
 
 @router.get("/v1/{pid}/vpcs")
 async def list_vpcs(request: Request, pid: str):
+    """List VPCs with their CIDRs and default subnets."""
     state = request.app.state.sim
     return {"vpcs": [_vpc_json(v) for v in state.vpcs.values() if v["project_id"] == pid]}
 
 
 @router.get("/v1/{pid}/vpcs/{vpc_id}")
 async def show_vpc(request: Request, pid: str, vpc_id: str):
+    """Show one VPC: its CIDR, subnets, and routes."""
     state = request.app.state.sim
     v = state.vpcs.get(vpc_id)
     if not v or v["project_id"] != pid:
@@ -98,6 +100,7 @@ async def show_vpc(request: Request, pid: str, vpc_id: str):
 
 @router.post("/v1/{pid}/vpcs")
 async def create_vpc(request: Request, pid: str):
+    """Create a VPC: the private network that holds subnets, servers, and load balancers."""
     state = request.app.state.sim
     body = await request.json()
     spec = body.get("vpc") or {}
@@ -122,6 +125,7 @@ async def create_vpc(request: Request, pid: str):
 
 @router.put("/v1/{pid}/vpcs/{vpc_id}")
 async def update_vpc(request: Request, pid: str, vpc_id: str):
+    """Update a VPC's name or description."""
     state = request.app.state.sim
     v = state.vpcs.get(vpc_id)
     if not v or v["project_id"] != pid:
@@ -136,6 +140,7 @@ async def update_vpc(request: Request, pid: str, vpc_id: str):
 
 @router.delete("/v1/{pid}/vpcs/{vpc_id}")
 async def delete_vpc(request: Request, pid: str, vpc_id: str):
+    """Delete a VPC (must contain no subnets)."""
     state = request.app.state.sim
     v = state.vpcs.get(vpc_id)
     if not v or v["project_id"] != pid:
@@ -152,12 +157,14 @@ async def delete_vpc(request: Request, pid: str, vpc_id: str):
 
 @router.get("/v1/{pid}/subnets")
 async def list_subnets(request: Request, pid: str):
+    """List subnets with their CIDRs, gateways, and DNS servers."""
     state = request.app.state.sim
     return {"subnets": [_subnet_json(s) for s in state.subnets.values() if s["project_id"] == pid]}
 
 
 @router.get("/v1/{pid}/subnets/{subnet_id}")
 async def show_subnet(request: Request, pid: str, subnet_id: str):
+    """Show one subnet: its gateway, DHCP range, and availability zone."""
     state = request.app.state.sim
     s = state.subnets.get(subnet_id)
     if not s or s["project_id"] != pid:
@@ -196,6 +203,7 @@ async def create_subnet_nested(request: Request, pid: str, vpc_id: str):
 
 @router.post("/v1/{pid}/subnets")
 async def create_subnet(request: Request, pid: str):
+    """Create a subnet in a VPC: the CIDR range where servers get their IPs."""
     state = request.app.state.sim
     body = await request.json()
     return _create_subnet_core(state, pid, body["subnet"])
@@ -203,6 +211,7 @@ async def create_subnet(request: Request, pid: str):
 
 @router.put("/v1/{pid}/vpcs/{vpc_id}/subnets/{subnet_id}")
 async def update_subnet(request: Request, pid: str, vpc_id: str, subnet_id: str):
+    """Update a subnet's name, DHCP, or DNS settings."""
     state = request.app.state.sim
     s = state.subnets.get(subnet_id)
     if not s or s["project_id"] != pid:
@@ -221,6 +230,7 @@ async def update_subnet(request: Request, pid: str, vpc_id: str, subnet_id: str)
 @router.delete("/v1/{pid}/subnets/{subnet_id}")
 @router.delete("/v1/{pid}/vpcs/{vpc_id}/subnets/{subnet_id}")
 async def delete_subnet(request: Request, pid: str, subnet_id: str, vpc_id: str = ""):
+    """Delete a subnet (must contain no ports)."""
     state = request.app.state.sim
     s = state.subnets.get(subnet_id)
     if not s or s["project_id"] != pid:
@@ -238,6 +248,7 @@ async def delete_subnet(request: Request, pid: str, subnet_id: str, vpc_id: str 
 
 @router.post("/v1/{pid}/publicips")
 async def create_eip(request: Request, pid: str):
+    """Allocate an EIP: the public IP that can be bound to a server or load balancer."""
     state = request.app.state.sim
     body = await request.json()
     n = len(state.eips)
@@ -277,12 +288,14 @@ async def _delay_flip(fn, delay):
 
 @router.get("/v1/{pid}/publicips")
 async def list_eips(request: Request, pid: str):
+    """List EIPs with their bandwidths and binding status."""
     state = request.app.state.sim
     return {"publicips": [_eip_json(e) for e in state.eips.values() if e["project_id"] == pid]}
 
 
 @router.get("/v1/{pid}/publicips/{eip_id}")
 async def show_eip(request: Request, pid: str, eip_id: str):
+    """Show one EIP: its address, bandwidth, and bound instance."""
     state = request.app.state.sim
     e = state.eips.get(eip_id)
     if not e or e["project_id"] != pid:
@@ -292,6 +305,7 @@ async def show_eip(request: Request, pid: str, eip_id: str):
 
 @router.put("/v1/{pid}/publicips/{eip_id}")
 async def update_eip(request: Request, pid: str, eip_id: str):
+    """Update an EIP's binding or bandwidth reference."""
     state = request.app.state.sim
     e = state.eips.get(eip_id)
     if not e or e["project_id"] != pid:
@@ -320,6 +334,7 @@ async def update_eip(request: Request, pid: str, eip_id: str):
 
 @router.delete("/v1/{pid}/publicips/{eip_id}")
 async def delete_eip(request: Request, pid: str, eip_id: str):
+    """Release an EIP."""
     state = request.app.state.sim
     e = state.eips.get(eip_id)
     if not e or e["project_id"] != pid:
@@ -336,6 +351,7 @@ async def delete_eip(request: Request, pid: str, eip_id: str):
 
 @router.post("/v1/{pid}/ports")
 async def create_port(request: Request, pid: str):
+    """Create a port: the network interface that gives a device an IP in a subnet."""
     state = request.app.state.sim
     body = await request.json()
     spec = body.get("port", {})
@@ -363,6 +379,7 @@ async def create_port(request: Request, pid: str):
 
 @router.delete("/v1/{pid}/ports/{port_id}")
 async def delete_port(request: Request, pid: str, port_id: str):
+    """Delete a port."""
     state = request.app.state.sim
     p = state.ports.get(port_id)
     if not p or p["project_id"] != pid:
@@ -376,6 +393,7 @@ async def delete_port(request: Request, pid: str, port_id: str):
 
 @router.get("/v1/{pid}/ports/{port_id}")
 async def show_port(request: Request, pid: str, port_id: str):
+    """Show one port: its fixed IPs, security groups, and device owner."""
     state = request.app.state.sim
     p = state.ports.get(port_id)
     if not p or p["project_id"] != pid:
@@ -392,6 +410,7 @@ async def show_port(request: Request, pid: str, port_id: str):
 
 @router.get("/v1/{pid}/ports")
 async def list_ports(request: Request, pid: str):
+    """List ports with their IPs, MACs, and bound servers."""
     state = request.app.state.sim
     device_id = request.query_params.get("device_id")
     ports = [p for p in state.ports.values() if p["project_id"] == pid]
@@ -443,6 +462,7 @@ def _default_rules(sg_id, tenant):
 
 @router.post("/v1/{pid}/security-groups")
 async def create_sg(request: Request, pid: str):
+    """Create a security group: the stateful firewall rules for ports."""
     state = request.app.state.sim
     body = await request.json()
     sg_id = new_id()
@@ -456,6 +476,7 @@ async def create_sg(request: Request, pid: str):
 
 @router.get("/v1/{pid}/security-groups")
 async def list_sgs(request: Request, pid: str):
+    """List security groups with their rule counts."""
     state = request.app.state.sim
     return {"security_groups": [_sg_json(g) for g in state.security_groups.values()
                                  if g["project_id"] == pid]}
@@ -463,6 +484,7 @@ async def list_sgs(request: Request, pid: str):
 
 @router.get("/v1/{pid}/security-groups/{sg_id}")
 async def show_sg(request: Request, pid: str, sg_id: str):
+    """Show one security group: its inbound and outbound rules."""
     state = request.app.state.sim
     g = state.security_groups.get(sg_id)
     if not g or g["project_id"] != pid:
@@ -472,6 +494,7 @@ async def show_sg(request: Request, pid: str, sg_id: str):
 
 @router.put("/v1/{pid}/security-groups/{sg_id}")
 async def update_sg(request: Request, pid: str, sg_id: str):
+    """Update a security group's name or description."""
     state = request.app.state.sim
     g = state.security_groups.get(sg_id)
     if not g or g["project_id"] != pid:
@@ -487,6 +510,7 @@ async def update_sg(request: Request, pid: str, sg_id: str):
 
 @router.delete("/v1/{pid}/security-groups/{sg_id}")
 async def delete_sg(request: Request, pid: str, sg_id: str):
+    """Delete a security group (must not be in use by ports)."""
     state = request.app.state.sim
     g = state.security_groups.get(sg_id)
     if not g or g["project_id"] != pid:
@@ -504,6 +528,7 @@ async def delete_sg(request: Request, pid: str, sg_id: str):
 
 @router.post("/v1/{pid}/security-group-rules")
 async def create_sg_rule(request: Request, pid: str):
+    """Add a rule to a security group: direction, protocol, port, and source CIDR."""
     state = request.app.state.sim
     body = await request.json()
     spec = body["security_group_rule"]
@@ -542,6 +567,7 @@ async def create_sg_rule(request: Request, pid: str):
 
 @router.get("/v1/{pid}/security-group-rules")
 async def list_sg_rules(request: Request, pid: str):
+    """List security group rules across the project."""
     state = request.app.state.sim
     rules = []
     for g in state.security_groups.values():
@@ -565,6 +591,7 @@ def _find_sg_rule(state, pid, rule_id):
 
 @router.get("/v1/{pid}/security-group-rules/{rule_id}")
 async def show_sg_rule(request: Request, pid: str, rule_id: str):
+    """Show one security group rule."""
     state = request.app.state.sim
     _, r = _find_sg_rule(state, pid, rule_id)
     if not r:
@@ -574,6 +601,7 @@ async def show_sg_rule(request: Request, pid: str, rule_id: str):
 
 @router.delete("/v1/{pid}/security-group-rules/{rule_id}")
 async def delete_sg_rule(request: Request, pid: str, rule_id: str):
+    """Delete a security group rule."""
     state = request.app.state.sim
     g, r = _find_sg_rule(state, pid, rule_id)
     if not r:
@@ -584,6 +612,7 @@ async def delete_sg_rule(request: Request, pid: str, rule_id: str):
 
 @router.put("/v1/{pid}/ports/{port_id}")
 async def update_port(request: Request, pid: str, port_id: str):
+    """Update a port's security groups or allowed address pairs."""
     state = request.app.state.sim
     p = state.ports.get(port_id)
     if not p or p["project_id"] != pid:
@@ -599,6 +628,7 @@ async def update_port(request: Request, pid: str, port_id: str):
 
 @router.get("/v2.0/{pid}/bandwidths")
 async def list_bandwidths(request: Request, pid: str):
+    """List bandwidths: the shared or dedicated speed limits for EIPs."""
     state = request.app.state.sim
     items = []
     for e in state.eips.values():
@@ -624,6 +654,7 @@ async def list_bandwidths(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/bandwidths/{bandwidth_id}")
 async def show_bandwidth(request: Request, pid: str, bandwidth_id: str):
+    """Show one bandwidth: its size, charging mode, and bound EIPs."""
     state = request.app.state.sim
     bws = getattr(state, "bandwidths", {})
     b = bws.get(bandwidth_id)
@@ -634,6 +665,7 @@ async def show_bandwidth(request: Request, pid: str, bandwidth_id: str):
 
 @router.put("/v2.0/{pid}/bandwidths/{bandwidth_id}")
 async def resize_bandwidth(request: Request, pid: str, bandwidth_id: str):
+    """Change a bandwidth's size (async)."""
     state = request.app.state.sim
     e = next((e for e in state.eips.values()
               if e["bandwidth_id"] == bandwidth_id and e["project_id"] == pid), None)

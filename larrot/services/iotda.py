@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v5/iot/{pid}/products")
 async def create_product(request: Request, pid: str):
+    """Create an IoT product: the device model with its services and properties."""
     s = request.app.state.sim
     if not hasattr(s, "iot_products"): s.iot_products = {}
     body = await request.json()
@@ -20,12 +21,14 @@ async def create_product(request: Request, pid: str):
 
 @router.get("/v5/iot/{pid}/products")
 async def list_products(request: Request, pid: str):
+    """List IoT products."""
     s = request.app.state.sim
     products = [p for p in getattr(s, "iot_products", {}).values() if p["project_id"] == pid]
     return {"products": products, "total": len(products)}
 
 @router.get("/v5/iot/{pid}/products/{product_id}")
 async def show_product(request: Request, pid: str, product_id: str):
+    """Show one product: its protocol type and data format."""
     s = request.app.state.sim
     p = getattr(s, "iot_products", {}).get(product_id)
     if not p or p.get("project_id") != pid:
@@ -36,6 +39,7 @@ async def show_product(request: Request, pid: str, product_id: str):
 
 @router.delete("/v5/iot/{pid}/products/{product_id}")
 async def delete_product(request: Request, pid: str, product_id: str):
+    """Delete a product (devices of it must be deleted first)."""
     s = request.app.state.sim
     p = getattr(s, "iot_products", {}).get(product_id)
     if not p or p.get("project_id") != pid:
@@ -47,6 +51,7 @@ async def delete_product(request: Request, pid: str, product_id: str):
 
 @router.post("/v5/iot/{pid}/devices")
 async def create_device(request: Request, pid: str):
+    """Register an IoT device under a product: it gets credentials for connecting."""
     s = request.app.state.sim
     if not hasattr(s, "iot_devices"): s.iot_devices = {}
     body = await request.json()
@@ -58,12 +63,14 @@ async def create_device(request: Request, pid: str):
 
 @router.get("/v5/iot/{pid}/devices")
 async def list_devices(request: Request, pid: str):
+    """List devices with their online status."""
     s = request.app.state.sim
     devices = [d for d in getattr(s, "iot_devices", {}).values() if d["project_id"] == pid]
     return {"devices": devices, "total": len(devices)}
 
 @router.get("/v5/iot/{pid}/devices/{device_id}")
 async def show_device(request: Request, pid: str, device_id: str):
+    """Show one device: its product, firmware version, and connection state."""
     s = request.app.state.sim
     d = getattr(s, "iot_devices", {}).get(device_id)
     if not d or d.get("project_id") != pid:
@@ -74,6 +81,7 @@ async def show_device(request: Request, pid: str, device_id: str):
 
 @router.put("/v5/iot/{pid}/devices/{device_id}")
 async def update_device(request: Request, pid: str, device_id: str):
+    """Update a device's name or firmware version."""
     s = request.app.state.sim
     d = getattr(s, "iot_devices", {}).get(device_id)
     if not d or d.get("project_id") != pid:
@@ -87,6 +95,7 @@ async def update_device(request: Request, pid: str, device_id: str):
 
 @router.delete("/v5/iot/{pid}/devices/{device_id}")
 async def delete_device(request: Request, pid: str, device_id: str):
+    """Delete a device."""
     s = request.app.state.sim
     if device_id not in getattr(s, "iot_devices", {}):
         return JSONResponse({"error_msg": "Device not found", "error_code": "IoT.0001"}, status_code=404)
@@ -96,6 +105,7 @@ async def delete_device(request: Request, pid: str, device_id: str):
 
 @router.post("/v5/iot/{pid}/devices/{device_id}/commands")
 async def send_command(request: Request, pid: str, device_id: str):
+    """Send a command to a device (async: the device must acknowledge)."""
     s = request.app.state.sim
     dev = getattr(s, "iot_devices", {}).get(device_id)
     if not dev or dev.get("project_id") != pid:

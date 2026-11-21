@@ -303,8 +303,8 @@ def create_app() -> FastAPI:
     @app.post("/admin/reset", include_in_schema=False)
     async def admin_reset():
         """Wipe every store and engine while the server keeps running."""
-        from .core.chaos import ChaosEngine
         from .core import determinism
+        from .core.chaos import ChaosEngine
         fresh = SimState()
         fresh.chaos = ChaosEngine()
         fresh.jobs.chaos = fresh.chaos

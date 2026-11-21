@@ -14,6 +14,7 @@ router = APIRouter()
 
 @router.post("/v1/{pid}/cci/namespaces")
 async def create_namespace(request: Request, pid: str):
+    """Create a CCI namespace: the Kubernetes-style isolation unit for serverless containers."""
     s = request.app.state.sim
     if not hasattr(s, "cci_namespaces"):
         s.cci_namespaces = {}
@@ -36,6 +37,7 @@ async def create_namespace(request: Request, pid: str):
 
 @router.get("/v1/{pid}/cci/namespaces")
 async def list_namespaces(request: Request, pid: str):
+    """List CCI namespaces."""
     s = request.app.state.sim
     ns = [n for n in getattr(s, "cci_namespaces", {}).values()
           if n["project_id"] == pid]
@@ -44,6 +46,7 @@ async def list_namespaces(request: Request, pid: str):
 
 @router.delete("/v1/{pid}/cci/namespaces/{ns_id}")
 async def delete_namespace(request: Request, pid: str, ns_id: str):
+    """Delete a namespace and everything in it."""
     s = request.app.state.sim
     if ns_id not in getattr(s, "cci_namespaces", {}):
         return JSONResponse({"error_code": "CCI.0003", "error_msg": "namespace not found"},
@@ -61,6 +64,7 @@ async def delete_namespace(request: Request, pid: str, ns_id: str):
 
 @router.post("/v1/{pid}/cci/namespaces/{ns_id}/pods")
 async def create_pod(request: Request, pid: str, ns_id: str):
+    """Create a pod in a namespace: serverless container instances with their workloads."""
     s = request.app.state.sim
     if ns_id not in getattr(s, "cci_namespaces", {}):
         return JSONResponse({"error_code": "CCI.0003", "error_msg": "namespace not found"},
@@ -100,6 +104,7 @@ async def create_pod(request: Request, pid: str, ns_id: str):
 
 @router.get("/v1/{pid}/cci/namespaces/{ns_id}/pods")
 async def list_pods(request: Request, pid: str, ns_id: str):
+    """List the pods of a namespace."""
     s = request.app.state.sim
     if ns_id not in getattr(s, "cci_namespaces", {}):
         return JSONResponse({"error_code": "CCI.0003", "error_msg": "namespace not found"},
@@ -111,6 +116,7 @@ async def list_pods(request: Request, pid: str, ns_id: str):
 
 @router.get("/v1/{pid}/cci/namespaces/{ns_id}/pods/{pod_id}")
 async def show_pod(request: Request, pid: str, ns_id: str, pod_id: str):
+    """Show one pod: container statuses, restarts, and events."""
     s = request.app.state.sim
     p = getattr(s, "cci_pods", {}).get(pod_id)
     if not p or p["project_id"] != pid or p["namespace_id"] != ns_id:
@@ -121,6 +127,7 @@ async def show_pod(request: Request, pid: str, ns_id: str, pod_id: str):
 
 @router.delete("/v1/{pid}/cci/namespaces/{ns_id}/pods/{pod_id}")
 async def delete_pod(request: Request, pid: str, ns_id: str, pod_id: str):
+    """Delete a pod."""
     s = request.app.state.sim
     p = getattr(s, "cci_pods", {}).get(pod_id)
     if not p or p["project_id"] != pid or p["namespace_id"] != ns_id:

@@ -24,6 +24,7 @@ def _project_json(state, p):
 
 @router.get("/v3/projects")
 async def list_projects(request: Request):
+    """List the projects of the domain: the per-region resource containers."""
     state = request.app.state.sim
     name = request.query_params.get("name")
     projects = [_project_json(state, p) for p in state.projects
@@ -39,6 +40,7 @@ async def list_projects(request: Request):
 
 @router.get("/v3/auth/projects")
 async def list_auth_projects(request: Request):
+    """List the projects the current token can access (the SDK discovery endpoint)."""
     state = request.app.state.sim
     return {
         "projects": [_project_json(state, p) for p in state.projects],
@@ -48,6 +50,7 @@ async def list_auth_projects(request: Request):
 
 @router.post("/v3/auth/tokens")
 async def create_token(request: Request):
+    """Issue a token: exchange username/password (or another auth method) for an X-Subject-Token."""
     state = request.app.state.sim
     body = await request.json()
 
@@ -99,6 +102,7 @@ async def create_token(request: Request):
 
 @router.post("/v3/users")
 async def create_user(request: Request):
+    """Create an IAM user: the login identity with a password and access keys."""
     state = request.app.state.sim
     if not hasattr(state, "iam_users"):
         state.iam_users = {}
@@ -118,6 +122,7 @@ async def create_user(request: Request):
 
 @router.get("/v3/users")
 async def list_users(request: Request):
+    """List the IAM users of the domain."""
     state = request.app.state.sim
     users = list(getattr(state, "iam_users", {}).values())
     return {"users": users}
@@ -125,6 +130,7 @@ async def list_users(request: Request):
 
 @router.get("/v3/users/{user_id}")
 async def show_user(request: Request, user_id: str):
+    """Show one user: name, status, and email."""
     state = request.app.state.sim
     u = getattr(state, "iam_users", {}).get(user_id)
     if not u:
@@ -134,6 +140,7 @@ async def show_user(request: Request, user_id: str):
 
 @router.put("/v3/users/{user_id}")
 async def update_user(request: Request, user_id: str):
+    """Update a user's name, email, or password."""
     state = request.app.state.sim
     u = getattr(state, "iam_users", {}).get(user_id)
     if not u:
@@ -147,6 +154,7 @@ async def update_user(request: Request, user_id: str):
 
 @router.delete("/v3/users/{user_id}")
 async def delete_user(request: Request, user_id: str):
+    """Delete an IAM user."""
     state = request.app.state.sim
     if user_id not in getattr(state, "iam_users", {}):
         return JSONResponse(apigw_error("IAM.0002", "user not found"), status_code=404)
@@ -156,6 +164,7 @@ async def delete_user(request: Request, user_id: str):
 
 @router.post("/v3/groups")
 async def create_user_group(request: Request):
+    """Create a user group."""
     state = request.app.state.sim
     if not hasattr(state, "iam_groups"):
         state.iam_groups = {}
@@ -173,12 +182,14 @@ async def create_user_group(request: Request):
 
 @router.get("/v3/groups")
 async def list_user_groups(request: Request):
+    """List user groups: the containers that carry permissions."""
     state = request.app.state.sim
     return {"groups": list(getattr(state, "iam_groups", {}).values())}
 
 
 @router.get("/v3/roles")
 async def list_roles(request: Request):
+    """List roles: the permission sets that can be granted."""
     return {"roles": [
         {"id": "r_00000000000000000000000000000000", "name": "system_all_1",
          "description": "All permissions", "display_name": "Full access"},
@@ -197,6 +208,7 @@ def _assignment_key(project_id, principal_type, principal_id, role_id):
 
 @router.put("/v3/projects/{project_id}/users/{user_id}/roles/{role_id}")
 async def grant_user_role(request: Request, project_id: str, user_id: str, role_id: str):
+    """Grant a role to a user on a project: the actual permission assignment."""
     state = request.app.state.sim
     if not hasattr(state, "iam_role_assignments"):
         state.iam_role_assignments = {}
@@ -209,6 +221,7 @@ async def grant_user_role(request: Request, project_id: str, user_id: str, role_
 
 @router.delete("/v3/projects/{project_id}/users/{user_id}/roles/{role_id}")
 async def revoke_user_role(request: Request, project_id: str, user_id: str, role_id: str):
+    """Revoke a role from a user on a project."""
     state = request.app.state.sim
     key = _assignment_key(project_id, "user", user_id, role_id)
     if getattr(state, "iam_role_assignments", {}).pop(key, None) is None:
@@ -218,6 +231,7 @@ async def revoke_user_role(request: Request, project_id: str, user_id: str, role
 
 @router.get("/v3/projects/{project_id}/users/{user_id}/roles")
 async def list_user_roles(request: Request, project_id: str, user_id: str):
+    """List the roles a user has on a project."""
     state = request.app.state.sim
     roles = [{"id": a["role_id"], "name": "assigned",
               "links": {"self": f"/v3/roles/{a['role_id']}"}}
@@ -229,6 +243,7 @@ async def list_user_roles(request: Request, project_id: str, user_id: str):
 
 @router.put("/v3/projects/{project_id}/groups/{group_id}/roles/{role_id}")
 async def grant_group_role(request: Request, project_id: str, group_id: str, role_id: str):
+    """Grant a role to a group on a project."""
     state = request.app.state.sim
     if not hasattr(state, "iam_role_assignments"):
         state.iam_role_assignments = {}
@@ -241,6 +256,7 @@ async def grant_group_role(request: Request, project_id: str, group_id: str, rol
 
 @router.delete("/v3/projects/{project_id}/groups/{group_id}/roles/{role_id}")
 async def revoke_group_role(request: Request, project_id: str, group_id: str, role_id: str):
+    """Revoke a role from a group on a project."""
     state = request.app.state.sim
     key = _assignment_key(project_id, "group", group_id, role_id)
     if getattr(state, "iam_role_assignments", {}).pop(key, None) is None:
@@ -250,6 +266,7 @@ async def revoke_group_role(request: Request, project_id: str, group_id: str, ro
 
 @router.get("/v3/projects/{project_id}/groups/{group_id}/roles")
 async def list_group_roles(request: Request, project_id: str, group_id: str):
+    """List the roles a group has on a project."""
     state = request.app.state.sim
     roles = [{"id": a["role_id"], "name": "assigned",
               "links": {"self": f"/v3/roles/{a['role_id']}"}}
@@ -261,6 +278,7 @@ async def list_group_roles(request: Request, project_id: str, group_id: str):
 
 @router.get("/v3/domains")
 async def list_domains(request: Request):
+    """List domains (accounts)."""
     state = request.app.state.sim
     return {"domains": [{"id": state.account["domain_id"],
                           "name": state.account["name"],
@@ -273,6 +291,7 @@ async def list_domains(request: Request):
 
 @router.post("/v3.0/OS-AGENCY/agencies")
 async def create_agency(request: Request):
+    """Create an agency: the delegated identity that lets another account or service act as you."""
     state = request.app.state.sim
     if not hasattr(state, "iam_agencies"):
         state.iam_agencies = {}
@@ -294,12 +313,14 @@ async def create_agency(request: Request):
 
 @router.get("/v3.0/OS-AGENCY/agencies")
 async def list_agencies(request: Request):
+    """List agencies."""
     state = request.app.state.sim
     return {"agencies": list(getattr(state, "iam_agencies", {}).values())}
 
 
 @router.get("/v3.0/OS-AGENCY/agencies/{agency_id}")
 async def show_agency(request: Request, agency_id: str):
+    """Show one agency: its delegated domain and trust duration."""
     state = request.app.state.sim
     a = getattr(state, "iam_agencies", {}).get(agency_id)
     if not a:
@@ -309,6 +330,7 @@ async def show_agency(request: Request, agency_id: str):
 
 @router.put("/v3.0/OS-AGENCY/agencies/{agency_id}")
 async def update_agency(request: Request, agency_id: str):
+    """Update an agency's trust policy or duration."""
     state = request.app.state.sim
     a = getattr(state, "iam_agencies", {}).get(agency_id)
     if not a:
@@ -322,6 +344,7 @@ async def update_agency(request: Request, agency_id: str):
 
 @router.delete("/v3.0/OS-AGENCY/agencies/{agency_id}")
 async def delete_agency(request: Request, agency_id: str):
+    """Delete an agency."""
     state = request.app.state.sim
     if agency_id not in getattr(state, "iam_agencies", {}):
         return JSONResponse(apigw_error("IAM.0004", "agency not found"), status_code=404)
@@ -331,6 +354,7 @@ async def delete_agency(request: Request, agency_id: str):
 
 @router.get("/v3/projects/{project_id}")
 async def show_project(request: Request, project_id: str):
+    """Show one project: its name, domain, and status."""
     state = request.app.state.sim
     p = state.project(project_id)
     if not p:
@@ -341,6 +365,7 @@ async def show_project(request: Request, project_id: str):
 
 @router.put("/v3/projects/{project_id}")
 async def update_project(request: Request, project_id: str):
+    """Update a project's name or description."""
     state = request.app.state.sim
     p = state.project(project_id)
     if not p:
@@ -354,6 +379,7 @@ async def update_project(request: Request, project_id: str):
 
 @router.put("/v3/groups/{group_id}/users/{user_id}")
 async def add_user_to_group(request: Request, group_id: str, user_id: str):
+    """Add a user to a group: the user inherits the group's roles."""
     state = request.app.state.sim
     g = getattr(state, "iam_groups", {}).get(group_id)
     u = getattr(state, "iam_users", {}).get(user_id)
@@ -367,6 +393,7 @@ async def add_user_to_group(request: Request, group_id: str, user_id: str):
 
 @router.delete("/v3/groups/{group_id}/users/{user_id}")
 async def remove_user_from_group(request: Request, group_id: str, user_id: str):
+    """Remove a user from a group."""
     state = request.app.state.sim
     g = getattr(state, "iam_groups", {}).get(group_id)
     if not g:
@@ -379,6 +406,7 @@ async def remove_user_from_group(request: Request, group_id: str, user_id: str):
 
 @router.get("/v3/groups/{group_id}/users")
 async def list_group_users(request: Request, group_id: str):
+    """List the users in a group."""
     state = request.app.state.sim
     g = getattr(state, "iam_groups", {}).get(group_id)
     if not g:
@@ -390,6 +418,7 @@ async def list_group_users(request: Request, group_id: str):
 
 @router.get("/v3/users/{user_id}/groups")
 async def list_user_groups_for_user(request: Request, user_id: str):
+    """List the groups a user belongs to."""
     state = request.app.state.sim
     if user_id not in getattr(state, "iam_users", {}):
         return JSONResponse(apigw_error("IAM.0002", "user not found"), status_code=404)
@@ -400,6 +429,7 @@ async def list_user_groups_for_user(request: Request, user_id: str):
 
 @router.get("/v3/auth/catalog")
 async def get_service_catalog(request: Request):
+    """Show the service catalog: every service's endpoints (SDK discovery)."""
     return {"catalog": [
         {"id": "sim-ecs", "name": "ecs", "type": "compute",
          "endpoints": [{"id": "sim-ecs-ep", "interface": "public",
@@ -422,6 +452,7 @@ async def get_service_catalog(request: Request):
 
 @router.put("/v3.0/OS-FEDERATION/identity_providers")
 async def create_identity_provider(request: Request):
+    """Register an identity provider: the federation IdP (OIDC or SAML)."""
     state = request.app.state.sim
     if not hasattr(state, "iam_idps"):
         state.iam_idps = {}
@@ -443,12 +474,14 @@ async def create_identity_provider(request: Request):
 
 @router.get("/v3.0/OS-FEDERATION/identity_providers")
 async def list_identity_providers(request: Request):
+    """List registered identity providers."""
     state = request.app.state.sim
     return {"identity_providers": list(getattr(state, "iam_idps", {}).values())}
 
 
 @router.get("/v3.0/OS-FEDERATION/identity_providers/{provider_id}")
 async def show_identity_provider(request: Request, provider_id: str):
+    """Show one identity provider: its protocol and status."""
     state = request.app.state.sim
     p = getattr(state, "iam_idps", {}).get(provider_id)
     if not p:
@@ -459,6 +492,7 @@ async def show_identity_provider(request: Request, provider_id: str):
 
 @router.delete("/v3.0/OS-FEDERATION/identity_providers/{provider_id}")
 async def delete_identity_provider(request: Request, provider_id: str):
+    """Delete an identity provider."""
     state = request.app.state.sim
     if provider_id not in getattr(state, "iam_idps", {}):
         return JSONResponse(apigw_error("IAM.0009", "identity provider not found"),
@@ -493,6 +527,7 @@ async def revoke_token(request: Request):
 
 @router.put("/v3.0/OS-FEDERATION/mappings")
 async def create_mapping(request: Request):
+    """Create a mapping: the rules converting IdP assertions to local identities."""
     state = request.app.state.sim
     if not hasattr(state, "iam_mappings"):
         state.iam_mappings = {}
@@ -511,12 +546,14 @@ async def create_mapping(request: Request):
 
 @router.get("/v3.0/OS-FEDERATION/mappings")
 async def list_mappings(request: Request):
+    """List mappings."""
     state = request.app.state.sim
     return {"mappings": list(getattr(state, "iam_mappings", {}).values())}
 
 
 @router.get("/v3.0/OS-FEDERATION/mappings/{mapping_id}")
 async def show_mapping(request: Request, mapping_id: str):
+    """Show one mapping's rules."""
     state = request.app.state.sim
     m = getattr(state, "iam_mappings", {}).get(mapping_id)
     if not m:
@@ -526,6 +563,7 @@ async def show_mapping(request: Request, mapping_id: str):
 
 @router.delete("/v3.0/OS-FEDERATION/mappings/{mapping_id}")
 async def delete_mapping(request: Request, mapping_id: str):
+    """Delete a mapping."""
     state = request.app.state.sim
     if mapping_id not in getattr(state, "iam_mappings", {}):
         return JSONResponse(apigw_error("IAM.0012", "mapping not found"), status_code=404)
@@ -535,6 +573,7 @@ async def delete_mapping(request: Request, mapping_id: str):
 
 @router.put("/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}")
 async def create_protocol(request: Request, provider_id: str, protocol_id: str):
+    """Configure a provider's protocol: how federation assertions map to local users."""
     state = request.app.state.sim
     idp = getattr(state, "iam_idps", {}).get(provider_id)
     if not idp:
@@ -557,6 +596,7 @@ async def create_protocol(request: Request, provider_id: str, protocol_id: str):
 
 @router.get("/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols")
 async def list_protocols(request: Request, provider_id: str):
+    """List a provider's protocols."""
     state = request.app.state.sim
     if provider_id not in getattr(state, "iam_idps", {}):
         return JSONResponse(apigw_error("IAM.0009", "identity provider not found"),
@@ -568,6 +608,7 @@ async def list_protocols(request: Request, provider_id: str):
 
 @router.get("/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}")
 async def show_protocol(request: Request, provider_id: str, protocol_id: str):
+    """Show one protocol."""
     state = request.app.state.sim
     p = getattr(state, "iam_protocols", {}).get(f"{provider_id}/{protocol_id}")
     if not p:
@@ -577,6 +618,7 @@ async def show_protocol(request: Request, provider_id: str, protocol_id: str):
 
 @router.delete("/v3.0/OS-FEDERATION/identity_providers/{provider_id}/protocols/{protocol_id}")
 async def delete_protocol(request: Request, provider_id: str, protocol_id: str):
+    """Delete a protocol."""
     state = request.app.state.sim
     key = f"{provider_id}/{protocol_id}"
     if key not in getattr(state, "iam_protocols", {}):
@@ -591,6 +633,7 @@ async def delete_protocol(request: Request, provider_id: str, protocol_id: str):
 
 @router.post("/v3.0/OS-CREDENTIAL/credentials")
 async def create_access_key(request: Request):
+    """Create an access key (AK/SK) for a user: the permanent API credentials."""
     state = request.app.state.sim
     if not hasattr(state, "iam_credentials"):
         state.iam_credentials = {}
@@ -612,6 +655,7 @@ async def create_access_key(request: Request):
 
 @router.get("/v3.0/OS-CREDENTIAL/credentials")
 async def list_access_keys(request: Request):
+    """List a user's access keys with their status."""
     state = request.app.state.sim
     creds = [{"access": c["access"], "status": c["status"],
               "user_id": c["user_id"], "description": c["description"],
@@ -622,6 +666,7 @@ async def list_access_keys(request: Request):
 
 @router.get("/v3.0/OS-CREDENTIAL/credentials/{access_key}")
 async def show_access_key(request: Request, access_key: str):
+    """Show one access key: its creation time and last use."""
     state = request.app.state.sim
     c = getattr(state, "iam_credentials", {}).get(access_key)
     if not c:
@@ -633,6 +678,7 @@ async def show_access_key(request: Request, access_key: str):
 
 @router.delete("/v3.0/OS-CREDENTIAL/credentials/{access_key}")
 async def delete_access_key(request: Request, access_key: str):
+    """Delete an access key."""
     state = request.app.state.sim
     if access_key not in getattr(state, "iam_credentials", {}):
         return JSONResponse(apigw_error("IAM.0015", "access key not found"), status_code=404)

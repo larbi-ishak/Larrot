@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/apigw/instances")
 async def create_apig_instance(request: Request, pid: str):
+    """Create a dedicated API Gateway instance (async: deployment takes minutes)."""
     s = request.app.state.sim
     if not hasattr(s, "apig_instances"): s.apig_instances = {}
     body = await request.json()
@@ -19,12 +20,14 @@ async def create_apig_instance(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/instances")
 async def list_apig_instances(request: Request, pid: str):
+    """List the dedicated API Gateway instances."""
     s = request.app.state.sim
     instances = [i for i in getattr(s, "apig_instances", {}).values() if i["project_id"] == pid]
     return {"total": len(instances), "instances": instances}
 
 @router.post("/v2/{pid}/apigw/groups")
 async def create_api_group(request: Request, pid: str):
+    """Create an API group: the object that owns APIs and their release environments."""
     s = request.app.state.sim
     if not hasattr(s, "apig_groups"): s.apig_groups = {}
     body = await request.json()
@@ -36,12 +39,14 @@ async def create_api_group(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/groups")
 async def list_api_groups(request: Request, pid: str):
+    """List API groups."""
     s = request.app.state.sim
     groups = [g for g in getattr(s, "apig_groups", {}).values() if g["project_id"] == pid]
     return {"total": len(groups), "groups": groups}
 
 @router.post("/v2/{pid}/apigw/apis")
 async def create_api(request: Request, pid: str):
+    """Define an API in a group: request method and path, backend service, and security settings."""
     s = request.app.state.sim
     if not hasattr(s, "apig_apis"):
         s.apig_apis = {}
@@ -61,6 +66,7 @@ async def create_api(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/apis")
 async def list_apig_apis(request: Request, pid: str):
+    """List the APIs of the project."""
     s = request.app.state.sim
     apis = [a for a in getattr(s, "apig_apis", {}).values() if a.get("project_id") == pid]
     return {"apis": apis, "total": len(apis)}
@@ -68,6 +74,7 @@ async def list_apig_apis(request: Request, pid: str):
 
 @router.post("/v2/{pid}/apigw/environments")
 async def create_environment(request: Request, pid: str):
+    """Create a release environment (e.g. RELEASE, BETA) for publishing APIs."""
     s = request.app.state.sim
     if not hasattr(s, "apig_environments"):
         s.apig_environments = {}
@@ -87,6 +94,7 @@ async def create_environment(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/environments")
 async def list_environments(request: Request, pid: str):
+    """List release environments."""
     s = request.app.state.sim
     envs = [e for e in getattr(s, "apig_environments", {}).values() if e["project_id"] == pid]
     return {"environments": envs, "total": len(envs)}
@@ -94,6 +102,7 @@ async def list_environments(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/apis/{api_id}")
 async def show_api(request: Request, pid: str, api_id: str):
+    """Show one API's full definition."""
     s = request.app.state.sim
     a = getattr(s, "apig_apis", {}).get(api_id)
     if not a or a.get("project_id") != pid:
@@ -103,6 +112,7 @@ async def show_api(request: Request, pid: str, api_id: str):
 
 @router.delete("/v2/{pid}/apigw/apis/{api_id}")
 async def delete_api(request: Request, pid: str, api_id: str):
+    """Delete an API."""
     s = request.app.state.sim
     a = getattr(s, "apig_apis", {}).get(api_id)
     if not a or a.get("project_id") != pid:
@@ -113,6 +123,7 @@ async def delete_api(request: Request, pid: str, api_id: str):
 
 @router.get("/v2/{pid}/apigw/instances/{instance_id}")
 async def show_apig_instance(request: Request, pid: str, instance_id: str):
+    """Show one dedicated instance: its specs and running status."""
     s = request.app.state.sim
     i = getattr(s, "apig_instances", {}).get(instance_id)
     if not i or i.get("project_id") != pid:
@@ -122,6 +133,7 @@ async def show_apig_instance(request: Request, pid: str, instance_id: str):
 
 @router.get("/v2/{pid}/apigw/groups/{group_id}")
 async def show_apig_group(request: Request, pid: str, group_id: str):
+    """Show one API group."""
     s = request.app.state.sim
     g = getattr(s, "apig_groups", {}).get(group_id)
     if not g or g.get("project_id") != pid:
@@ -131,6 +143,7 @@ async def show_apig_group(request: Request, pid: str, group_id: str):
 
 @router.delete("/v2/{pid}/apigw/groups/{group_id}")
 async def delete_apig_group(request: Request, pid: str, group_id: str):
+    """Delete an API group (must contain no published APIs)."""
     s = request.app.state.sim
     g = getattr(s, "apig_groups", {}).get(group_id)
     if not g or g.get("project_id") != pid:
@@ -141,6 +154,7 @@ async def delete_apig_group(request: Request, pid: str, group_id: str):
 
 @router.delete("/v2/{pid}/apigw/environments/{env_id}")
 async def delete_apig_environment(request: Request, pid: str, env_id: str):
+    """Delete a release environment."""
     s = request.app.state.sim
     e = getattr(s, "apig_environments", {}).get(env_id)
     if not e or e.get("project_id") != pid:
@@ -151,6 +165,7 @@ async def delete_apig_environment(request: Request, pid: str, env_id: str):
 
 @router.post("/v2/{pid}/apigw/throttles")
 async def create_throttle(request: Request, pid: str):
+    """Create a throttle policy: API-level rate limiting by user, app, or IP."""
     s = request.app.state.sim
     if not hasattr(s, "apig_throttles"):
         s.apig_throttles = {}
@@ -173,6 +188,7 @@ async def create_throttle(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/throttles")
 async def list_throttles(request: Request, pid: str):
+    """List throttle policies."""
     s = request.app.state.sim
     ts = [t for t in getattr(s, "apig_throttles", {}).values() if t["project_id"] == pid]
     return {"throttles": ts, "total": len(ts)}
@@ -180,6 +196,7 @@ async def list_throttles(request: Request, pid: str):
 
 @router.post("/v2/{pid}/apigw/apps")
 async def create_app(request: Request, pid: str):
+    """Create an app: the API-calling credential (AppKey/AppSecret) given to consumers."""
     s = request.app.state.sim
     if not hasattr(s, "apig_apps"):
         s.apig_apps = {}
@@ -198,6 +215,7 @@ async def create_app(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/apps")
 async def list_apps(request: Request, pid: str):
+    """List apps."""
     s = request.app.state.sim
     apps = [a for a in getattr(s, "apig_apps", {}).values() if a["project_id"] == pid]
     return {"apps": apps, "total": len(apps)}
@@ -205,6 +223,7 @@ async def list_apps(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/environments/{env_id}")
 async def show_apig_environment(request: Request, pid: str, env_id: str):
+    """Show one release environment."""
     s = request.app.state.sim
     e = getattr(s, "apig_environments", {}).get(env_id)
     if not e or e.get("project_id") != pid:
@@ -214,6 +233,7 @@ async def show_apig_environment(request: Request, pid: str, env_id: str):
 
 @router.post("/v2/{pid}/apigw/app-auths")
 async def create_app_auth(request: Request, pid: str):
+    """Authorize an app to call an API."""
     s = request.app.state.sim
     if not hasattr(s, "apig_app_auths"):
         s.apig_app_auths = {}
@@ -239,6 +259,7 @@ async def create_app_auth(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/app-auths")
 async def list_app_auths(request: Request, pid: str):
+    """List app authorizations."""
     s = request.app.state.sim
     auths = [a for a in getattr(s, "apig_app_auths", {}).values()
              if a["project_id"] == pid]
@@ -247,6 +268,7 @@ async def list_app_auths(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/throttles/{throttle_id}")
 async def show_throttle(request: Request, pid: str, throttle_id: str):
+    """Show one throttle policy."""
     s = request.app.state.sim
     t = getattr(s, "apig_throttles", {}).get(throttle_id)
     if not t or t.get("project_id") != pid:
@@ -256,6 +278,7 @@ async def show_throttle(request: Request, pid: str, throttle_id: str):
 
 @router.delete("/v2/{pid}/apigw/throttles/{throttle_id}")
 async def delete_throttle(request: Request, pid: str, throttle_id: str):
+    """Delete a throttle policy."""
     s = request.app.state.sim
     t = getattr(s, "apig_throttles", {}).get(throttle_id)
     if not t or t.get("project_id") != pid:
@@ -266,6 +289,7 @@ async def delete_throttle(request: Request, pid: str, throttle_id: str):
 
 @router.get("/v2/{pid}/apigw/apps/{app_id}")
 async def show_app(request: Request, pid: str, app_id: str):
+    """Show one app."""
     s = request.app.state.sim
     a = getattr(s, "apig_apps", {}).get(app_id)
     if not a or a.get("project_id") != pid:
@@ -275,6 +299,7 @@ async def show_app(request: Request, pid: str, app_id: str):
 
 @router.delete("/v2/{pid}/apigw/apps/{app_id}")
 async def delete_app(request: Request, pid: str, app_id: str):
+    """Delete an app."""
     s = request.app.state.sim
     a = getattr(s, "apig_apps", {}).get(app_id)
     if not a or a.get("project_id") != pid:
@@ -285,6 +310,7 @@ async def delete_app(request: Request, pid: str, app_id: str):
 
 @router.post("/v2/{pid}/apigw/authorizers")
 async def create_authorizer(request: Request, pid: str):
+    """Create a custom authorizer: a function that validates API callers."""
     s = request.app.state.sim
     if not hasattr(s, "apig_authorizers"):
         s.apig_authorizers = {}
@@ -305,6 +331,7 @@ async def create_authorizer(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apigw/authorizers")
 async def list_authorizers(request: Request, pid: str):
+    """List custom authorizers."""
     s = request.app.state.sim
     auths = [a for a in getattr(s, "apig_authorizers", {}).values()
              if a["project_id"] == pid]

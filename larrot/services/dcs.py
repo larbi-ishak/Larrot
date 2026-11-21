@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/instances")
 async def create_dcs_instance(request: Request, pid: str):
+    """Create a DCS Redis instance (async: takes minutes)."""
     s = request.app.state.sim
     if not hasattr(s, "dcs_instances"): s.dcs_instances = {}
     body = await request.json()
@@ -25,12 +26,14 @@ async def create_dcs_instance(request: Request, pid: str):
 
 @router.get("/v2/{pid}/instances")
 async def list_dcs_instances(request: Request, pid: str):
+    """List DCS instances."""
     s = request.app.state.sim
     instances = [i for i in getattr(s, "dcs_instances", {}).values() if i["project_id"] == pid]
     return {"instance_num": len(instances), "instances": instances}
 
 @router.get("/v2/{pid}/instances/{instance_id}")
 async def show_dcs_instance(request: Request, pid: str, instance_id: str):
+    """Show one instance: capacity, engine version, endpoints, and status."""
     s = request.app.state.sim
     i = getattr(s, "dcs_instances", {}).get(instance_id)
     if not i or i["project_id"] != pid:
@@ -39,6 +42,7 @@ async def show_dcs_instance(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v2/{pid}/instances/{instance_id}")
 async def delete_dcs_instance(request: Request, pid: str, instance_id: str):
+    """Delete a DCS instance (async)."""
     s = request.app.state.sim
     if instance_id not in getattr(s, "dcs_instances", {}):
         return JSONResponse({"error_msg": "Instance not found", "error_code": "DCS.0001"}, status_code=404)

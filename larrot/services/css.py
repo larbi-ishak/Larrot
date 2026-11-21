@@ -26,6 +26,7 @@ def _cluster_json(c):
 
 @router.post("/v1.0/{pid}/css/clusters")
 async def create_cluster(request: Request, pid: str):
+    """Create a CSS cluster: Elasticsearch-compatible search (async: takes minutes)."""
     s = request.app.state.sim
     if not hasattr(s, "css_clusters"):
         s.css_clusters = {}
@@ -64,6 +65,7 @@ async def create_cluster(request: Request, pid: str):
 
 @router.get("/v1.0/{pid}/css/clusters")
 async def list_clusters(request: Request, pid: str):
+    """List CSS clusters."""
     s = request.app.state.sim
     clusters = [c for c in getattr(s, "css_clusters", {}).values()
                 if c["project_id"] == pid]
@@ -72,6 +74,7 @@ async def list_clusters(request: Request, pid: str):
 
 @router.get("/v1.0/{pid}/css/clusters/{cluster_id}")
 async def show_cluster(request: Request, pid: str, cluster_id: str):
+    """Show one cluster: node count, storage, and health."""
     s = request.app.state.sim
     c = getattr(s, "css_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -82,6 +85,7 @@ async def show_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.delete("/v1.0/{pid}/css/clusters/{cluster_id}")
 async def delete_cluster(request: Request, pid: str, cluster_id: str):
+    """Delete a CSS cluster."""
     s = request.app.state.sim
     c = getattr(s, "css_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -94,6 +98,7 @@ async def delete_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.post("/v1.0/{pid}/css/clusters/{cluster_id}/restart")
 async def restart_cluster(request: Request, pid: str, cluster_id: str):
+    """Restart a CSS cluster (async)."""
     s = request.app.state.sim
     c = getattr(s, "css_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -117,6 +122,7 @@ async def restart_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.post("/v1.0/{pid}/css/clusters/{cluster_id}/indices")
 async def create_index(request: Request, pid: str, cluster_id: str):
+    """Create an index in a cluster: the mapping and settings."""
     s = request.app.state.sim
     c = getattr(s, "css_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -137,6 +143,7 @@ async def create_index(request: Request, pid: str, cluster_id: str):
 
 @router.get("/v1.0/{pid}/css/clusters/{cluster_id}/indices")
 async def list_indices(request: Request, pid: str, cluster_id: str):
+    """List the indices of a cluster with document counts and sizes."""
     s = request.app.state.sim
     c = getattr(s, "css_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -148,6 +155,7 @@ async def list_indices(request: Request, pid: str, cluster_id: str):
 
 @router.delete("/v1.0/{pid}/css/clusters/{cluster_id}/indices/{index_name}")
 async def delete_index(request: Request, pid: str, cluster_id: str, index_name: str):
+    """Delete an index."""
     s = request.app.state.sim
     c = getattr(s, "css_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:

@@ -138,6 +138,7 @@ def resolve_device(server, volume_bootable, requested):
 
 @router.get("/v1/{pid}/cloudservers/detail")
 async def list_servers_detail(request: Request, pid: str):
+    """List ECS servers with full details: status, addresses, flavor, and image."""
     state = request.app.state.sim
     params = request.query_params
     servers = [s for s in state.servers.values() if s["project_id"] == pid]
@@ -174,6 +175,7 @@ async def list_servers_detail(request: Request, pid: str):
 
 @router.get("/v1.1/{pid}/cloudservers/detail")
 async def list_servers_v11(request: Request, pid: str):
+    """List ECS servers (v1.1 API): the paginated variant with detail."""
     state = request.app.state.sim
     servers = [s for s in state.servers.values() if s["project_id"] == pid]
     return {"servers": [_server_list_json(state, pid, s) for s in servers],
@@ -182,6 +184,7 @@ async def list_servers_v11(request: Request, pid: str):
 
 @router.get("/v1/{pid}/cloudservers/flavors")
 async def list_flavors(request: Request, pid: str):
+    """List the ECS flavors available in the region: vCPU, memory, and disk specs."""
     state = request.app.state.sim
     if state.profile_of(pid) == Profile.HCS:
         return JSONResponse(
@@ -197,6 +200,7 @@ async def list_flavors(request: Request, pid: str):
 
 @router.get("/v1/{pid}/cloudservers/limits")
 async def get_quotas(request: Request, pid: str):
+    """Show the project's ECS quotas: max servers, cores, RAM, and security groups."""
     state = request.app.state.sim
     server_count = len([x for x in state.servers.values() if x["project_id"] == pid])
     return {
@@ -214,6 +218,7 @@ async def get_quotas(request: Request, pid: str):
 
 @router.get("/v1/{pid}/cloudservers/{server_id}")
 async def show_server(request: Request, pid: str, server_id: str):
+    """Show one ECS server: its full spec, addresses, and metadata."""
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:
@@ -223,6 +228,7 @@ async def show_server(request: Request, pid: str, server_id: str):
 
 @router.put("/v1/{pid}/cloudservers/{server_id}")
 async def update_server(request: Request, pid: str, server_id: str):
+    """Update a server's name or description."""
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:
@@ -269,6 +275,7 @@ async def delete_server_tags(request: Request, pid: str, server_id: str):
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/tags")
 async def list_server_tags(request: Request, pid: str, server_id: str):
+    """List a server's tags: key-value pairs for cost tracking and filtering."""
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:
@@ -309,6 +316,7 @@ async def server_tags_action(request: Request, pid: str, server_id: str):
 
 @router.post("/v1/{pid}/cloudservers/{server_id}/action")
 async def server_action(request: Request, pid: str, server_id: str):
+    """Power or lifecycle action on one server: os-start, os-stop, reboot, rebuild, resize..."""
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:
@@ -394,6 +402,7 @@ async def server_action(request: Request, pid: str, server_id: str):
 @router.post("/v1/{pid}/cloudservers")
 @router.post("/v2.1/{pid}/servers")
 async def create_servers(request: Request, pid: str):
+    """Create one or more ECS servers (async: returns a job; status goes BUILD to ACTIVE)."""
     state = request.app.state.sim
     body = await request.json()
     spec = body.get("server") or {}
@@ -463,6 +472,7 @@ async def create_servers(request: Request, pid: str):
 
 @router.post("/v1/{pid}/cloudservers/delete")
 async def delete_servers(request: Request, pid: str):
+    """Batch delete servers, optionally deleting their disks (async)."""
     state = request.app.state.sim
     body = await request.json()
     ids = [s["id"] for s in body.get("servers", [])]
@@ -507,6 +517,7 @@ async def delete_servers(request: Request, pid: str):
 
 @router.post("/v1/{pid}/cloudservers/action")
 async def batch_action(request: Request, pid: str):
+    """Batch action on multiple servers at once (async)."""
     state = request.app.state.sim
     body = await request.json()
 
@@ -573,6 +584,7 @@ async def batch_action(request: Request, pid: str):
 
 @router.get("/v1/{pid}/jobs/{job_id}")
 async def show_job(request: Request, pid: str, job_id: str):
+    """Show an async job: its status, entities, and progress (the polling endpoint)."""
     state = request.app.state.sim
     job = state.jobs.get(job_id)
     if not job:
@@ -593,6 +605,7 @@ async def nova_list_availability_zones(request: Request, pid: str):
 
 @router.get("/v2.1/{pid}/servers")
 async def nova_list_brief(request: Request, pid: str):
+    """List servers briefly (Nova v2.1): IDs, names, and links only."""
     state = request.app.state.sim
     servers = [{"id": s["id"], "name": s["name"],
                 "links": [{"rel": "self", "href": f"/v2.1/{pid}/servers/{s['id']}"},
@@ -603,6 +616,7 @@ async def nova_list_brief(request: Request, pid: str):
 
 @router.get("/v2.1/{pid}/servers/detail")
 async def nova_list_detail(request: Request, pid: str):
+    """List servers with details (Nova v2.1): the OpenStack-style view."""
     state = request.app.state.sim
     servers = [_server_list_json(state, pid, s)
                for s in state.servers.values() if s["project_id"] == pid]
@@ -615,6 +629,7 @@ async def nova_list_detail(request: Request, pid: str):
 
 @router.post("/v1/{pid}/cloudservers/{server_id}/attachvolume")
 async def attach_volume(request: Request, pid: str, server_id: str):
+    """Attach an EVS disk to a server (async)."""
     state = request.app.state.sim
     body = await request.json()
     va = body["volumeAttachment"]
@@ -662,6 +677,7 @@ async def attach_volume(request: Request, pid: str, server_id: str):
 
 @router.delete("/v1/{pid}/cloudservers/{server_id}/attachvolume/{volume_id}")
 async def detach_volume(request: Request, pid: str, server_id: str, volume_id: str):
+    """Detach an EVS disk from a server (async)."""
     state = request.app.state.sim
     server = state.servers.get(server_id)
     if not server or server["project_id"] != pid:
@@ -703,6 +719,7 @@ async def detach_volume(request: Request, pid: str, server_id: str, volume_id: s
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/block_device")
 async def list_block_devices(request: Request, pid: str, server_id: str):
+    """List the block devices (disks) attached to a server: device names and boot order."""
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:
@@ -718,6 +735,7 @@ async def list_block_devices(request: Request, pid: str, server_id: str):
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/os-volume_attachments")
 async def list_volume_attachments(request: Request, pid: str, server_id: str):
+    """List volume attachments with disk buses and device paths."""
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:
@@ -742,6 +760,7 @@ async def get_server_password(request: Request, pid: str, server_id: str):
 
 @router.get("/v1/{pid}/cloudservers/{server_id}/os-resetpwd-flag")
 async def show_resetpwd_flag(request: Request, pid: str, server_id: str):
+    """Show whether one-click password reset is enabled on the server."""
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:
@@ -768,6 +787,7 @@ async def update_resetpwd_flag(request: Request, pid: str, server_id: str):
 @router.put("/v1/{pid}/cloudservers/{server_id}/os-reset-password")
 @router.post("/v1/{pid}/cloudservers/{server_id}/os-reset-password")
 async def reset_password(request: Request, pid: str, server_id: str):
+    """Reset the server's login password (takes effect after a restart)."""
     state = request.app.state.sim
     s = state.servers.get(server_id)
     if not s or s["project_id"] != pid:

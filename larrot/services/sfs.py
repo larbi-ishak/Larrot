@@ -25,6 +25,7 @@ def _share_json(s):
 
 @router.post("/v2/{pid}/shares")
 async def create_share(request: Request, pid: str):
+    """Create an SFS Turbo file share: the shared POSIX filesystem (async)."""
     state = request.app.state.sim
     if not hasattr(state, "sfs_shares"):
         state.sfs_shares = {}
@@ -58,6 +59,7 @@ async def create_share(request: Request, pid: str):
 
 @router.get("/v2/{pid}/shares")
 async def list_shares(request: Request, pid: str):
+    """List file shares with their sizes and export locations."""
     state = request.app.state.sim
     if not hasattr(state, "sfs_shares"):
         state.sfs_shares = {}
@@ -67,6 +69,7 @@ async def list_shares(request: Request, pid: str):
 
 @router.get("/v2/{pid}/shares/{share_id}")
 async def show_share(request: Request, pid: str, share_id: str):
+    """Show one share: its capacity, protocol, and mount target."""
     state = request.app.state.sim
     s = getattr(state, "sfs_shares", {}).get(share_id)
     if not s or s["project_id"] != pid:
@@ -76,6 +79,7 @@ async def show_share(request: Request, pid: str, share_id: str):
 
 @router.delete("/v2/{pid}/shares/{share_id}")
 async def delete_share(request: Request, pid: str, share_id: str):
+    """Delete a file share (async)."""
     state = request.app.state.sim
     s = getattr(state, "sfs_shares", {}).get(share_id)
     if not s or s["project_id"] != pid:
@@ -86,6 +90,7 @@ async def delete_share(request: Request, pid: str, share_id: str):
 
 @router.post("/v2/{pid}/shares/{share_id}/action")
 async def share_action(request: Request, pid: str, share_id: str):
+    """Share action: expand capacity or change the performance mode (async)."""
     state = request.app.state.sim
     s = getattr(state, "sfs_shares", {}).get(share_id)
     if not s or s["project_id"] != pid:

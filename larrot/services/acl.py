@@ -33,6 +33,7 @@ def _rule_json(r):
 
 @router.post("/v3/{pid}/vpc/acls")
 async def create_acl(request: Request, pid: str):
+    """Create a network ACL: a stateful firewall for a VPC with ingress and egress rule sets."""
     s = request.app.state.sim
     if not hasattr(s, "network_acls"): s.network_acls = {}
     body = await request.json()
@@ -48,6 +49,7 @@ async def create_acl(request: Request, pid: str):
 
 @router.get("/v3/{pid}/vpc/acls")
 async def list_acls(request: Request, pid: str):
+    """List the network ACLs of the project."""
     s = request.app.state.sim
     acls = [a for a in getattr(s, "network_acls", {}).values() if a["project_id"] == pid]
     return {"acls": [_acl_json(a) for a in acls], "count": len(acls)}
@@ -55,6 +57,7 @@ async def list_acls(request: Request, pid: str):
 
 @router.get("/v3/{pid}/vpc/acls/{acl_id}")
 async def show_acl(request: Request, pid: str, acl_id: str):
+    """Show one network ACL, including its ingress and egress rules."""
     s = request.app.state.sim
     a = getattr(s, "network_acls", {}).get(acl_id)
     if not a or a["project_id"] != pid:
@@ -64,6 +67,7 @@ async def show_acl(request: Request, pid: str, acl_id: str):
 
 @router.put("/v3/{pid}/vpc/acls/{acl_id}")
 async def update_acl(request: Request, pid: str, acl_id: str):
+    """Update a network ACL's name or description."""
     s = request.app.state.sim
     a = getattr(s, "network_acls", {}).get(acl_id)
     if not a or a.get("project_id") != pid:
@@ -77,6 +81,7 @@ async def update_acl(request: Request, pid: str, acl_id: str):
 
 @router.delete("/v3/{pid}/vpc/acls/{acl_id}")
 async def delete_acl(request: Request, pid: str, acl_id: str):
+    """Delete a network ACL (it must be disassociated from all subnets first)."""
     s = request.app.state.sim
     if acl_id not in getattr(s, "network_acls", {}):
         return JSONResponse({"error_msg": "ACL not found", "error_code": "ACL.0001"}, status_code=404)
@@ -90,6 +95,7 @@ async def delete_acl(request: Request, pid: str, acl_id: str):
 
 @router.post("/v3/{pid}/vpc/acls/{acl_id}/ingress-rules")
 async def add_ingress_rule(request: Request, pid: str, acl_id: str):
+    """Add an ingress rule to a network ACL (protocol, port range, source CIDR, action)."""
     s = request.app.state.sim
     a = getattr(s, "network_acls", {}).get(acl_id)
     if not a or a["project_id"] != pid:
@@ -110,6 +116,7 @@ async def add_ingress_rule(request: Request, pid: str, acl_id: str):
 
 @router.post("/v3/{pid}/vpc/acls/{acl_id}/egress-rules")
 async def add_egress_rule(request: Request, pid: str, acl_id: str):
+    """Add an egress rule to a network ACL (protocol, port range, destination CIDR, action)."""
     s = request.app.state.sim
     a = getattr(s, "network_acls", {}).get(acl_id)
     if not a or a["project_id"] != pid:
@@ -134,6 +141,7 @@ async def add_egress_rule(request: Request, pid: str, acl_id: str):
 
 @router.post("/v3/{pid}/vpc/acls/{acl_id}/associate")
 async def associate_acl(request: Request, pid: str, acl_id: str):
+    """Associate a network ACL with a subnet."""
     s = request.app.state.sim
     a = getattr(s, "network_acls", {}).get(acl_id)
     if not a or a["project_id"] != pid:
@@ -148,6 +156,7 @@ async def associate_acl(request: Request, pid: str, acl_id: str):
 
 @router.post("/v3/{pid}/vpc/acls/{acl_id}/disassociate")
 async def disassociate_acl(request: Request, pid: str, acl_id: str):
+    """Disassociate a network ACL from a subnet."""
     s = request.app.state.sim
     a = getattr(s, "network_acls", {}).get(acl_id)
     if not a or a["project_id"] != pid:

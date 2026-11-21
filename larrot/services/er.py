@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.post("/v3/{pid}/enterprise-router/instances")
 async def create_instance(request: Request, pid: str):
+    """Create an Enterprise Router instance: the transit hub for VPCs (async)."""
     s = request.app.state.sim
     if not hasattr(s, "er_instances"):
         s.er_instances = {}
@@ -47,6 +48,7 @@ async def create_instance(request: Request, pid: str):
 
 @router.get("/v3/{pid}/enterprise-router/instances")
 async def list_instances(request: Request, pid: str):
+    """List Enterprise Router instances."""
     s = request.app.state.sim
     state_f = request.query_params.get("state")
     instances = [i for i in getattr(s, "er_instances", {}).values()
@@ -58,6 +60,7 @@ async def list_instances(request: Request, pid: str):
 
 @router.get("/v3/{pid}/enterprise-router/instances/{er_id}")
 async def show_instance(request: Request, pid: str, er_id: str):
+    """Show one instance: its ASN, status, and default route table."""
     s = request.app.state.sim
     er = getattr(s, "er_instances", {}).get(er_id)
     if not er or er["project_id"] != pid:
@@ -68,6 +71,7 @@ async def show_instance(request: Request, pid: str, er_id: str):
 
 @router.delete("/v3/{pid}/enterprise-router/instances/{er_id}")
 async def delete_instance(request: Request, pid: str, er_id: str):
+    """Delete an Enterprise Router instance."""
     s = request.app.state.sim
     er = getattr(s, "er_instances", {}).get(er_id)
     if not er or er["project_id"] != pid:
@@ -87,6 +91,7 @@ async def delete_instance(request: Request, pid: str, er_id: str):
 @router.post("/v3/{pid}/enterprise-router/instances/{er_id}/attachments")
 @router.post("/v3/{pid}/enterprise-router/instances/{er_id}/vpc-attachments")
 async def create_attachment(request: Request, pid: str, er_id: str):
+    """Attach a VPC or another router to the Enterprise Router."""
     s = request.app.state.sim
     er = getattr(s, "er_instances", {}).get(er_id)
     if not er or er["project_id"] != pid:
@@ -123,6 +128,7 @@ async def create_attachment(request: Request, pid: str, er_id: str):
 @router.get("/v3/{pid}/enterprise-router/instances/{er_id}/attachments")
 @router.get("/v3/{pid}/enterprise-router/instances/{er_id}/vpc-attachments")
 async def list_attachments(request: Request, pid: str, er_id: str):
+    """List the attachments of an instance."""
     s = request.app.state.sim
     atts = [a for a in getattr(s, "er_attachments", {}).values()
             if a["project_id"] == pid and a["er_id"] == er_id]
@@ -132,6 +138,7 @@ async def list_attachments(request: Request, pid: str, er_id: str):
 
 @router.delete("/v3/{pid}/enterprise-router/instances/{er_id}/attachments/{attachment_id}")
 async def delete_attachment(request: Request, pid: str, er_id: str, attachment_id: str):
+    """Remove an attachment."""
     s = request.app.state.sim
     att = getattr(s, "er_attachments", {}).get(attachment_id)
     if not att or att["project_id"] != pid or att["er_id"] != er_id:
@@ -147,6 +154,7 @@ async def delete_attachment(request: Request, pid: str, er_id: str, attachment_i
 
 @router.post("/v3/{pid}/enterprise-router/instances/{er_id}/route-tables")
 async def create_route_table(request: Request, pid: str, er_id: str):
+    """Create a route table on the instance: the routing policy container."""
     s = request.app.state.sim
     er = getattr(s, "er_instances", {}).get(er_id)
     if not er or er["project_id"] != pid:
@@ -167,6 +175,7 @@ async def create_route_table(request: Request, pid: str, er_id: str):
 
 @router.get("/v3/{pid}/enterprise-router/instances/{er_id}/route-tables/{route_table_id}")
 async def show_route_table(request: Request, pid: str, er_id: str, route_table_id: str):
+    """Show one route table: its associations and propagations."""
     s = request.app.state.sim
     t = getattr(s, "er_route_tables", {}).get(route_table_id)
     if not t or t["project_id"] != pid or t["er_id"] != er_id:
@@ -177,6 +186,7 @@ async def show_route_table(request: Request, pid: str, er_id: str, route_table_i
 
 @router.get("/v3/{pid}/enterprise-router/instances/{er_id}/route-tables")
 async def list_route_tables(request: Request, pid: str, er_id: str):
+    """List the route tables of an instance."""
     s = request.app.state.sim
     tables = [t for t in getattr(s, "er_route_tables", {}).values()
               if t["project_id"] == pid and t["er_id"] == er_id]

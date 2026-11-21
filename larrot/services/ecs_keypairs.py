@@ -12,6 +12,7 @@ router = APIRouter()
 
 @router.post("/v2.1/{pid}/os-keypairs")
 async def create_keypair(request: Request, pid: str):
+    """Create an SSH key pair: the public key is stored, the private key is returned once."""
     s = request.app.state.sim
     if not hasattr(s, "ecs_keypairs"): s.ecs_keypairs = {}
     body = await request.json()
@@ -29,6 +30,7 @@ async def create_keypair(request: Request, pid: str):
 
 @router.get("/v2.1/{pid}/os-keypairs")
 async def list_keypairs(request: Request, pid: str):
+    """List the project's SSH key pairs with their fingerprints."""
     s = request.app.state.sim
     kps = [k for k in getattr(s, "ecs_keypairs", {}).values() if k["project_id"] == pid]
     return {"keypairs": [{"name": k["name"], "public_key": k["public_key"],
@@ -37,6 +39,7 @@ async def list_keypairs(request: Request, pid: str):
 
 @router.get("/v2.1/{pid}/os-keypairs/{keypair_name}")
 async def show_keypair(request: Request, pid: str, keypair_name: str):
+    """Show one key pair: its public key and fingerprint."""
     s = request.app.state.sim
     kp = getattr(s, "ecs_keypairs", {}).get(keypair_name)
     if not kp or kp["project_id"] != pid:
@@ -46,6 +49,7 @@ async def show_keypair(request: Request, pid: str, keypair_name: str):
 
 @router.delete("/v2.1/{pid}/os-keypairs/{keypair_name}")
 async def delete_keypair(request: Request, pid: str, keypair_name: str):
+    """Delete a key pair (servers using it keep running)."""
     s = request.app.state.sim
     if keypair_name not in getattr(s, "ecs_keypairs", {}):
         return JSONResponse({"error": {"code": "Ecs.0115", "message": "Keypair not found"}}, status_code=404)
@@ -55,6 +59,7 @@ async def delete_keypair(request: Request, pid: str, keypair_name: str):
 
 @router.post("/v2.1/{pid}/os-keypairs/import")
 async def import_keypair(request: Request, pid: str):
+    """Import an existing public key as a key pair."""
     s = request.app.state.sim
     if not hasattr(s, "ecs_keypairs"): s.ecs_keypairs = {}
     body = await request.json()

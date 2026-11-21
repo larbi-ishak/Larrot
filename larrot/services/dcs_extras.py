@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/instances/{instance_id}/backups")
 async def create_dcs_backup(request: Request, pid: str, instance_id: str):
+    """Back up an instance's data now (async: returns a backup id)."""
     s = request.app.state.sim
     if not hasattr(s, "dcs_backups"): s.dcs_backups = {}
     bid = new_id()
@@ -23,6 +24,7 @@ async def create_dcs_backup(request: Request, pid: str, instance_id: str):
 
 @router.get("/v2/{pid}/instances/{instance_id}/backups")
 async def list_dcs_backups(request: Request, pid: str, instance_id: str):
+    """List an instance's backups."""
     s = request.app.state.sim
     backups = [b for b in getattr(s, "dcs_backups", {}).values()
                if b["project_id"] == pid and b["instance_id"] == instance_id]
@@ -31,6 +33,7 @@ async def list_dcs_backups(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v2/{pid}/instances/{instance_id}/backups/{backup_id}")
 async def delete_dcs_backup(request: Request, pid: str, instance_id: str, backup_id: str):
+    """Delete a backup."""
     s = request.app.state.sim
     if backup_id not in getattr(s, "dcs_backups", {}):
         return JSONResponse({"error_msg": "Backup not found", "error_code": "DCS.0201"}, status_code=404)
@@ -40,12 +43,14 @@ async def delete_dcs_backup(request: Request, pid: str, instance_id: str, backup
 
 @router.post("/v2/{pid}/instances/{instance_id}/restore")
 async def restore_dcs_backup(request: Request, pid: str, instance_id: str):
+    """Restore an instance from a backup (async)."""
     body = await request.json()
     return {"job_id": new_id(), "backup_id": body.get("backup_id", "")}
 
 
 @router.get("/v2/{pid}/instances/{instance_id}/parameters")
 async def list_dcs_parameters(request: Request, pid: str, instance_id: str):
+    """List an instance's Redis parameters with their values and ranges."""
     return {"parameters": [
         {"name": "maxmemory-policy", "value": "allkeys-lru", "description": "Memory eviction policy",
          "restart_required": False},
@@ -62,23 +67,27 @@ async def list_dcs_parameters(request: Request, pid: str, instance_id: str):
 
 @router.put("/v2/{pid}/instances/{instance_id}/parameters")
 async def update_dcs_parameters(request: Request, pid: str, instance_id: str):
+    """Update Redis parameters of an instance (async)."""
     await request.json()
     return {"job_id": new_id(), "restart_required": False}
 
 
 @router.post("/v2/{pid}/instances/{instance_id}/restart")
 async def restart_dcs_instance(request: Request, pid: str, instance_id: str):
+    """Restart a DCS instance (async)."""
     return {"job_id": new_id(), "action": "restart"}
 
 
 @router.post("/v2/{pid}/instances/{instance_id}/resize")
 async def resize_dcs_instance(request: Request, pid: str, instance_id: str):
+    """Change an instance's capacity or flavor (async)."""
     body = await request.json()
     return {"job_id": new_id(), "new_capacity": body.get("new_capacity", 4)}
 
 
 @router.get("/v2/{pid}/instances/{instance_id}/big-keys")
 async def analyze_big_keys(request: Request, pid: str, instance_id: str):
+    """Analyze the instance for big keys: memory-heavy keys that risk eviction."""
     return {"big_keys": [
         {"key": "session:12345", "type": "string", "size": 1048576, "shard": 1},
         {"key": "user:profile:67890", "type": "hash", "size": 524288, "shard": 2},
@@ -87,6 +96,7 @@ async def analyze_big_keys(request: Request, pid: str, instance_id: str):
 
 @router.get("/v2/{pid}/instances/{instance_id}/hot-keys")
 async def analyze_hot_keys(request: Request, pid: str, instance_id: str):
+    """Analyze the instance for hot keys: frequently accessed keys."""
     return {"hot_keys": [
         {"key": "counter:page_views", "qps": 5000, "shard": 1},
         {"key": "cache:user:12345", "qps": 3200, "shard": 3},
@@ -95,6 +105,7 @@ async def analyze_hot_keys(request: Request, pid: str, instance_id: str):
 
 @router.get("/v2/{pid}/flavors")
 async def list_dcs_flavors(request: Request, pid: str):
+    """List the available DCS instance specs."""
     return {"flavors": [
         {"flavor_id": "redis.ha.xlarge.2", "spec_code": "redis_cluster",
          "cache_mode": "cluster", "vcpus": 2, "memory": 4},

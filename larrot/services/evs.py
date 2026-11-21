@@ -51,11 +51,13 @@ def _summary(v, pid):
 
 @router.post("/v2.1/{pid}/cloudvolumes")
 async def create_volume_v21(request: Request, pid: str):
+    """Create a cloud volume (v2.1 API, async)."""
     return await _create_volume(request, pid, include_ids=True)
 
 
 @router.post("/v2/{pid}/cloudvolumes")
 async def create_volume_v2(request: Request, pid: str):
+    """Create an EVS disk (v2 API, async: returns a job and volume ids)."""
     return await _create_volume(request, pid, include_ids=False)
 
 
@@ -106,6 +108,7 @@ async def _create_volume(request, pid, include_ids):
 
 @router.post("/v2/{pid}/volumes")
 async def create_volume_cinder(request: Request, pid: str):
+    """Create an EVS disk (Cinder v2 API, async)."""
     state = request.app.state.sim
     body = await request.json()
     spec = body["volume"]
@@ -139,6 +142,7 @@ async def create_volume_cinder(request: Request, pid: str):
 
 @router.get("/v2/{pid}/cloudvolumes")
 async def list_volumes_sparse(request: Request, pid: str):
+    """List cloud volumes briefly: IDs and names."""
     state = request.app.state.sim
     name = request.query_params.get("name")
     status_f = request.query_params.get("status")
@@ -152,6 +156,7 @@ async def list_volumes_sparse(request: Request, pid: str):
 
 @router.get("/v2/{pid}/cloudvolumes/detail")
 async def list_volumes_detail(request: Request, pid: str):
+    """List cloud volumes with full details: attachments, EVS disk type, and status."""
     state = request.app.state.sim
     vols = [v for v in state.volumes.values() if v["project_id"] == pid]
     return {"count": len(vols), "volumes": [_detail(v, pid) for v in vols]}
@@ -159,6 +164,7 @@ async def list_volumes_detail(request: Request, pid: str):
 
 @router.get("/v2.1/{pid}/cloudvolumes/detail")
 async def list_volumes_detail_v21(request: Request, pid: str):
+    """List cloud volumes with details (v2.1 API)."""
     state = request.app.state.sim
     if state.profile_of(pid) == Profile.HCS:
         return {"volumes": []}
@@ -169,6 +175,7 @@ async def list_volumes_detail_v21(request: Request, pid: str):
 @router.get("/v2/{pid}/cloudvolumes/{volume_id}")
 @router.get("/v2/{pid}/os-vendor-volumes/{volume_id}")
 async def show_volume(request: Request, pid: str, volume_id: str):
+    """Show one volume: its size, type, attachments, and bootable flag."""
     state = request.app.state.sim
     v = state.volumes.get(volume_id)
     if not v or v["project_id"] != pid:
@@ -179,6 +186,7 @@ async def show_volume(request: Request, pid: str, volume_id: str):
 
 @router.get("/v2/{pid}/os-vendor-volumes/detail")
 async def os_vendor_list(request: Request, pid: str):
+    """List vendor volumes (v2.1): the compatibility view for third-party tools."""
     state = request.app.state.sim
     vols = [v for v in state.volumes.values() if v["project_id"] == pid]
     return {"volumes": [_detail(v, pid) for v in vols]}
@@ -186,6 +194,7 @@ async def os_vendor_list(request: Request, pid: str):
 
 @router.put("/v2/{pid}/cloudvolumes/{volume_id}")
 async def update_volume(request: Request, pid: str, volume_id: str):
+    """Update a volume's name or description."""
     state = request.app.state.sim
     v = state.volumes.get(volume_id)
     if not v or v["project_id"] != pid:
@@ -203,6 +212,7 @@ async def update_volume(request: Request, pid: str, volume_id: str):
 
 @router.delete("/v2/{pid}/cloudvolumes/{volume_id}")
 async def delete_volume(request: Request, pid: str, volume_id: str):
+    """Delete a volume (must be detached; async)."""
     state = request.app.state.sim
     v = state.volumes.get(volume_id)
     if not v or v["project_id"] != pid:
@@ -223,6 +233,7 @@ async def delete_volume(request: Request, pid: str, volume_id: str):
 
 @router.post("/v2.1/{pid}/cloudvolumes/{volume_id}/action")
 async def volume_action(request: Request, pid: str, volume_id: str):
+    """Volume action (v2.1): resize, attach, detach, or set read-only."""
     state = request.app.state.sim
     body = await request.json()
     if "os-extend" not in body:
@@ -252,6 +263,7 @@ async def volume_action(request: Request, pid: str, volume_id: str):
 
 @router.post("/v2/{pid}/cloudsnapshots")
 async def create_snapshot(request: Request, pid: str):
+    """Create a snapshot: the point-in-time copy of a volume (async)."""
     state = request.app.state.sim
     body = await request.json()
     spec = body["snapshot"]
@@ -304,6 +316,7 @@ def _snap_json(s):
 
 @router.get("/v2/{pid}/snapshots/detail")
 async def list_snapshots(request: Request, pid: str):
+    """List volume snapshots (the v2 sparse view)."""
     state = request.app.state.sim
     snaps = [s for s in state.snapshots.values() if s["project_id"] == pid]
     return {"snapshots": [_snap_json(s) for s in snaps]}
@@ -311,6 +324,7 @@ async def list_snapshots(request: Request, pid: str):
 
 @router.get("/v2/{pid}/cloudsnapshots")
 async def list_snapshots_v2(request: Request, pid: str):
+    """List volume snapshots."""
     state = request.app.state.sim
     snaps = [x for x in state.snapshots.values() if x["project_id"] == pid]
     return {"snapshots": [_snap_json(x) for x in snaps], "count": len(snaps)}
@@ -318,6 +332,7 @@ async def list_snapshots_v2(request: Request, pid: str):
 
 @router.get("/v2/{pid}/cloudsnapshots/detail")
 async def list_snapshots_detail(request: Request, pid: str):
+    """List snapshots with details: sizes, sources, and statuses."""
     state = request.app.state.sim
     snaps = [x for x in state.snapshots.values() if x["project_id"] == pid]
     return {"snapshots": [_snap_json(x) for x in snaps], "count": len(snaps)}
@@ -325,6 +340,7 @@ async def list_snapshots_detail(request: Request, pid: str):
 
 @router.get("/v2/{pid}/cloudsnapshots/{snapshot_id}")
 async def show_snapshot(request: Request, pid: str, snapshot_id: str):
+    """Show one snapshot: the volume it protects and its size."""
     state = request.app.state.sim
     s = state.snapshots.get(snapshot_id)
     if not s or s["project_id"] != pid:
@@ -335,6 +351,7 @@ async def show_snapshot(request: Request, pid: str, snapshot_id: str):
 
 @router.delete("/v2/{pid}/cloudsnapshots/{snapshot_id}")
 async def delete_snapshot(request: Request, pid: str, snapshot_id: str):
+    """Delete a snapshot."""
     state = request.app.state.sim
     s = state.snapshots.get(snapshot_id)
     if not s or s["project_id"] != pid:
@@ -346,6 +363,7 @@ async def delete_snapshot(request: Request, pid: str, snapshot_id: str):
 
 @router.post("/v2/{pid}/cloudsnapshots/{snapshot_id}/rollback")
 async def rollback_snapshot(request: Request, pid: str, snapshot_id: str):
+    """Roll a volume back to a snapshot's state (async)."""
     state = request.app.state.sim
     s = state.snapshots.get(snapshot_id)
     if not s or s["project_id"] != pid:
@@ -368,6 +386,7 @@ async def rollback_snapshot(request: Request, pid: str, snapshot_id: str):
 
 @router.put("/v2/{pid}/cloudsnapshots/{snapshot_id}")
 async def update_snapshot(request: Request, pid: str, snapshot_id: str):
+    """Update a snapshot's name or description."""
     state = request.app.state.sim
     snap = state.snapshots.get(snapshot_id)
     if not snap or snap["project_id"] != pid:

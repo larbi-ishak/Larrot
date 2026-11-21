@@ -26,6 +26,7 @@ def _recordset_json(r):
 
 @router.post("/v2/zones")
 async def create_zone(request: Request):
+    """Create a DNS zone: public or private, the container for record sets."""
     state = request.app.state.sim
     if not hasattr(state, "dns_zones"):
         state.dns_zones = {}
@@ -44,6 +45,7 @@ async def create_zone(request: Request):
 
 @router.get("/v2/zones")
 async def list_zones(request: Request):
+    """List DNS zones."""
     state = request.app.state.sim
     if not hasattr(state, "dns_zones"):
         state.dns_zones = {}
@@ -53,6 +55,7 @@ async def list_zones(request: Request):
 
 @router.get("/v2/zones/{zone_id}")
 async def show_zone(request: Request, zone_id: str):
+    """Show one zone: its type, TTL, and record count."""
     state = request.app.state.sim
     if not hasattr(state, "dns_zones"):
         state.dns_zones = {}
@@ -64,6 +67,7 @@ async def show_zone(request: Request, zone_id: str):
 
 @router.put("/v2/zones/{zone_id}")
 async def update_zone(request: Request, zone_id: str):
+    """Update a zone's description, email, or TTL."""
     state = request.app.state.sim
     z = state.dns_zones.get(zone_id)
     if not z:
@@ -81,6 +85,7 @@ async def update_zone(request: Request, zone_id: str):
 
 @router.delete("/v2/zones/{zone_id}")
 async def delete_zone(request: Request, zone_id: str):
+    """Delete a zone and all its record sets."""
     state = request.app.state.sim
     if not hasattr(state, "dns_zones"):
         state.dns_zones = {}
@@ -92,6 +97,7 @@ async def delete_zone(request: Request, zone_id: str):
 
 @router.post("/v2/zones/{zone_id}/recordsets")
 async def create_recordset(request: Request, zone_id: str):
+    """Create a record set in a zone: A, AAAA, CNAME, MX, TXT..."""
     state = request.app.state.sim
     if not hasattr(state, "dns_zones"):
         state.dns_zones = {}
@@ -111,6 +117,7 @@ async def create_recordset(request: Request, zone_id: str):
 
 @router.get("/v2/zones/{zone_id}/recordsets")
 async def list_recordsets(request: Request, zone_id: str):
+    """List the record sets of a zone."""
     state = request.app.state.sim
     if not hasattr(state, "dns_zones"):
         state.dns_zones = {}
@@ -123,6 +130,7 @@ async def list_recordsets(request: Request, zone_id: str):
 
 @router.get("/v2/zones/{zone_id}/recordsets/{recordset_id}")
 async def show_recordset(request: Request, zone_id: str, recordset_id: str):
+    """Show one record set: its records and TTL."""
     state = request.app.state.sim
     z = state.dns_zones.get(zone_id)
     if not z:
@@ -135,6 +143,7 @@ async def show_recordset(request: Request, zone_id: str, recordset_id: str):
 
 @router.put("/v2/zones/{zone_id}/recordsets/{recordset_id}")
 async def update_recordset(request: Request, zone_id: str, recordset_id: str):
+    """Update a record set's records."""
     state = request.app.state.sim
     z = state.dns_zones.get(zone_id)
     if not z:
@@ -155,6 +164,7 @@ async def update_recordset(request: Request, zone_id: str, recordset_id: str):
 
 @router.delete("/v2/zones/{zone_id}/recordsets/{recordset_id}")
 async def delete_recordset(request: Request, zone_id: str, recordset_id: str):
+    """Delete a record set."""
     state = request.app.state.sim
     zone = state.dns_zones.get(zone_id)
     if not zone:
@@ -165,6 +175,7 @@ async def delete_recordset(request: Request, zone_id: str, recordset_id: str):
 
 @router.get("/v2/recordsets")
 async def list_all_recordsets(request: Request):
+    """List record sets across all zones in the project."""
     state = request.app.state.sim
     out = []
     for z in state.dns_zones.values():

@@ -19,6 +19,7 @@ def _key_json(k):
 
 @router.post("/v1/{pid}/kms/create-key")
 async def create_key(request: Request, pid: str):
+    """Create a customer master key: the root key that protects your data."""
     state = request.app.state.sim
     if not hasattr(state, "kms_keys"):
         state.kms_keys = {}
@@ -39,6 +40,7 @@ async def create_key(request: Request, pid: str):
 
 @router.get("/v1/{pid}/kms/describe-key/{key_id}")
 async def describe_key(request: Request, pid: str, key_id: str):
+    """Show one key: its algorithm, usage, and rotation policy."""
     state = request.app.state.sim
     if not hasattr(state, "kms_keys"):
         state.kms_keys = {}
@@ -50,6 +52,7 @@ async def describe_key(request: Request, pid: str, key_id: str):
 
 @router.post("/v1/{pid}/kms/list-keys")
 async def list_keys(request: Request, pid: str):
+    """List CMKs with their states and origins."""
     state = request.app.state.sim
     if not hasattr(state, "kms_keys"):
         state.kms_keys = {}
@@ -59,6 +62,7 @@ async def list_keys(request: Request, pid: str):
 
 @router.post("/v1/{pid}/kms/schedule-key-deletion")
 async def schedule_key_deletion(request: Request, pid: str, key_id: str = None):
+    """Schedule a key's deletion (after the waiting period)."""
     state = request.app.state.sim
     body = await request.json()
     key_id = body.get("key_id")
@@ -103,6 +107,7 @@ async def decrypt_data(request: Request, pid: str):
 
 @router.post("/v1/{pid}/kms/enable-key")
 async def enable_key(request: Request, pid: str):
+    """Enable a disabled key so it can be used again."""
     s = request.app.state.sim
     body = await request.json()
     k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
@@ -115,6 +120,7 @@ async def enable_key(request: Request, pid: str):
 
 @router.post("/v1/{pid}/kms/disable-key")
 async def disable_key(request: Request, pid: str):
+    """Disable a key: it cannot be used until re-enabled."""
     s = request.app.state.sim
     body = await request.json()
     k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))
@@ -127,6 +133,7 @@ async def disable_key(request: Request, pid: str):
 
 @router.post("/v1/{pid}/kms/gen-random")
 async def gen_random(request: Request, pid: str):
+    """Generate a cryptographically random string."""
     import base64
     import os as _os
     body = await request.json()
@@ -139,6 +146,7 @@ async def gen_random(request: Request, pid: str):
 
 @router.get("/v1/{pid}/kms/get-publickey/{key_id}")
 async def get_public_key(request: Request, pid: str, key_id: str):
+    """Get a key's public key: for verifying signatures outside KMS."""
     s = request.app.state.sim
     k = getattr(s, "kms_keys", {}).get(key_id)
     if not k:
@@ -149,6 +157,7 @@ async def get_public_key(request: Request, pid: str, key_id: str):
 
 @router.post("/v1/{pid}/kms/update-key-alias")
 async def update_key_alias(request: Request, pid: str):
+    """Update a key's alias."""
     s = request.app.state.sim
     body = await request.json()
     k = getattr(s, "kms_keys", {}).get(body.get("key_id", ""))

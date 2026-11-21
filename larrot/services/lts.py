@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/log-groups")
 async def create_log_group(request: Request, pid: str):
+    """Create a log group: the top-level container for logs."""
     s = request.app.state.sim
     if not hasattr(s, "lts_groups"): s.lts_groups = {}
     body = await request.json()
@@ -19,12 +20,14 @@ async def create_log_group(request: Request, pid: str):
 
 @router.get("/v2/{pid}/log-groups")
 async def list_log_groups(request: Request, pid: str):
+    """List log groups."""
     s = request.app.state.sim
     groups = [g for g in getattr(s, "lts_groups", {}).values() if g["project_id"] == pid]
     return {"log_groups": [{"id": g["id"], "name": g["name"], "ttl_in_days": g["ttl_in_days"]} for g in groups]}
 
 @router.delete("/v2/{pid}/log-groups/{group_id}")
 async def delete_log_group(request: Request, pid: str, group_id: str):
+    """Delete a log group."""
     s = request.app.state.sim
     if group_id not in getattr(s, "lts_groups", {}):
         return JSONResponse({"error_msg": "Group not found", "error_code": "LTS.0001"}, status_code=404)
@@ -33,6 +36,7 @@ async def delete_log_group(request: Request, pid: str, group_id: str):
 
 @router.post("/v2/{pid}/log-groups/{group_id}/log-streams")
 async def create_log_stream(request: Request, pid: str, group_id: str):
+    """Create a log stream inside a group: the actual log channel."""
     s = request.app.state.sim
     g = getattr(s, "lts_groups", {}).get(group_id)
     if not g:
@@ -45,6 +49,7 @@ async def create_log_stream(request: Request, pid: str, group_id: str):
 
 @router.delete("/v2/{pid}/log-groups/{group_id}/log-streams/{stream_id}")
 async def delete_log_stream(request: Request, pid: str, group_id: str, stream_id: str):
+    """Delete a log stream."""
     s = request.app.state.sim
     g = getattr(s, "lts_groups", {}).get(group_id)
     if not g or g.get("project_id") != pid:
@@ -60,6 +65,7 @@ async def delete_log_stream(request: Request, pid: str, group_id: str, stream_id
 
 @router.get("/v2/{pid}/log-groups/{group_id}/log-streams")
 async def list_log_streams(request: Request, pid: str, group_id: str):
+    """List the log streams of a group."""
     s = request.app.state.sim
     g = getattr(s, "lts_groups", {}).get(group_id)
     if not g:

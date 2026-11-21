@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/v1/{pid}/dbss/instances")
 async def create_dbss_instance(request: Request, pid: str):
+    """Create a database security instance: the audit agent (async)."""
     s = request.app.state.sim
     if not hasattr(s, "dbss_instances"): s.dbss_instances = {}
     body = await request.json()
@@ -25,6 +26,7 @@ async def create_dbss_instance(request: Request, pid: str):
 
 @router.get("/v1/{pid}/dbss/instances")
 async def list_dbss_instances(request: Request, pid: str):
+    """List DBSS instances."""
     s = request.app.state.sim
     instances = [i for i in getattr(s, "dbss_instances", {}).values() if i["project_id"] == pid]
     return {"instances": instances, "total": len(instances)}
@@ -32,6 +34,7 @@ async def list_dbss_instances(request: Request, pid: str):
 
 @router.get("/v1/{pid}/dbss/instances/{instance_id}")
 async def show_dbss_instance(request: Request, pid: str, instance_id: str):
+    """Show one instance: its specs and connection info."""
     s = request.app.state.sim
     i = getattr(s, "dbss_instances", {}).get(instance_id)
     if not i or i["project_id"] != pid:
@@ -41,6 +44,7 @@ async def show_dbss_instance(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v1/{pid}/dbss/instances/{instance_id}")
 async def delete_dbss_instance(request: Request, pid: str, instance_id: str):
+    """Delete a DBSS instance."""
     s = request.app.state.sim
     if instance_id not in getattr(s, "dbss_instances", {}):
         return JSONResponse({"error_msg": "Instance not found", "error_code": "DBSS.0001"}, status_code=404)
@@ -50,6 +54,7 @@ async def delete_dbss_instance(request: Request, pid: str, instance_id: str):
 
 @router.post("/v1/{pid}/dbss/instances/{instance_id}/audit-rules")
 async def create_audit_rule(request: Request, pid: str, instance_id: str):
+    """Create an audit rule: which statements to capture or alert on."""
     body = await request.json()
     return {"rule_id": new_id(), "rule_name": body.get("name", "audit-rule"),
             "risk_level": body.get("risk_level", "HIGH"),
@@ -58,6 +63,7 @@ async def create_audit_rule(request: Request, pid: str, instance_id: str):
 
 @router.get("/v1/{pid}/dbss/instances/{instance_id}/audit-logs")
 async def list_audit_logs(request: Request, pid: str, instance_id: str):
+    """List the captured audit logs of an instance."""
     return {"audit_logs": [
         {"time": "2026-11-20T10:00:00Z", "user": "admin", "database": "mydb",
          "sql": "DROP TABLE users", "risk_level": "HIGH", "action": "ALARM"},

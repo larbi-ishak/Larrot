@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.post("/v3/{pid}/rds/backups")
 async def create_backup(request: Request, pid: str):
+    """Back up an instance now: the manual snapshot (async)."""
     s = request.app.state.sim
     if not hasattr(s, "rds_backups"): s.rds_backups = {}
     body = await request.json()
@@ -30,6 +31,7 @@ async def create_backup(request: Request, pid: str):
 
 @router.get("/v3/{pid}/rds/backups")
 async def list_backups(request: Request, pid: str):
+    """List backups: automatic and manual."""
     s = request.app.state.sim
     instance_id = request.query_params.get("instance_id")
     backups = [b for b in getattr(s, "rds_backups", {}).values() if b["project_id"] == pid]
@@ -40,6 +42,7 @@ async def list_backups(request: Request, pid: str):
 
 @router.get("/v3/{pid}/rds/backups/{backup_id}")
 async def show_backup(request: Request, pid: str, backup_id: str):
+    """Show one backup: its size, type, and instance."""
     s = request.app.state.sim
     b = getattr(s, "rds_backups", {}).get(backup_id)
     if not b or b["project_id"] != pid:
@@ -49,6 +52,7 @@ async def show_backup(request: Request, pid: str, backup_id: str):
 
 @router.delete("/v3/{pid}/rds/backups/{backup_id}")
 async def delete_backup(request: Request, pid: str, backup_id: str):
+    """Delete a manual backup."""
     s = request.app.state.sim
     if backup_id not in getattr(s, "rds_backups", {}):
         return JSONResponse({"error_msg": "Backup not found", "error_code": "DBS.0201"}, status_code=404)
@@ -58,6 +62,7 @@ async def delete_backup(request: Request, pid: str, backup_id: str):
 
 @router.post("/v3/{pid}/instances/{instance_id}/restore")
 async def restore_backup(request: Request, pid: str, instance_id: str):
+    """Restore an instance from a backup: overwrite or to a new instance (async)."""
     body = await request.json()
     return {"job_id": new_id(), "restore_target": body.get("target_instance_id", instance_id)}
 
@@ -68,6 +73,7 @@ async def restore_backup(request: Request, pid: str, instance_id: str):
 
 @router.get("/v3/{pid}/instances/{instance_id}/parameters")
 async def list_parameters(request: Request, pid: str, instance_id: str):
+    """List an instance's engine parameters with values and ranges."""
     return {"parameters": [
         {"name": "max_connections", "value": "1000", "description": "Maximum connections",
          "restart_required": False, "readonly": False},
@@ -90,6 +96,7 @@ async def list_parameters(request: Request, pid: str, instance_id: str):
 
 @router.put("/v3/{pid}/instances/{instance_id}/parameters")
 async def update_parameters(request: Request, pid: str, instance_id: str):
+    """Change engine parameters on an instance (async)."""
     await request.json()
     return {"job_id": new_id(), "restart_required": False}
 
@@ -100,6 +107,7 @@ async def update_parameters(request: Request, pid: str, instance_id: str):
 
 @router.post("/v3/{pid}/instances/{instance_id}/replicas")
 async def create_read_replica(request: Request, pid: str, instance_id: str):
+    """Add a read replica to an instance: scale read traffic horizontally (async)."""
     s = request.app.state.sim
     if not hasattr(s, "rds_replicas"): s.rds_replicas = {}
     body = await request.json()
@@ -116,6 +124,7 @@ async def create_read_replica(request: Request, pid: str, instance_id: str):
 
 @router.get("/v3/{pid}/instances/{instance_id}/replicas")
 async def list_read_replicas(request: Request, pid: str, instance_id: str):
+    """List an instance's read replicas."""
     s = request.app.state.sim
     replicas = [r for r in getattr(s, "rds_replicas", {}).values()
                 if r["project_id"] == pid and r["master_id"] == instance_id]
@@ -124,6 +133,7 @@ async def list_read_replicas(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v3/{pid}/instances/{instance_id}/replicas/{replica_id}")
 async def delete_read_replica(request: Request, pid: str, instance_id: str, replica_id: str):
+    """Delete a read replica (async)."""
     s = request.app.state.sim
     if replica_id not in getattr(s, "rds_replicas", {}):
         return JSONResponse({"error_msg": "Replica not found", "error_code": "DBS.0301"}, status_code=404)
@@ -137,6 +147,7 @@ async def delete_read_replica(request: Request, pid: str, instance_id: str, repl
 
 @router.post("/v3/{pid}/instances/{instance_id}/db-users")
 async def create_db_user(request: Request, pid: str, instance_id: str):
+    """Create a database user with its password and privileges."""
     s = request.app.state.sim
     if not hasattr(s, "rds_db_users"): s.rds_db_users = {}
     body = await request.json()
@@ -152,6 +163,7 @@ async def create_db_user(request: Request, pid: str, instance_id: str):
 
 @router.get("/v3/{pid}/instances/{instance_id}/db-users")
 async def list_db_users(request: Request, pid: str, instance_id: str):
+    """List the database users of an instance."""
     s = request.app.state.sim
     users = [u for u in getattr(s, "rds_db_users", {}).values()
              if u["project_id"] == pid and u["instance_id"] == instance_id]
@@ -160,6 +172,7 @@ async def list_db_users(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v3/{pid}/instances/{instance_id}/db-users/{user_name}")
 async def delete_db_user(request: Request, pid: str, instance_id: str, user_name: str):
+    """Delete a database user."""
     s = request.app.state.sim
     if user_name not in getattr(s, "rds_db_users", {}):
         return JSONResponse({"error_msg": "User not found", "error_code": "DBS.0401"}, status_code=404)
@@ -173,6 +186,7 @@ async def delete_db_user(request: Request, pid: str, instance_id: str, user_name
 
 @router.post("/v3/{pid}/instances/{instance_id}/databases")
 async def create_database(request: Request, pid: str, instance_id: str):
+    """Create a database inside an instance."""
     s = request.app.state.sim
     if not hasattr(s, "rds_databases"): s.rds_databases = {}
     body = await request.json()
@@ -186,6 +200,7 @@ async def create_database(request: Request, pid: str, instance_id: str):
 
 @router.get("/v3/{pid}/instances/{instance_id}/databases")
 async def list_databases(request: Request, pid: str, instance_id: str):
+    """List the databases inside an instance."""
     s = request.app.state.sim
     databases = [d for d in getattr(s, "rds_databases", {}).values()
                  if d["project_id"] == pid and d["instance_id"] == instance_id]
@@ -194,6 +209,7 @@ async def list_databases(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v3/{pid}/instances/{instance_id}/databases/{db_name}")
 async def delete_database(request: Request, pid: str, instance_id: str, db_name: str):
+    """Delete a database."""
     s = request.app.state.sim
     if db_name not in getattr(s, "rds_databases", {}):
         return JSONResponse({"error_msg": "Database not found", "error_code": "DBS.0501"}, status_code=404)
@@ -207,6 +223,7 @@ async def delete_database(request: Request, pid: str, instance_id: str, db_name:
 
 @router.get("/v3/{pid}/instances/{instance_id}/slow-logs")
 async def list_slow_logs(request: Request, pid: str, instance_id: str):
+    """List an instance's slow query logs."""
     return {"slow_logs": [
         {"execute_time": "2026-11-20T10:00:00Z", "query_time": "2.5s",
          "lock_time": "0.01s", "rows_examined": 1000000, "rows_sent": 10,
@@ -219,6 +236,7 @@ async def list_slow_logs(request: Request, pid: str, instance_id: str):
 
 @router.get("/v3/{pid}/instances/{instance_id}/error-logs")
 async def list_error_logs(request: Request, pid: str, instance_id: str):
+    """List an instance's error logs."""
     return {"error_logs": [
         {"time": "2026-11-20T09:00:00Z", "level": "ERROR",
          "content": "InnoDB: Buffer pool is full, consider increasing innodb_buffer_pool_size"},
@@ -231,11 +249,13 @@ async def list_error_logs(request: Request, pid: str, instance_id: str):
 
 @router.post("/v3/{pid}/instances/{instance_id}/failover")
 async def failover(request: Request, pid: str, instance_id: str):
+    """Fail over an HA instance: force a primary/standby switch (async)."""
     return {"job_id": new_id(), "failover_mode": "auto"}
 
 
 @router.post("/v3/{pid}/instances/{instance_id}/switchover")
 async def switchover(request: Request, pid: str, instance_id: str):
+    """Switch over an HA instance: the planned primary/standby swap (async)."""
     body = await request.json()
     return {"job_id": new_id(), "target": body.get("target_instance_id", "")}
 
@@ -246,6 +266,7 @@ async def switchover(request: Request, pid: str, instance_id: str):
 
 @router.post("/v3/{pid}/instances/{instance_id}/action")
 async def instance_action(request: Request, pid: str, instance_id: str):
+    """Instance action: restart, resize flavor, or grow storage (async)."""
     body = await request.json()
     if "resize" in body:
         return {"job_id": new_id(), "action": "resize_flavor"}
@@ -263,6 +284,7 @@ async def instance_action(request: Request, pid: str, instance_id: str):
 
 @router.get("/v3/{pid}/configurations")
 async def list_rds_configurations(request: Request, pid: str):
+    """List parameter templates: the named parameter sets."""
     s = request.app.state.sim
     cfgs = [c for c in getattr(s, "rds_configurations", {}).values()
             if c["project_id"] == pid]
@@ -271,6 +293,7 @@ async def list_rds_configurations(request: Request, pid: str):
 
 @router.post("/v3/{pid}/configurations")
 async def create_rds_configuration(request: Request, pid: str):
+    """Create a parameter template from scratch or a copy."""
     s = request.app.state.sim
     if not hasattr(s, "rds_configurations"):
         s.rds_configurations = {}
@@ -292,6 +315,7 @@ async def create_rds_configuration(request: Request, pid: str):
 
 @router.get("/v3/{pid}/configurations/{configuration_id}")
 async def show_rds_configuration(request: Request, pid: str, configuration_id: str):
+    """Show one parameter template: its engine version and values."""
     s = request.app.state.sim
     c = getattr(s, "rds_configurations", {}).get(configuration_id)
     if not c or c["project_id"] != pid:
@@ -302,6 +326,7 @@ async def show_rds_configuration(request: Request, pid: str, configuration_id: s
 
 @router.put("/v3/{pid}/configurations/{configuration_id}")
 async def update_rds_configuration(request: Request, pid: str, configuration_id: str):
+    """Update a parameter template's values."""
     s = request.app.state.sim
     c = getattr(s, "rds_configurations", {}).get(configuration_id)
     if not c or c["project_id"] != pid:
@@ -317,6 +342,7 @@ async def update_rds_configuration(request: Request, pid: str, configuration_id:
 
 @router.delete("/v3/{pid}/configurations/{configuration_id}")
 async def delete_rds_configuration(request: Request, pid: str, configuration_id: str):
+    """Delete a parameter template."""
     s = request.app.state.sim
     c = getattr(s, "rds_configurations", {}).get(configuration_id)
     if not c or c["project_id"] != pid:
@@ -328,6 +354,7 @@ async def delete_rds_configuration(request: Request, pid: str, configuration_id:
 
 @router.post("/v3/{pid}/configurations/{configuration_id}/apply")
 async def apply_rds_configuration(request: Request, pid: str, configuration_id: str):
+    """Apply a parameter template to instances (async)."""
     s = request.app.state.sim
     c = getattr(s, "rds_configurations", {}).get(configuration_id)
     if not c or c["project_id"] != pid:

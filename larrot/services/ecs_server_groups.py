@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/v2.1/{pid}/os-server-groups")
 async def create_server_group(request: Request, pid: str):
+    """Create a server group: keep servers on different hosts (anti-affinity) or the same host."""
     s = request.app.state.sim
     if not hasattr(s, "ecs_server_groups"): s.ecs_server_groups = {}
     body = await request.json()
@@ -24,6 +25,7 @@ async def create_server_group(request: Request, pid: str):
 
 @router.get("/v2.1/{pid}/os-server-groups")
 async def list_server_groups(request: Request, pid: str):
+    """List server groups: the anti-affinity/affinity policies for placement."""
     s = request.app.state.sim
     groups = [g for g in getattr(s, "ecs_server_groups", {}).values() if g["project_id"] == pid]
     return {"server_groups": [{"id": g["id"], "name": g["name"], "policies": g["policies"],
@@ -32,6 +34,7 @@ async def list_server_groups(request: Request, pid: str):
 
 @router.get("/v2.1/{pid}/os-server-groups/{group_id}")
 async def show_server_group(request: Request, pid: str, group_id: str):
+    """Show one server group: its policy and members."""
     s = request.app.state.sim
     g = getattr(s, "ecs_server_groups", {}).get(group_id)
     if not g or g["project_id"] != pid:
@@ -41,6 +44,7 @@ async def show_server_group(request: Request, pid: str, group_id: str):
 
 @router.delete("/v2.1/{pid}/os-server-groups/{group_id}")
 async def delete_server_group(request: Request, pid: str, group_id: str):
+    """Delete a server group (member servers are unaffected)."""
     s = request.app.state.sim
     if group_id not in getattr(s, "ecs_server_groups", {}):
         return JSONResponse({"error": {"code": "Ecs.0116", "message": "Server group not found"}}, status_code=404)
@@ -50,6 +54,7 @@ async def delete_server_group(request: Request, pid: str, group_id: str):
 
 @router.put("/v2.1/{pid}/os-server-groups/{group_id}")
 async def update_server_group(request: Request, pid: str, group_id: str):
+    """Update a server group's name or policy."""
     s = request.app.state.sim
     g = getattr(s, "ecs_server_groups", {}).get(group_id)
     if not g or g["project_id"] != pid:

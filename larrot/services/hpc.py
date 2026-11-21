@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/hpc/clusters")
 async def create_hpc_cluster(request: Request, pid: str):
+    """Create an HPC cluster: bare-metal based high performance computing (async)."""
     s = request.app.state.sim
     if not hasattr(s, "hpc_clusters"): s.hpc_clusters = {}
     body = await request.json()
@@ -25,6 +26,7 @@ async def create_hpc_cluster(request: Request, pid: str):
 
 @router.get("/v2/{pid}/hpc/clusters")
 async def list_hpc_clusters(request: Request, pid: str):
+    """List HPC clusters."""
     s = request.app.state.sim
     clusters = [c for c in getattr(s, "hpc_clusters", {}).values() if c["project_id"] == pid]
     return {"clusters": clusters, "total": len(clusters)}
@@ -32,6 +34,7 @@ async def list_hpc_clusters(request: Request, pid: str):
 
 @router.get("/v2/{pid}/hpc/clusters/{cluster_id}")
 async def show_hpc_cluster(request: Request, pid: str, cluster_id: str):
+    """Show one cluster: its scheduler, network, and nodes."""
     s = request.app.state.sim
     c = getattr(s, "hpc_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -41,6 +44,7 @@ async def show_hpc_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.delete("/v2/{pid}/hpc/clusters/{cluster_id}")
 async def delete_hpc_cluster(request: Request, pid: str, cluster_id: str):
+    """Delete an HPC cluster (async)."""
     s = request.app.state.sim
     if cluster_id not in getattr(s, "hpc_clusters", {}):
         return JSONResponse({"error_msg": "HPC cluster not found", "error_code": "HPC.0001"}, status_code=404)
@@ -50,6 +54,7 @@ async def delete_hpc_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.post("/v2/{pid}/hpc/clusters/{cluster_id}/nodes")
 async def add_hpc_node(request: Request, pid: str, cluster_id: str):
+    """Add a compute node to an HPC cluster (async)."""
     s = request.app.state.sim
     c = getattr(s, "hpc_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -63,6 +68,7 @@ async def add_hpc_node(request: Request, pid: str, cluster_id: str):
 
 @router.get("/v2/{pid}/hpc/clusters/{cluster_id}/nodes")
 async def list_hpc_nodes(request: Request, pid: str, cluster_id: str):
+    """List the compute nodes of an HPC cluster."""
     s = request.app.state.sim
     c = getattr(s, "hpc_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:

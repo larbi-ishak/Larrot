@@ -26,6 +26,7 @@ def _cluster_json(c):
 
 @router.post("/v1.1/{pid}/cluster_infos")
 async def create_cluster(request: Request, pid: str):
+    """Create an MRS cluster: the managed Hadoop/Spark/HBase big data platform (async)."""
     s = request.app.state.sim
     if not hasattr(s, "mrs_clusters"):
         s.mrs_clusters = {}
@@ -62,6 +63,7 @@ async def create_cluster(request: Request, pid: str):
 
 @router.get("/v1.1/{pid}/cluster_infos")
 async def list_clusters(request: Request, pid: str):
+    """List MRS clusters."""
     s = request.app.state.sim
     clusters = [c for c in getattr(s, "mrs_clusters", {}).values()
                 if c["project_id"] == pid]
@@ -71,6 +73,7 @@ async def list_clusters(request: Request, pid: str):
 
 @router.get("/v1.1/{pid}/cluster_infos/{cluster_id}")
 async def show_cluster(request: Request, pid: str, cluster_id: str):
+    """Show one cluster: its master nodes, components, and software version."""
     s = request.app.state.sim
     c = getattr(s, "mrs_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -81,6 +84,7 @@ async def show_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.delete("/v1.1/{pid}/cluster_infos/{cluster_id}")
 async def delete_cluster(request: Request, pid: str, cluster_id: str):
+    """Delete an MRS cluster (async)."""
     s = request.app.state.sim
     c = getattr(s, "mrs_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:

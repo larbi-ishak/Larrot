@@ -14,6 +14,7 @@ router = APIRouter()
 
 @router.post("/v3/{pid}/sources")
 async def register_source(request: Request, pid: str):
+    """Register a source server for migration: its specs and disks."""
     s = request.app.state.sim
     if not hasattr(s, "sms_sources"):
         s.sms_sources = {}
@@ -45,6 +46,7 @@ async def register_source(request: Request, pid: str):
 
 @router.get("/v3/{pid}/sources")
 async def list_sources(request: Request, pid: str):
+    """List registered source servers with their migration states."""
     s = request.app.state.sim
     state_f = request.query_params.get("state")
     sources = [x for x in getattr(s, "sms_sources", {}).values()
@@ -56,6 +58,7 @@ async def list_sources(request: Request, pid: str):
 
 @router.get("/v3/{pid}/sources/{source_id}")
 async def show_source(request: Request, pid: str, source_id: str):
+    """Show one source server: its disks, CPU, and memory."""
     s = request.app.state.sim
     src = getattr(s, "sms_sources", {}).get(source_id)
     if not src or src["project_id"] != pid:
@@ -66,6 +69,7 @@ async def show_source(request: Request, pid: str, source_id: str):
 
 @router.delete("/v3/{pid}/sources/{source_id}")
 async def delete_source(request: Request, pid: str, source_id: str):
+    """Remove a source server registration."""
     s = request.app.state.sim
     src = getattr(s, "sms_sources", {}).get(source_id)
     if not src or src["project_id"] != pid:
@@ -112,6 +116,7 @@ async def create_task(request: Request, pid: str):
 
 @router.get("/v3/{pid}/tasks")
 async def list_tasks(request: Request, pid: str):
+    """List migration tasks with their progress."""
     s = request.app.state.sim
     state_f = request.query_params.get("state")
     tasks = [t for t in getattr(s, "sms_tasks", {}).values() if t["project_id"] == pid]
@@ -122,6 +127,7 @@ async def list_tasks(request: Request, pid: str):
 
 @router.get("/v3/{pid}/tasks/{task_id}")
 async def show_task(request: Request, pid: str, task_id: str):
+    """Show one task: its state, speed, and target server."""
     s = request.app.state.sim
     t = getattr(s, "sms_tasks", {}).get(task_id)
     if not t or t["project_id"] != pid:
@@ -132,6 +138,7 @@ async def show_task(request: Request, pid: str, task_id: str):
 
 @router.delete("/v3/{pid}/tasks/{task_id}")
 async def delete_task(request: Request, pid: str, task_id: str):
+    """Delete a migration task."""
     s = request.app.state.sim
     t = getattr(s, "sms_tasks", {}).get(task_id)
     if not t or t["project_id"] != pid:
@@ -143,6 +150,7 @@ async def delete_task(request: Request, pid: str, task_id: str):
 
 @router.post("/v3/{pid}/templates")
 async def create_template(request: Request, pid: str):
+    """Create a migration template: the target specs and disk mappings."""
     s = request.app.state.sim
     if not hasattr(s, "sms_templates"):
         s.sms_templates = {}
@@ -158,6 +166,7 @@ async def create_template(request: Request, pid: str):
 
 @router.get("/v3/{pid}/templates")
 async def list_templates(request: Request, pid: str):
+    """List migration templates."""
     s = request.app.state.sim
     templates = [t for t in getattr(s, "sms_templates", {}).values()
                  if t["project_id"] == pid]

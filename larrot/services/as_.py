@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v1/{pid}/scaling_group")
 async def create_as_group(request: Request, pid: str):
+    """Create an AS group: the ECS pool that scales, with min/max/desired counts, VPC, and subnets."""
     s = request.app.state.sim
     if not hasattr(s, "as_groups"): s.as_groups = {}
     body = await request.json()
@@ -21,12 +22,14 @@ async def create_as_group(request: Request, pid: str):
 
 @router.get("/v1/{pid}/scaling_group")
 async def list_as_groups(request: Request, pid: str):
+    """List AS groups."""
     s = request.app.state.sim
     groups = [g for g in getattr(s, "as_groups", {}).values() if g["project_id"] == pid]
     return {"total_number": len(groups), "scaling_groups": groups}
 
 @router.get("/v1/{pid}/scaling_group/{group_id}")
 async def show_as_group(request: Request, pid: str, group_id: str):
+    """Show one AS group."""
     s = request.app.state.sim
     g = getattr(s, "as_groups", {}).get(group_id)
     if not g or g["project_id"] != pid:
@@ -35,6 +38,7 @@ async def show_as_group(request: Request, pid: str, group_id: str):
 
 @router.delete("/v1/{pid}/scaling_group/{group_id}")
 async def delete_as_group(request: Request, pid: str, group_id: str):
+    """Delete an AS group."""
     s = request.app.state.sim
     if group_id not in getattr(s, "as_groups", {}):
         return JSONResponse({"error_msg": "Group not found", "error_code": "AS.0001"}, status_code=404)
@@ -43,6 +47,7 @@ async def delete_as_group(request: Request, pid: str, group_id: str):
 
 @router.post("/v1/{pid}/scaling_policy")
 async def create_as_policy(request: Request, pid: str):
+    """Create an AS policy: alarm-triggered, scheduled, or periodic scaling."""
     s = request.app.state.sim
     if not hasattr(s, "as_policies"): s.as_policies = {}
     body = await request.json()
@@ -56,6 +61,7 @@ async def create_as_policy(request: Request, pid: str):
 
 @router.get("/v1/{pid}/scaling_policy")
 async def list_as_policies(request: Request, pid: str):
+    """List AS policies."""
     s = request.app.state.sim
     policies = [p for p in getattr(s, "as_policies", {}).values() if p["project_id"] == pid]
     return {"total_number": len(policies), "scaling_policies": policies}
@@ -67,6 +73,7 @@ async def list_as_policies(request: Request, pid: str):
 
 @router.get("/v1/{pid}/scaling_policy/{policy_id}")
 async def show_scaling_policy(request: Request, pid: str, policy_id: str):
+    """Show one AS policy."""
     s = request.app.state.sim
     pol = getattr(s, "as_policies", {}).get(policy_id)
     if not pol or pol["project_id"] != pid:
@@ -77,6 +84,7 @@ async def show_scaling_policy(request: Request, pid: str, policy_id: str):
 
 @router.delete("/v1/{pid}/scaling_policy/{policy_id}")
 async def delete_scaling_policy(request: Request, pid: str, policy_id: str):
+    """Delete an AS policy."""
     s = request.app.state.sim
     pol = getattr(s, "as_policies", {}).get(policy_id)
     if not pol or pol["project_id"] != pid:
@@ -88,6 +96,7 @@ async def delete_scaling_policy(request: Request, pid: str, policy_id: str):
 
 @router.post("/v1/{pid}/scaling_policy/{policy_id}/execute")
 async def execute_policy(request: Request, pid: str, policy_id: str):
+    """Execute an AS policy immediately: a manual scaling action."""
     s = request.app.state.sim
     pol = getattr(s, "as_policies", {}).get(policy_id)
     if not pol or pol["project_id"] != pid:
@@ -102,6 +111,7 @@ async def execute_policy(request: Request, pid: str, policy_id: str):
 
 @router.get("/v1/{pid}/scaling_group/{group_id}/instances")
 async def list_group_instances(request: Request, pid: str, group_id: str):
+    """List the ECS instances currently in an AS group."""
     s = request.app.state.sim
     group = getattr(s, "as_groups", {}).get(group_id)
     if not group or group["project_id"] != pid:

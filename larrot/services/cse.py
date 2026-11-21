@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/engines")
 async def create_engine(request: Request, pid: str):
+    """Create a CSE microservice engine: the service registry and config center (async)."""
     s = request.app.state.sim
     if not hasattr(s, "cse_engines"):
         s.cse_engines = {}
@@ -45,6 +46,7 @@ async def create_engine(request: Request, pid: str):
 
 @router.get("/v2/{pid}/engines")
 async def list_engines(request: Request, pid: str):
+    """List microservice engines."""
     s = request.app.state.sim
     engines = [e for e in getattr(s, "cse_engines", {}).values()
                if e["project_id"] == pid]
@@ -53,6 +55,7 @@ async def list_engines(request: Request, pid: str):
 
 @router.get("/v2/{pid}/engines/{engine_id}")
 async def show_engine(request: Request, pid: str, engine_id: str):
+    """Show one engine: its version, endpoints, and capacity."""
     s = request.app.state.sim
     e = getattr(s, "cse_engines", {}).get(engine_id)
     if not e or e["project_id"] != pid:
@@ -63,6 +66,7 @@ async def show_engine(request: Request, pid: str, engine_id: str):
 
 @router.delete("/v2/{pid}/engines/{engine_id}")
 async def delete_engine(request: Request, pid: str, engine_id: str):
+    """Delete a microservice engine."""
     s = request.app.state.sim
     e = getattr(s, "cse_engines", {}).get(engine_id)
     if not e or e["project_id"] != pid:
@@ -78,6 +82,7 @@ async def delete_engine(request: Request, pid: str, engine_id: str):
 
 @router.post("/v2/{pid}/engines/{engine_id}/microservices")
 async def register_microservice(request: Request, pid: str, engine_id: str):
+    """Register a microservice with an engine: its endpoints and schema."""
     s = request.app.state.sim
     e = getattr(s, "cse_engines", {}).get(engine_id)
     if not e or e["project_id"] != pid:
@@ -107,6 +112,7 @@ async def register_microservice(request: Request, pid: str, engine_id: str):
 
 @router.get("/v2/{pid}/engines/{engine_id}/microservices")
 async def list_microservices(request: Request, pid: str, engine_id: str):
+    """List the microservices registered with an engine."""
     s = request.app.state.sim
     e = getattr(s, "cse_engines", {}).get(engine_id)
     if not e or e["project_id"] != pid:

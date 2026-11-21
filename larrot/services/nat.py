@@ -19,6 +19,7 @@ def _gw_json(g):
 
 @router.post("/v2.0/{pid}/nat_gateways")
 async def create_nat_gateway(request: Request, pid: str):
+    """Create a NAT gateway: the SNAT/DNAT point for outbound and inbound traffic (async)."""
     s = request.app.state.sim
     if not hasattr(s, "nat_gateways"): s.nat_gateways = {}
     if not hasattr(s, "nat_snat_rules"): s.nat_snat_rules = {}
@@ -37,6 +38,7 @@ async def create_nat_gateway(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/nat_gateways")
 async def list_nat_gateways(request: Request, pid: str):
+    """List NAT gateways."""
     s = request.app.state.sim
     gateways = [g for g in getattr(s, "nat_gateways", {}).values() if g["project_id"] == pid]
     return {"nat_gateways": [_gw_json(g) for g in gateways], "total": len(gateways)}
@@ -44,6 +46,7 @@ async def list_nat_gateways(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/nat_gateways/{gateway_id}")
 async def show_nat_gateway(request: Request, pid: str, gateway_id: str):
+    """Show one gateway: its spec, subnet, and EIP bindings."""
     s = request.app.state.sim
     g = getattr(s, "nat_gateways", {}).get(gateway_id)
     if not g or g["project_id"] != pid:
@@ -53,6 +56,7 @@ async def show_nat_gateway(request: Request, pid: str, gateway_id: str):
 
 @router.delete("/v2.0/{pid}/nat_gateways/{gateway_id}")
 async def delete_nat_gateway(request: Request, pid: str, gateway_id: str):
+    """Delete a NAT gateway (async)."""
     s = request.app.state.sim
     if gateway_id not in getattr(s, "nat_gateways", {}):
         return JSONResponse({"error_msg": "NAT gateway not found", "error_code": "NAT.0001"}, status_code=404)
@@ -66,6 +70,7 @@ async def delete_nat_gateway(request: Request, pid: str, gateway_id: str):
 
 @router.post("/v2.0/{pid}/snat_rules")
 async def create_snat_rule(request: Request, pid: str):
+    """Create an SNAT rule: let a subnet's instances reach the internet through an EIP."""
     s = request.app.state.sim
     if not hasattr(s, "nat_snat_rules"): s.nat_snat_rules = {}
     body = await request.json()
@@ -82,6 +87,7 @@ async def create_snat_rule(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/snat_rules")
 async def list_snat_rules(request: Request, pid: str):
+    """List SNAT rules."""
     s = request.app.state.sim
     rules = [r for r in getattr(s, "nat_snat_rules", {}).values() if r["project_id"] == pid]
     return {"snat_rules": rules, "total": len(rules)}
@@ -89,6 +95,7 @@ async def list_snat_rules(request: Request, pid: str):
 
 @router.delete("/v2.0/{pid}/snat_rules/{rule_id}")
 async def delete_snat_rule(request: Request, pid: str, rule_id: str):
+    """Delete an SNAT rule."""
     s = request.app.state.sim
     if rule_id not in getattr(s, "nat_snat_rules", {}):
         return JSONResponse({"error_msg": "SNAT rule not found", "error_code": "NAT.0002"}, status_code=404)
@@ -102,6 +109,7 @@ async def delete_snat_rule(request: Request, pid: str, rule_id: str):
 
 @router.post("/v2.0/{pid}/dnat_rules")
 async def create_dnat_rule(request: Request, pid: str):
+    """Create a DNAT rule: expose one internal port to the internet via an EIP."""
     s = request.app.state.sim
     if not hasattr(s, "nat_dnat_rules"): s.nat_dnat_rules = {}
     body = await request.json()
@@ -122,6 +130,7 @@ async def create_dnat_rule(request: Request, pid: str):
 
 @router.get("/v2.0/{pid}/dnat_rules")
 async def list_dnat_rules(request: Request, pid: str):
+    """List DNAT rules."""
     s = request.app.state.sim
     rules = [r for r in getattr(s, "nat_dnat_rules", {}).values() if r["project_id"] == pid]
     return {"dnat_rules": rules, "total": len(rules)}
@@ -129,6 +138,7 @@ async def list_dnat_rules(request: Request, pid: str):
 
 @router.delete("/v2.0/{pid}/dnat_rules/{rule_id}")
 async def delete_dnat_rule(request: Request, pid: str, rule_id: str):
+    """Delete a DNAT rule."""
     s = request.app.state.sim
     if rule_id not in getattr(s, "nat_dnat_rules", {}):
         return JSONResponse({"error_msg": "DNAT rule not found", "error_code": "NAT.0003"}, status_code=404)

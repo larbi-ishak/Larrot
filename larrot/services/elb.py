@@ -65,6 +65,7 @@ def _member_json(m):
 
 @router.post("/v2/{pid}/elb/loadbalancers")
 async def create_loadbalancer(request: Request, pid: str):
+    """Create a load balancer: the public or private traffic entry point (async)."""
     state = request.app.state.sim
     if not hasattr(state, "elb_loadbalancers"):
         state.elb_loadbalancers = {}
@@ -86,6 +87,7 @@ async def create_loadbalancer(request: Request, pid: str):
 
 @router.get("/v2/{pid}/elb/loadbalancers")
 async def list_loadbalancers(request: Request, pid: str):
+    """List load balancers."""
     state = request.app.state.sim
     if not hasattr(state, "elb_loadbalancers"):
         state.elb_loadbalancers = {}
@@ -95,6 +97,7 @@ async def list_loadbalancers(request: Request, pid: str):
 
 @router.get("/v2/{pid}/elb/loadbalancers/{lb_id}")
 async def show_loadbalancer(request: Request, pid: str, lb_id: str):
+    """Show one load balancer: its EIP, subnets, and provisioning status."""
     state = request.app.state.sim
     lb = getattr(state, "elb_loadbalancers", {}).get(lb_id)
     if not lb or lb["project_id"] != pid:
@@ -104,6 +107,7 @@ async def show_loadbalancer(request: Request, pid: str, lb_id: str):
 
 @router.delete("/v2/{pid}/elb/loadbalancers/{lb_id}")
 async def delete_loadbalancer(request: Request, pid: str, lb_id: str):
+    """Delete a load balancer (async)."""
     state = request.app.state.sim
     lb = getattr(state, "elb_loadbalancers", {}).get(lb_id)
     if not lb or lb["project_id"] != pid:
@@ -118,6 +122,7 @@ async def delete_loadbalancer(request: Request, pid: str, lb_id: str):
 
 @router.post("/v2/{pid}/elb/listeners")
 async def create_listener(request: Request, pid: str):
+    """Create a listener: protocol, port, and TLS policy on a load balancer."""
     state = request.app.state.sim
     if not hasattr(state, "elb_listeners"):
         state.elb_listeners = {}
@@ -143,6 +148,7 @@ async def create_listener(request: Request, pid: str):
 
 @router.get("/v2/{pid}/elb/listeners")
 async def list_listeners(request: Request, pid: str):
+    """List listeners."""
     state = request.app.state.sim
     if not hasattr(state, "elb_listeners"):
         state.elb_listeners = {}
@@ -152,6 +158,7 @@ async def list_listeners(request: Request, pid: str):
 
 @router.delete("/v2/{pid}/elb/listeners/{listener_id}")
 async def delete_listener(request: Request, pid: str, listener_id: str):
+    """Delete a listener."""
     state = request.app.state.sim
     if listener_id not in state.elb_listeners:
         return JSONResponse({"error_msg": "Listener not found", "error_code": "ELB.0102"}, status_code=404)
@@ -168,6 +175,7 @@ async def delete_listener(request: Request, pid: str, listener_id: str):
 
 @router.post("/v2/{pid}/elb/pools")
 async def create_pool(request: Request, pid: str):
+    """Create a backend server group: where the load balancer forwards traffic."""
     state = request.app.state.sim
     if not hasattr(state, "elb_pools"):
         state.elb_pools = {}
@@ -189,6 +197,7 @@ async def create_pool(request: Request, pid: str):
 
 @router.get("/v2/{pid}/elb/pools")
 async def list_pools(request: Request, pid: str):
+    """List backend server groups."""
     state = request.app.state.sim
     if not hasattr(state, "elb_pools"):
         state.elb_pools = {}
@@ -198,6 +207,7 @@ async def list_pools(request: Request, pid: str):
 
 @router.post("/v2/{pid}/elb/pools/{pool_id}/members")
 async def create_member(request: Request, pid: str, pool_id: str):
+    """Add a backend member to a pool: an ECS with its IP and port."""
     state = request.app.state.sim
     pool = state.elb_pools.get(pool_id)
     if not pool:
@@ -219,6 +229,7 @@ async def create_member(request: Request, pid: str, pool_id: str):
 
 @router.get("/v2/{pid}/elb/pools/{pool_id}/members")
 async def list_members(request: Request, pid: str, pool_id: str):
+    """List the backend members of a pool."""
     state = request.app.state.sim
     pool = state.elb_pools.get(pool_id)
     if not pool:
@@ -228,6 +239,7 @@ async def list_members(request: Request, pid: str, pool_id: str):
 
 @router.get("/v2/{pid}/elb/listeners/{listener_id}")
 async def show_listener(request: Request, pid: str, listener_id: str):
+    """Show one listener: its protocol, port, and constraints."""
     state = request.app.state.sim
     listener = getattr(state, "elb_listeners", {}).get(listener_id)
     if not listener or listener.get("project_id") != pid:
@@ -237,6 +249,7 @@ async def show_listener(request: Request, pid: str, listener_id: str):
 
 @router.delete("/v2/{pid}/elb/pools/{pool_id}")
 async def delete_pool(request: Request, pid: str, pool_id: str):
+    """Delete a backend server group (must have no members)."""
     state = request.app.state.sim
     p = getattr(state, "elb_pools", {}).get(pool_id)
     if not p or p.get("project_id") != pid:
@@ -247,6 +260,7 @@ async def delete_pool(request: Request, pid: str, pool_id: str):
 
 @router.post("/v2/{pid}/elb/healthmonitors")
 async def create_health_monitor(request: Request, pid: str):
+    """Create a health monitor: how the load balancer checks backend health."""
     state = request.app.state.sim
     if not hasattr(state, "elb_healthmonitors"):
         state.elb_healthmonitors = {}
@@ -266,6 +280,7 @@ async def create_health_monitor(request: Request, pid: str):
 
 @router.get("/v2/{pid}/elb/healthmonitors")
 async def list_health_monitors(request: Request, pid: str):
+    """List health monitors."""
     state = request.app.state.sim
     hms = [h for h in getattr(state, "elb_healthmonitors", {}).values()
            if h["project_id"] == pid]
@@ -274,6 +289,7 @@ async def list_health_monitors(request: Request, pid: str):
 
 @router.get("/v2/{pid}/elb/pools/{pool_id}/members/{member_id}")
 async def show_member(request: Request, pid: str, pool_id: str, member_id: str):
+    """Show one backend member: its address and weight."""
     state = request.app.state.sim
     p = getattr(state, "elb_pools", {}).get(pool_id)
     if not p or p.get("project_id") != pid:
@@ -286,6 +302,7 @@ async def show_member(request: Request, pid: str, pool_id: str, member_id: str):
 
 @router.get("/v2/{pid}/elb/healthmonitors/{healthmonitor_id}")
 async def show_health_monitor(request: Request, pid: str, healthmonitor_id: str):
+    """Show one health monitor: its protocol, interval, and thresholds."""
     state = request.app.state.sim
     h = getattr(state, "elb_healthmonitors", {}).get(healthmonitor_id)
     if not h or h["project_id"] != pid:
@@ -296,6 +313,7 @@ async def show_health_monitor(request: Request, pid: str, healthmonitor_id: str)
 
 @router.delete("/v2/{pid}/elb/healthmonitors/{healthmonitor_id}")
 async def delete_health_monitor(request: Request, pid: str, healthmonitor_id: str):
+    """Delete a health monitor."""
     state = request.app.state.sim
     h = getattr(state, "elb_healthmonitors", {}).get(healthmonitor_id)
     if not h or h["project_id"] != pid:
@@ -307,6 +325,7 @@ async def delete_health_monitor(request: Request, pid: str, healthmonitor_id: st
 
 @router.delete("/v2/{pid}/elb/pools/{pool_id}/members/{member_id}")
 async def delete_member(request: Request, pid: str, pool_id: str, member_id: str):
+    """Remove a backend member from a pool."""
     state = request.app.state.sim
     p = getattr(state, "elb_pools", {}).get(pool_id)
     if not p or p.get("project_id") != pid:

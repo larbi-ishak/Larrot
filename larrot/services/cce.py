@@ -36,6 +36,7 @@ def _node_json(n):
 
 @router.post("/api/v3/projects/{pid}/clusters")
 async def create_cluster(request: Request, pid: str):
+    """Create a CCE cluster: the Kubernetes control plane (async: takes minutes)."""
     state = request.app.state.sim
     if not hasattr(state, "cce_clusters"):
         state.cce_clusters = {}
@@ -67,6 +68,7 @@ async def create_cluster(request: Request, pid: str):
 
 @router.get("/api/v3/projects/{pid}/clusters")
 async def list_clusters(request: Request, pid: str):
+    """List CCE clusters."""
     state = request.app.state.sim
     if not hasattr(state, "cce_clusters"):
         state.cce_clusters = {}
@@ -76,6 +78,7 @@ async def list_clusters(request: Request, pid: str):
 
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}")
 async def show_cluster(request: Request, pid: str, cluster_id: str):
+    """Show one cluster: status, flavor, network, and API endpoint."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -85,6 +88,7 @@ async def show_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.delete("/api/v3/projects/{pid}/clusters/{cluster_id}")
 async def delete_cluster(request: Request, pid: str, cluster_id: str):
+    """Delete a cluster and its nodes (async)."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -95,6 +99,7 @@ async def delete_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.post("/api/v3/projects/{pid}/clusters/{cluster_id}/nodes")
 async def create_node(request: Request, pid: str, cluster_id: str):
+    """Create a node in a cluster: the ECS that runs the workloads (async)."""
     state = request.app.state.sim
     cluster = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not cluster or cluster["project_id"] != pid:
@@ -129,6 +134,7 @@ async def create_node(request: Request, pid: str, cluster_id: str):
 
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodes")
 async def list_nodes(request: Request, pid: str, cluster_id: str):
+    """List the nodes of a cluster."""
     state = request.app.state.sim
     cluster = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not cluster or cluster["project_id"] != pid:
@@ -138,6 +144,7 @@ async def list_nodes(request: Request, pid: str, cluster_id: str):
 
 @router.post("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools")
 async def create_node_pool(request: Request, pid: str, cluster_id: str):
+    """Create a node pool: a group of identical nodes that can autoscale."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c.get("project_id") != pid:
@@ -167,6 +174,7 @@ async def create_node_pool(request: Request, pid: str, cluster_id: str):
 
 @router.put("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}")
 async def update_node_pool(request: Request, pid: str, cluster_id: str, nodepool_id: str):
+    """Update a node pool's size or spec."""
     state = request.app.state.sim
     np_ = getattr(state, "cce_node_pools", {}).get(nodepool_id)
     if not np_ or np_["project_id"] != pid or np_["cluster_id"] != cluster_id:
@@ -181,6 +189,7 @@ async def update_node_pool(request: Request, pid: str, cluster_id: str, nodepool
 
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}")
 async def show_node_pool(request: Request, pid: str, cluster_id: str, nodepool_id: str):
+    """Show one node pool."""
     state = request.app.state.sim
     np_ = getattr(state, "cce_node_pools", {}).get(nodepool_id)
     if not np_ or np_["project_id"] != pid or np_["cluster_id"] != cluster_id:
@@ -191,6 +200,7 @@ async def show_node_pool(request: Request, pid: str, cluster_id: str, nodepool_i
 
 @router.delete("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools/{nodepool_id}")
 async def delete_node_pool(request: Request, pid: str, cluster_id: str, nodepool_id: str):
+    """Delete a node pool."""
     state = request.app.state.sim
     np_ = getattr(state, "cce_node_pools", {}).get(nodepool_id)
     if not np_ or np_["project_id"] != pid or np_["cluster_id"] != cluster_id:
@@ -202,6 +212,7 @@ async def delete_node_pool(request: Request, pid: str, cluster_id: str, nodepool
 
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodepools")
 async def list_node_pools(request: Request, pid: str, cluster_id: str):
+    """List the node pools of a cluster."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c.get("project_id") != pid:
@@ -214,6 +225,7 @@ async def list_node_pools(request: Request, pid: str, cluster_id: str):
 
 @router.post("/api/v3/projects/{pid}/clusters/{cluster_id}/addons")
 async def create_addon(request: Request, pid: str, cluster_id: str):
+    """Install an add-on into a cluster (e.g. metrics-server, everest)."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c.get("project_id") != pid:
@@ -235,6 +247,7 @@ async def create_addon(request: Request, pid: str, cluster_id: str):
 
 @router.put("/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}")
 async def update_addon(request: Request, pid: str, cluster_id: str, addon_id: str):
+    """Update an installed add-on's configuration."""
     state = request.app.state.sim
     a = getattr(state, "cce_addons", {}).get(addon_id)
     if not a or a["project_id"] != pid or a["cluster_id"] != cluster_id:
@@ -250,6 +263,7 @@ async def update_addon(request: Request, pid: str, cluster_id: str, addon_id: st
 
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}")
 async def show_addon(request: Request, pid: str, cluster_id: str, addon_id: str):
+    """Show one add-on instance."""
     state = request.app.state.sim
     a = getattr(state, "cce_addons", {}).get(addon_id)
     if not a or a["project_id"] != pid or a["cluster_id"] != cluster_id:
@@ -260,6 +274,7 @@ async def show_addon(request: Request, pid: str, cluster_id: str, addon_id: str)
 
 @router.delete("/api/v3/projects/{pid}/clusters/{cluster_id}/addons/{addon_id}")
 async def delete_addon(request: Request, pid: str, cluster_id: str, addon_id: str):
+    """Uninstall an add-on."""
     state = request.app.state.sim
     a = getattr(state, "cce_addons", {}).get(addon_id)
     if not a or a["project_id"] != pid or a["cluster_id"] != cluster_id:
@@ -271,6 +286,7 @@ async def delete_addon(request: Request, pid: str, cluster_id: str, addon_id: st
 
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/addons")
 async def list_addons(request: Request, pid: str, cluster_id: str):
+    """List the add-ons installed in a cluster."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c.get("project_id") != pid:
@@ -283,6 +299,7 @@ async def list_addons(request: Request, pid: str, cluster_id: str):
 
 @router.put("/api/v3/projects/{pid}/clusters/{cluster_id}")
 async def update_cluster(request: Request, pid: str, cluster_id: str):
+    """Update a cluster's name or description."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c.get("project_id") != pid:
@@ -299,6 +316,7 @@ async def update_cluster(request: Request, pid: str, cluster_id: str):
 
 @router.get("/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}")
 async def show_node(request: Request, pid: str, cluster_id: str, node_id: str):
+    """Show one node: its ECS flavor, status, and addresses."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c.get("project_id") != pid:
@@ -313,6 +331,7 @@ async def show_node(request: Request, pid: str, cluster_id: str, node_id: str):
 
 @router.delete("/api/v3/projects/{pid}/clusters/{cluster_id}/nodes/{node_id}")
 async def delete_node(request: Request, pid: str, cluster_id: str, node_id: str):
+    """Delete a node from its cluster (async)."""
     state = request.app.state.sim
     c = getattr(state, "cce_clusters", {}).get(cluster_id)
     if not c or c.get("project_id") != pid:

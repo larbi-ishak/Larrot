@@ -36,6 +36,7 @@ def _instance_json(db):
 
 @router.get("/v3/{pid}/instances")
 async def list_instances(request: Request, pid: str):
+    """List RDS instances."""
     state = request.app.state.sim
     if not hasattr(state, "rds_instances"):
         state.rds_instances = {}
@@ -46,6 +47,7 @@ async def list_instances(request: Request, pid: str):
 
 @router.get("/v3/{pid}/instances/{instance_id}")
 async def show_instance(request: Request, pid: str, instance_id: str):
+    """Show one instance: its flavor, storage, endpoints, and HA mode."""
     state = request.app.state.sim
     if not hasattr(state, "rds_instances"):
         state.rds_instances = {}
@@ -57,6 +59,7 @@ async def show_instance(request: Request, pid: str, instance_id: str):
 
 @router.post("/v3/{pid}/instances")
 async def create_instance(request: Request, pid: str):
+    """Create an RDS instance: MySQL, PostgreSQL, or SQL Server (async: takes minutes)."""
     state = request.app.state.sim
     if not hasattr(state, "rds_instances"):
         state.rds_instances = {}
@@ -109,6 +112,7 @@ async def _delay_flip(fn, delay):
 
 @router.delete("/v3/{pid}/instances/{instance_id}")
 async def delete_instance(request: Request, pid: str, instance_id: str):
+    """Delete an RDS instance (async)."""
     state = request.app.state.sim
     if not hasattr(state, "rds_instances"):
         state.rds_instances = {}
@@ -121,6 +125,7 @@ async def delete_instance(request: Request, pid: str, instance_id: str):
 
 @router.get("/v3/{pid}/flavors")
 async def list_flavors(request: Request, pid: str):
+    """List the RDS flavors available per engine version."""
     return {"flavors": [
         {"id": "rds.mysql.c2.large", "name": "2 vCPUs | 4 GB", "vcpus": "2", "ram": "4"},
         {"id": "rds.mysql.c2.xlarge", "name": "4 vCPUs | 8 GB", "vcpus": "4", "ram": "8"},

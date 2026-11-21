@@ -32,6 +32,7 @@ def _dws_error(code, msg):
 @router.post("/v1.0/{pid}/clusters")
 @router.post("/v1.0/{pid}/dws/clusters")
 async def create_cluster(request: Request, pid: str):
+    """Create a DWS GaussDB(DWS) data warehouse cluster (async: takes minutes)."""
     s = request.app.state.sim
     if not hasattr(s, "dws_clusters"):
         s.dws_clusters = {}
@@ -69,6 +70,7 @@ async def create_cluster(request: Request, pid: str):
 @router.get("/v1.0/{pid}/clusters")
 @router.get("/v1.0/{pid}/dws/clusters")
 async def list_clusters(request: Request, pid: str):
+    """List DWS clusters."""
     s = request.app.state.sim
     clusters = [c for c in getattr(s, "dws_clusters", {}).values()
                 if c["project_id"] == pid]
@@ -78,6 +80,7 @@ async def list_clusters(request: Request, pid: str):
 @router.get("/v1.0/{pid}/clusters/{cluster_id}")
 @router.get("/v1.0/{pid}/dws/clusters/{cluster_id}")
 async def show_cluster(request: Request, pid: str, cluster_id: str):
+    """Show one cluster: nodes, storage, endpoints, and status."""
     s = request.app.state.sim
     c = getattr(s, "dws_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -88,6 +91,7 @@ async def show_cluster(request: Request, pid: str, cluster_id: str):
 @router.delete("/v1.0/{pid}/clusters/{cluster_id}")
 @router.delete("/v1.0/{pid}/dws/clusters/{cluster_id}")
 async def delete_cluster(request: Request, pid: str, cluster_id: str):
+    """Delete a DWS cluster (async)."""
     s = request.app.state.sim
     c = getattr(s, "dws_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -99,6 +103,7 @@ async def delete_cluster(request: Request, pid: str, cluster_id: str):
 @router.post("/v1.0/{pid}/clusters/{cluster_id}/resize")
 @router.post("/v1.0/{pid}/dws/clusters/{cluster_id}/resize")
 async def resize_cluster(request: Request, pid: str, cluster_id: str):
+    """Resize a cluster: add nodes or change the flavor (async)."""
     s = request.app.state.sim
     c = getattr(s, "dws_clusters", {}).get(cluster_id)
     if not c or c["project_id"] != pid:
@@ -117,6 +122,7 @@ async def resize_cluster(request: Request, pid: str, cluster_id: str):
 @router.post("/v1.0/{pid}/snapshots")
 @router.post("/v1.0/{pid}/dws/snapshots")
 async def create_snapshot(request: Request, pid: str):
+    """Create a cluster snapshot: the point-in-time backup (async)."""
     s = request.app.state.sim
     if not hasattr(s, "dws_snapshots"):
         s.dws_snapshots = {}
@@ -145,6 +151,7 @@ async def create_snapshot(request: Request, pid: str):
 @router.get("/v1.0/{pid}/snapshots")
 @router.get("/v1.0/{pid}/dws/snapshots")
 async def list_snapshots(request: Request, pid: str):
+    """List cluster snapshots."""
     s = request.app.state.sim
     snaps = [x for x in getattr(s, "dws_snapshots", {}).values()
              if x["project_id"] == pid]
@@ -154,6 +161,7 @@ async def list_snapshots(request: Request, pid: str):
 @router.delete("/v1.0/{pid}/snapshots/{snapshot_id}")
 @router.delete("/v1.0/{pid}/dws/snapshots/{snapshot_id}")
 async def delete_dws_snapshot(request: Request, pid: str, snapshot_id: str):
+    """Delete a snapshot."""
     s = request.app.state.sim
     snap = getattr(s, "dws_snapshots", {}).get(snapshot_id)
     if not snap or snap.get("project_id") != pid:
@@ -166,6 +174,7 @@ async def delete_dws_snapshot(request: Request, pid: str, snapshot_id: str):
 @router.get("/v1.0/{pid}/snapshots/{snapshot_id}")
 @router.get("/v1.0/{pid}/dws/snapshots/{snapshot_id}")
 async def show_dws_snapshot(request: Request, pid: str, snapshot_id: str):
+    """Show one snapshot: its size, type, and cluster."""
     s = request.app.state.sim
     snap = getattr(s, "dws_snapshots", {}).get(snapshot_id)
     if not snap or snap.get("project_id") != pid:

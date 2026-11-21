@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v1/{pid}/waf/hosts")
 async def create_waf_domain(request: Request, pid: str):
+    """Add a website domain to WAF protection: the site to inspect."""
     s = request.app.state.sim
     if not hasattr(s, "waf_domains"): s.waf_domains = {}
     body = await request.json()
@@ -19,12 +20,14 @@ async def create_waf_domain(request: Request, pid: str):
 
 @router.get("/v1/{pid}/waf/hosts")
 async def list_waf_domains(request: Request, pid: str):
+    """List protected domains with their policies and traffic."""
     s = request.app.state.sim
     domains = [d for d in getattr(s, "waf_domains", {}).values() if d["project_id"] == pid]
     return {"total": len(domains), "items": domains}
 
 @router.delete("/v1/{pid}/waf/hosts/{domain_id}")
 async def delete_waf_domain(request: Request, pid: str, domain_id: str):
+    """Remove a domain from WAF."""
     s = request.app.state.sim
     if domain_id not in getattr(s, "waf_domains", {}):
         return JSONResponse({"error_msg": "Domain not found", "error_code": "WAF.0001"}, status_code=404)
@@ -33,6 +36,7 @@ async def delete_waf_domain(request: Request, pid: str, domain_id: str):
 
 @router.post("/v1/{pid}/waf/policies")
 async def create_waf_policy(request: Request, pid: str):
+    """Create a protection policy: the rule set for a domain."""
     s = request.app.state.sim
     if not hasattr(s, "waf_policies"): s.waf_policies = {}
     body = await request.json()
@@ -44,6 +48,7 @@ async def create_waf_policy(request: Request, pid: str):
 
 @router.get("/v1/{pid}/waf/policies")
 async def list_waf_policies(request: Request, pid: str):
+    """List protection policies."""
     s = request.app.state.sim
     policies = [p for p in getattr(s, "waf_policies", {}).values() if p["project_id"] == pid]
     return {"total": len(policies), "items": policies}
@@ -55,6 +60,7 @@ async def list_waf_policies(request: Request, pid: str):
 
 @router.get("/v1/{pid}/waf/hosts/{domain_id}")
 async def show_waf_host(request: Request, pid: str, domain_id: str):
+    """Show one protected domain: its certificate and policy binding."""
     s = request.app.state.sim
     d = getattr(s, "waf_domains", {}).get(domain_id)
     if not d or d["project_id"] != pid:
@@ -65,6 +71,7 @@ async def show_waf_host(request: Request, pid: str, domain_id: str):
 
 @router.get("/v1/{pid}/waf/policies/{policy_id}")
 async def show_waf_policy(request: Request, pid: str, policy_id: str):
+    """Show one policy: its rules and bindings."""
     s = request.app.state.sim
     p = getattr(s, "waf_policies", {}).get(policy_id)
     if not p or p["project_id"] != pid:
@@ -75,6 +82,7 @@ async def show_waf_policy(request: Request, pid: str, policy_id: str):
 
 @router.put("/v1/{pid}/waf/hosts/{domain_id}")
 async def bind_waf_policy(request: Request, pid: str, domain_id: str):
+    """Bind a protection policy to a domain."""
     s = request.app.state.sim
     d = getattr(s, "waf_domains", {}).get(domain_id)
     if not d or d["project_id"] != pid:
@@ -91,6 +99,7 @@ async def bind_waf_policy(request: Request, pid: str, domain_id: str):
 
 @router.post("/v1/{pid}/waf/policies/{policy_id}/rules")
 async def create_waf_rule(request: Request, pid: str, policy_id: str):
+    """Add a rule to a policy: blacklist, CC limit, or precise match."""
     s = request.app.state.sim
     p = getattr(s, "waf_policies", {}).get(policy_id)
     if not p or p["project_id"] != pid:
@@ -110,6 +119,7 @@ async def create_waf_rule(request: Request, pid: str, policy_id: str):
 
 @router.get("/v1/{pid}/waf/policies/{policy_id}/rules")
 async def list_waf_rules(request: Request, pid: str, policy_id: str):
+    """List a policy's rules."""
     s = request.app.state.sim
     p = getattr(s, "waf_policies", {}).get(policy_id)
     if not p or p["project_id"] != pid:

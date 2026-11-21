@@ -8,12 +8,14 @@ router = APIRouter()
 
 @router.get("/v1/{pid}/alarms")
 async def list_alarms(request: Request, pid: str):
+    """List alarm rules."""
     s = request.app.state.sim
     if not hasattr(s, "ces_alarms"): s.ces_alarms = {}
     return {"metric_alarms": list(getattr(s, "ces_alarms", {}).values())}
 
 @router.post("/v1/{pid}/alarms")
 async def create_alarm(request: Request, pid: str):
+    """Create an alarm rule: a metric threshold that triggers a notification."""
     s = request.app.state.sim
     if not hasattr(s, "ces_alarms"): s.ces_alarms = {}
     body = await request.json()
@@ -28,6 +30,7 @@ async def create_alarm(request: Request, pid: str):
 
 @router.get("/v1/{pid}/alarms/{alarm_id}")
 async def show_alarm(request: Request, pid: str, alarm_id: str):
+    """Show one alarm rule: its metric, condition, and actions."""
     s = request.app.state.sim
     a = getattr(s, "ces_alarms", {}).get(alarm_id)
     if not a:
@@ -36,6 +39,7 @@ async def show_alarm(request: Request, pid: str, alarm_id: str):
 
 @router.put("/v1/{pid}/alarms/{alarm_id}")
 async def update_alarm(request: Request, pid: str, alarm_id: str):
+    """Update an alarm rule."""
     s = request.app.state.sim
     a = getattr(s, "ces_alarms", {}).get(alarm_id)
     if not a or a.get("project_id") != pid:
@@ -50,6 +54,7 @@ async def update_alarm(request: Request, pid: str, alarm_id: str):
 
 @router.delete("/v1/{pid}/alarms/{alarm_id}")
 async def delete_alarm(request: Request, pid: str, alarm_id: str):
+    """Delete an alarm rule."""
     s = request.app.state.sim
     if alarm_id not in getattr(s, "ces_alarms", {}):
         return JSONResponse({"error_msg": "Alarm not found", "error_code": "CES.0001"}, status_code=404)
@@ -58,6 +63,7 @@ async def delete_alarm(request: Request, pid: str, alarm_id: str):
 
 @router.get("/v1/{pid}/metrics")
 async def list_metrics(request: Request, pid: str):
+    """List the metrics you can query: namespaces, names, and dimensions."""
     return {"metrics": [
         {"namespace": "SYS.ECS", "metric_name": "cpu_util", "unit": "%"},
         {"namespace": "SYS.ECS", "metric_name": "mem_util", "unit": "%"},
@@ -72,6 +78,7 @@ async def list_metrics(request: Request, pid: str):
 
 @router.get("/v1/{pid}/alarms/{alarm_id}/history")
 async def alarm_history(request: Request, pid: str, alarm_id: str):
+    """Show the alarm's history: each time it fired and its states."""
     s = request.app.state.sim
     a = getattr(s, "ces_alarms", {}).get(alarm_id)
     if not a or a["project_id"] != pid:
@@ -83,6 +90,7 @@ async def alarm_history(request: Request, pid: str, alarm_id: str):
 
 @router.post("/v1.0/{pid}/batch-query/metric-data")
 async def batch_metric_data(request: Request, pid: str):
+    """Batch-query metric data points: multiple metrics over a time range in one call."""
     body = await request.json()
     out = []
     for m in body.get("metrics", []):

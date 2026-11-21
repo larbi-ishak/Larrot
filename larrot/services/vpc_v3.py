@@ -40,6 +40,7 @@ def _find(state, pid: str, vpc_id: str):
 
 @router.get("/v3/{pid}/vpc/vpcs")
 async def v3_list_vpcs(request: Request, pid: str, limit: int = None, marker: str = None):
+    """List VPCs (v3 API): the paginated view with v3 fields."""
     state = request.app.state.sim
     items = [_v3_view(v) for v in state.vpcs.values() if v.get("project_id") == pid]
     items.sort(key=lambda v: v["id"])
@@ -53,6 +54,7 @@ async def v3_list_vpcs(request: Request, pid: str, limit: int = None, marker: st
 
 @router.post("/v3/{pid}/vpc/vpcs")
 async def v3_create_vpc(request: Request, pid: str):
+    """Create a VPC (v3 API): with description and secondary CIDR support."""
     state = request.app.state.sim
     body = await request.json()
     inner = body.get("vpc", body)  # accept wrapped or flat
@@ -73,6 +75,7 @@ async def v3_create_vpc(request: Request, pid: str):
 
 @router.get("/v3/{pid}/vpc/vpcs/{vpc_id}")
 async def v3_show_vpc(request: Request, pid: str, vpc_id: str):
+    """Show one VPC (v3 API): including extend_cidrs (what Terraform reads)."""
     state = request.app.state.sim
     v = _find(state, pid, vpc_id)
     if not v:
@@ -85,6 +88,7 @@ async def v3_show_vpc(request: Request, pid: str, vpc_id: str):
 
 @router.put("/v3/{pid}/vpc/vpcs/{vpc_id}")
 async def v3_update_vpc(request: Request, pid: str, vpc_id: str):
+    """Update a VPC (v3 API): name, description, or CIDR."""
     state = request.app.state.sim
     v = _find(state, pid, vpc_id)
     if not v:
@@ -103,6 +107,7 @@ async def v3_update_vpc(request: Request, pid: str, vpc_id: str):
 
 @router.delete("/v3/{pid}/vpc/vpcs/{vpc_id}")
 async def v3_delete_vpc(request: Request, pid: str, vpc_id: str):
+    """Delete a VPC (v3 API)."""
     state = request.app.state.sim
     v = _find(state, pid, vpc_id)
     if not v:
@@ -116,6 +121,7 @@ async def v3_delete_vpc(request: Request, pid: str, vpc_id: str):
 
 @router.put("/v3/{pid}/vpc/vpcs/{vpc_id}/add-extend-cidr")
 async def v3_add_extend_cidr(request: Request, pid: str, vpc_id: str):
+    """Add a secondary CIDR block to a VPC (v3 API)."""
     state = request.app.state.sim
     v = _find(state, pid, vpc_id)
     if not v:
@@ -140,6 +146,7 @@ async def v3_add_extend_cidr(request: Request, pid: str, vpc_id: str):
 
 @router.put("/v3/{pid}/vpc/vpcs/{vpc_id}/remove-extend-cidr")
 async def v3_remove_extend_cidr(request: Request, pid: str, vpc_id: str):
+    """Remove a secondary CIDR block from a VPC (v3 API)."""
     state = request.app.state.sim
     v = _find(state, pid, vpc_id)
     if not v:

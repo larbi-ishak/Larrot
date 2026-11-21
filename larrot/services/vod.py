@@ -23,6 +23,7 @@ def _asset_json(a):
 
 @router.post("/v1/{pid}/assets")
 async def create_asset(request: Request, pid: str):
+    """Create a VOD media asset: upload a video for processing and publishing."""
     s = request.app.state.sim
     if not hasattr(s, "vod_assets"):
         s.vod_assets = {}
@@ -45,6 +46,7 @@ async def create_asset(request: Request, pid: str):
 
 @router.get("/v1/{pid}/assets")
 async def list_assets(request: Request, pid: str):
+    """List media assets with their statuses and durations."""
     s = request.app.state.sim
     status_f = request.query_params.get("status")
     assets = [a for a in getattr(s, "vod_assets", {}).values()
@@ -56,6 +58,7 @@ async def list_assets(request: Request, pid: str):
 
 @router.get("/v1/{pid}/assets/{asset_id}")
 async def show_asset(request: Request, pid: str, asset_id: str):
+    """Show one asset: its playback URLs and transcode outputs."""
     s = request.app.state.sim
     a = getattr(s, "vod_assets", {}).get(asset_id)
     if not a or a["project_id"] != pid:
@@ -87,6 +90,7 @@ async def upload_asset(request: Request, pid: str, asset_id: str):
 
 @router.delete("/v1/{pid}/assets/{asset_id}")
 async def delete_asset(request: Request, pid: str, asset_id: str):
+    """Delete a media asset."""
     s = request.app.state.sim
     a = getattr(s, "vod_assets", {}).get(asset_id)
     if not a or a["project_id"] != pid:
@@ -102,6 +106,7 @@ async def delete_asset(request: Request, pid: str, asset_id: str):
 
 @router.post("/v1/{pid}/transcode-templates")
 async def create_transcode_template(request: Request, pid: str):
+    """Create a transcoding template: the output formats for media processing."""
     s = request.app.state.sim
     if not hasattr(s, "vod_templates"):
         s.vod_templates = {}
@@ -123,6 +128,7 @@ async def create_transcode_template(request: Request, pid: str):
 
 @router.get("/v1/{pid}/transcode-templates")
 async def list_transcode_templates(request: Request, pid: str):
+    """List transcoding templates."""
     s = request.app.state.sim
     templates = [t for t in getattr(s, "vod_templates", {}).values()
                  if t["project_id"] == pid]
@@ -131,6 +137,7 @@ async def list_transcode_templates(request: Request, pid: str):
 
 @router.delete("/v1/{pid}/transcode-templates/{template_id}")
 async def delete_transcode_template(request: Request, pid: str, template_id: str):
+    """Delete a transcoding template."""
     s = request.app.state.sim
     if template_id not in getattr(s, "vod_templates", {}):
         return JSONResponse({"error_code": "VOD.0004", "error_msg": "template not found"},
@@ -145,6 +152,7 @@ async def delete_transcode_template(request: Request, pid: str, template_id: str
 
 @router.post("/v1/{pid}/categories")
 async def create_category(request: Request, pid: str):
+    """Create a media category: the folder for organizing assets."""
     s = request.app.state.sim
     if not hasattr(s, "vod_categories"):
         s.vod_categories = {}
@@ -164,6 +172,7 @@ async def create_category(request: Request, pid: str):
 
 @router.get("/v1/{pid}/categories")
 async def list_categories(request: Request, pid: str):
+    """List media categories."""
     s = request.app.state.sim
     categories = [c for c in getattr(s, "vod_categories", {}).values()
                   if c["project_id"] == pid]

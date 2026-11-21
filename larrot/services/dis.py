@@ -12,6 +12,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/streams")
 async def create_stream(request: Request, pid: str):
+    """Create a DIS stream: the real-time data ingestion channel (async)."""
     s = request.app.state.sim
     if not hasattr(s, "dis_streams"):
         s.dis_streams = {}
@@ -42,6 +43,7 @@ async def create_stream(request: Request, pid: str):
 
 @router.get("/v2/{pid}/streams")
 async def list_streams(request: Request, pid: str):
+    """List DIS streams with partition counts and statuses."""
     s = request.app.state.sim
     limit = int(request.query_params.get("limit", 10))
     start = request.query_params.get("start_name", "")
@@ -56,6 +58,7 @@ async def list_streams(request: Request, pid: str):
 
 @router.get("/v2/{pid}/streams/{stream_name}")
 async def show_stream(request: Request, pid: str, stream_name: str):
+    """Show one stream: retention period, partitions, and metrics."""
     s = request.app.state.sim
     stream = next((x for x in getattr(s, "dis_streams", {}).values()
                    if x["stream_name"] == stream_name and x["project_id"] == pid), None)
@@ -85,6 +88,7 @@ async def update_stream(request: Request, pid: str, stream_name: str):
 
 @router.delete("/v2/{pid}/streams/{stream_name}")
 async def delete_stream(request: Request, pid: str, stream_name: str):
+    """Delete a DIS stream."""
     s = request.app.state.sim
     sid = next((k for k, x in getattr(s, "dis_streams", {}).items()
                 if x["stream_name"] == stream_name and x["project_id"] == pid), None)
@@ -101,6 +105,7 @@ async def delete_stream(request: Request, pid: str, stream_name: str):
 
 @router.post("/v2/{pid}/apps")
 async def create_app(request: Request, pid: str):
+    """Create a DIS app: the consumer credential that reads streams."""
     s = request.app.state.sim
     if not hasattr(s, "dis_apps"):
         s.dis_apps = {}
@@ -119,6 +124,7 @@ async def create_app(request: Request, pid: str):
 
 @router.get("/v2/{pid}/apps")
 async def list_apps(request: Request, pid: str):
+    """List DIS apps."""
     s = request.app.state.sim
     apps = [a for a in getattr(s, "dis_apps", {}).values() if a["project_id"] == pid]
     return {"apps": apps, "total": len(apps)}
@@ -148,6 +154,7 @@ async def commit_checkpoint(request: Request, pid: str, app_name: str):
 
 @router.delete("/v2/{pid}/apps/{app_name}/checkpoints")
 async def delete_checkpoint(request: Request, pid: str, app_name: str):
+    """Delete a consumer checkpoint: the app re-reads the stream from the start."""
     s = request.app.state.sim
     stream_name = request.query_params.get("stream_name", "")
     if not stream_name:
@@ -163,6 +170,7 @@ async def delete_checkpoint(request: Request, pid: str, app_name: str):
 
 @router.get("/v2/{pid}/apps/{app_name}/checkpoints")
 async def list_checkpoints(request: Request, pid: str, app_name: str):
+    """List a consumer's checkpoints: the read position per stream partition."""
     s = request.app.state.sim
     cps = [c for c in getattr(s, "dis_checkpoints", {}).values()
            if c["project_id"] == pid and c["app_name"] == app_name]

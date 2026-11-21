@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.post("/v1/{pid}/dsc/assets")
 async def create_asset(request: Request, pid: str):
+    """Register a data asset with DSC: the database or bucket to scan for sensitive data."""
     s = request.app.state.sim
     if not hasattr(s, "dsc_assets"):
         s.dsc_assets = {}
@@ -34,6 +35,7 @@ async def create_asset(request: Request, pid: str):
 
 @router.get("/v1/{pid}/dsc/assets")
 async def list_assets(request: Request, pid: str):
+    """List registered data assets."""
     s = request.app.state.sim
     assets = [a for a in getattr(s, "dsc_assets", {}).values()
               if a["project_id"] == pid]
@@ -42,6 +44,7 @@ async def list_assets(request: Request, pid: str):
 
 @router.delete("/v1/{pid}/dsc/assets/{asset_id}")
 async def delete_asset(request: Request, pid: str, asset_id: str):
+    """Remove a data asset."""
     s = request.app.state.sim
     if asset_id not in getattr(s, "dsc_assets", {}):
         return JSONResponse({"error_code": "DSC.0002", "error_msg": "asset not found"},
@@ -81,6 +84,7 @@ async def create_scan(request: Request, pid: str):
 
 @router.get("/v1/{pid}/dsc/risks")
 async def list_risks(request: Request, pid: str):
+    """List sensitive-data risks found by scans."""
     s = request.app.state.sim
     status_f = request.query_params.get("status")
     risks = [r for r in getattr(s, "dsc_risks", {}).values()

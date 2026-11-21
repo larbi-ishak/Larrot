@@ -8,12 +8,14 @@ router = APIRouter()
 
 @router.get("/v1/{pid}/baremetalservers/detail")
 async def list_bms(request: Request, pid: str):
+    """List bare metal servers with full details (flavor, networks, storage)."""
     s = request.app.state.sim
     if not hasattr(s, "bms_servers"): s.bms_servers = {}
     return {"servers": list(s.bms_servers.values()), "count": len(s.bms_servers)}
 
 @router.post("/v1/{pid}/baremetalservers")
 async def create_bms(request: Request, pid: str):
+    """Create a bare metal server (async: returns a job; provisioning takes minutes)."""
     s = request.app.state.sim
     if not hasattr(s, "bms_servers"): s.bms_servers = {}
     body = await request.json()
@@ -26,12 +28,14 @@ async def create_bms(request: Request, pid: str):
 
 @router.get("/v1/{pid}/baremetalservers/flavors")
 async def bms_flavors(request: Request, pid: str):
+    """List the BMS flavors available in the region: physical server specs."""
     return {"flavors": [{"id": "physical.s2.medium", "name": "physical.s2.medium"},
                           {"id": "physical.h2.large", "name": "physical.h2.large"}]}
 
 
 @router.get("/v1/{pid}/baremetalservers/{server_id}")
 async def show_bms(request: Request, pid: str, server_id: str):
+    """Show one bare metal server."""
     s = request.app.state.sim
     b = getattr(s, "bms_servers", {}).get(server_id)
     if not b or b["project_id"] != pid:
@@ -40,6 +44,7 @@ async def show_bms(request: Request, pid: str, server_id: str):
 
 @router.put("/v1/{pid}/baremetalservers/{server_id}")
 async def update_bms_server(request: Request, pid: str, server_id: str):
+    """Update a BMS name or description."""
     s = request.app.state.sim
     srv = getattr(s, "bms_servers", {}).get(server_id)
     if not srv or srv["project_id"] != pid:
@@ -53,6 +58,7 @@ async def update_bms_server(request: Request, pid: str, server_id: str):
 
 @router.delete("/v1/{pid}/baremetalservers/{server_id}")
 async def delete_bms(request: Request, pid: str, server_id: str):
+    """Delete a bare metal server (async: returns a job)."""
     s = request.app.state.sim
     if server_id not in getattr(s, "bms_servers", {}):
         return JSONResponse({"error": {"code": "BMS.0101", "message": "BMS not found"}}, status_code=404)
@@ -66,6 +72,7 @@ async def delete_bms(request: Request, pid: str, server_id: str):
 
 @router.post("/v1/{pid}/baremetalservers/{server_id}/action")
 async def bms_action(request: Request, pid: str, server_id: str):
+    """Power action on a BMS: os-start, os-stop, reboot, or reinstall."""
     s = request.app.state.sim
     srv = getattr(s, "bms_servers", {}).get(server_id)
     if not srv or srv["project_id"] != pid:
@@ -89,6 +96,7 @@ async def bms_action(request: Request, pid: str, server_id: str):
 
 @router.get("/v1/{pid}/baremetalservers/{server_id}/nics")
 async def bms_nics(request: Request, pid: str, server_id: str):
+    """List the network interfaces of a BMS with their IPs and MACs."""
     s = request.app.state.sim
     srv = getattr(s, "bms_servers", {}).get(server_id)
     if not srv or srv["project_id"] != pid:

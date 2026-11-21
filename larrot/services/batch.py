@@ -9,6 +9,7 @@ router = APIRouter()
 
 @router.post("/v1/{pid}/batch/jobs")
 async def create_batch_job(request: Request, pid: str):
+    """Create a batch job: provision many BMS/ECS instances from one spec (async)."""
     s = request.app.state.sim
     if not hasattr(s, "batch_jobs"): s.batch_jobs = {}
     body = await request.json()
@@ -27,6 +28,7 @@ async def create_batch_job(request: Request, pid: str):
 
 @router.get("/v1/{pid}/batch/jobs")
 async def list_batch_jobs(request: Request, pid: str):
+    """List batch jobs with their instance counts and progress."""
     s = request.app.state.sim
     jobs = [j for j in getattr(s, "batch_jobs", {}).values() if j["project_id"] == pid]
     return {"jobs": jobs, "total": len(jobs)}
@@ -34,6 +36,7 @@ async def list_batch_jobs(request: Request, pid: str):
 
 @router.get("/v1/{pid}/batch/jobs/{job_id}")
 async def show_batch_job(request: Request, pid: str, job_id: str):
+    """Show one batch job: its spec, count, and per-instance results."""
     s = request.app.state.sim
     j = getattr(s, "batch_jobs", {}).get(job_id)
     if not j or j["project_id"] != pid:
@@ -43,6 +46,7 @@ async def show_batch_job(request: Request, pid: str, job_id: str):
 
 @router.delete("/v1/{pid}/batch/jobs/{job_id}")
 async def delete_batch_job(request: Request, pid: str, job_id: str):
+    """Delete a batch job and its instances (async)."""
     s = request.app.state.sim
     if job_id not in getattr(s, "batch_jobs", {}):
         return JSONResponse({"error_msg": "Batch job not found", "error_code": "BATCH.0001"}, status_code=404)
@@ -52,6 +56,7 @@ async def delete_batch_job(request: Request, pid: str, job_id: str):
 
 @router.post("/v1/{pid}/batch/jobs/{job_id}/cancel")
 async def cancel_batch_job(request: Request, pid: str, job_id: str):
+    """Cancel a running batch job (async)."""
     s = request.app.state.sim
     j = getattr(s, "batch_jobs", {}).get(job_id)
     if not j or j["project_id"] != pid:

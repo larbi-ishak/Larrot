@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/edgemgr/nodes")
 async def create_node(request: Request, pid: str):
+    """Register an edge node with IEF: the device at the edge that runs deployments."""
     s = request.app.state.sim
     if not hasattr(s, "ief_nodes"):
         s.ief_nodes = {}
@@ -43,6 +44,7 @@ async def create_node(request: Request, pid: str):
 
 @router.get("/v2/{pid}/edgemgr/nodes")
 async def list_nodes(request: Request, pid: str):
+    """List edge nodes with their status and hardware info."""
     s = request.app.state.sim
     state_f = request.query_params.get("state")
     nodes = [n for n in getattr(s, "ief_nodes", {}).values()
@@ -54,6 +56,7 @@ async def list_nodes(request: Request, pid: str):
 
 @router.get("/v2/{pid}/edgemgr/nodes/{node_id}")
 async def show_node(request: Request, pid: str, node_id: str):
+    """Show one edge node: its CPU, memory, and applications."""
     s = request.app.state.sim
     n = getattr(s, "ief_nodes", {}).get(node_id)
     if not n or n["project_id"] != pid:
@@ -64,6 +67,7 @@ async def show_node(request: Request, pid: str, node_id: str):
 
 @router.delete("/v2/{pid}/edgemgr/nodes/{node_id}")
 async def delete_node(request: Request, pid: str, node_id: str):
+    """Remove an edge node."""
     s = request.app.state.sim
     n = getattr(s, "ief_nodes", {}).get(node_id)
     if not n or n["project_id"] != pid:
@@ -79,6 +83,7 @@ async def delete_node(request: Request, pid: str, node_id: str):
 
 @router.post("/v2/{pid}/edgemgr/deployments")
 async def create_deployment(request: Request, pid: str):
+    """Create an edge deployment: the containers to run on nodes."""
     s = request.app.state.sim
     if not hasattr(s, "ief_deployments"):
         s.ief_deployments = {}
@@ -118,6 +123,7 @@ async def create_deployment(request: Request, pid: str):
 
 @router.get("/v2/{pid}/edgemgr/deployments")
 async def list_deployments(request: Request, pid: str):
+    """List edge deployments."""
     s = request.app.state.sim
     deployments = [d for d in getattr(s, "ief_deployments", {}).values()
                    if d["project_id"] == pid]
@@ -126,6 +132,7 @@ async def list_deployments(request: Request, pid: str):
 
 @router.get("/v2/{pid}/edgemgr/deployments/{deployment_id}")
 async def show_deployment(request: Request, pid: str, deployment_id: str):
+    """Show one deployment: its containers and target nodes."""
     s = request.app.state.sim
     d = getattr(s, "ief_deployments", {}).get(deployment_id)
     if not d or d["project_id"] != pid:
@@ -136,6 +143,7 @@ async def show_deployment(request: Request, pid: str, deployment_id: str):
 
 @router.delete("/v2/{pid}/edgemgr/deployments/{deployment_id}")
 async def delete_deployment(request: Request, pid: str, deployment_id: str):
+    """Delete an edge deployment."""
     s = request.app.state.sim
     d = getattr(s, "ief_deployments", {}).get(deployment_id)
     if not d or d["project_id"] != pid:

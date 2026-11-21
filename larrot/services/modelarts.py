@@ -31,6 +31,7 @@ MAAS_MODELS = [
 
 @router.post("/v2/{pid}/notebooks")
 async def create_notebook(request: Request, pid: str):
+    """Create a ModelArts notebook: the hosted development environment (async)."""
     s = request.app.state.sim
     if not hasattr(s, "ma_notebooks"):
         s.ma_notebooks = {}
@@ -53,6 +54,7 @@ async def create_notebook(request: Request, pid: str):
 
 @router.get("/v2/{pid}/notebooks")
 async def list_notebooks(request: Request, pid: str):
+    """List notebooks with their compute flavors."""
     s = request.app.state.sim
     notebooks = [n for n in getattr(s, "ma_notebooks", {}).values()
                  if n["project_id"] == pid]
@@ -61,6 +63,7 @@ async def list_notebooks(request: Request, pid: str):
 
 @router.delete("/v2/{pid}/notebooks/{notebook_id}")
 async def delete_notebook(request: Request, pid: str, notebook_id: str):
+    """Delete a notebook."""
     s = request.app.state.sim
     nb = getattr(s, "ma_notebooks", {}).get(notebook_id)
     if not nb or nb["project_id"] != pid:
@@ -76,6 +79,7 @@ async def delete_notebook(request: Request, pid: str, notebook_id: str):
 
 @router.post("/v2/{pid}/training-jobs")
 async def create_training_job(request: Request, pid: str):
+    """Create a training job: run an algorithm on a dataset and save the model (async)."""
     s = request.app.state.sim
     if not hasattr(s, "ma_training_jobs"):
         s.ma_training_jobs = {}
@@ -99,6 +103,7 @@ async def create_training_job(request: Request, pid: str):
 
 @router.get("/v2/{pid}/training-jobs")
 async def list_training_jobs(request: Request, pid: str):
+    """List training jobs with status and duration."""
     s = request.app.state.sim
     jobs = [j for j in getattr(s, "ma_training_jobs", {}).values()
             if j["project_id"] == pid]
@@ -111,6 +116,7 @@ async def list_training_jobs(request: Request, pid: str):
 
 @router.post("/v1/{pid}/models")
 async def register_model(request: Request, pid: str):
+    """Register a model: the trained artifact, ready to deploy."""
     s = request.app.state.sim
     if not hasattr(s, "ma_models"):
         s.ma_models = {}
@@ -140,6 +146,7 @@ async def register_model(request: Request, pid: str):
 
 @router.get("/v1/{pid}/models")
 async def list_models(request: Request, pid: str):
+    """List registered models."""
     s = request.app.state.sim
     models = [m for m in getattr(s, "ma_models", {}).values()
               if m["project_id"] == pid]
@@ -148,6 +155,7 @@ async def list_models(request: Request, pid: str):
 
 @router.get("/v1/{pid}/models/{model_id}")
 async def show_model(request: Request, pid: str, model_id: str):
+    """Show one model: its version, size, and runtime."""
     s = request.app.state.sim
     m = getattr(s, "ma_models", {}).get(model_id)
     if not m or m["project_id"] != pid:
@@ -158,6 +166,7 @@ async def show_model(request: Request, pid: str, model_id: str):
 
 @router.delete("/v1/{pid}/models/{model_id}")
 async def delete_model(request: Request, pid: str, model_id: str):
+    """Delete a model."""
     s = request.app.state.sim
     m = getattr(s, "ma_models", {}).get(model_id)
     if not m or m["project_id"] != pid:
@@ -173,6 +182,7 @@ async def delete_model(request: Request, pid: str, model_id: str):
 
 @router.post("/v1/{pid}/services")
 async def create_service(request: Request, pid: str):
+    """Deploy a model as an inference service with an endpoint (async)."""
     s = request.app.state.sim
     if not hasattr(s, "ma_services"):
         s.ma_services = {}
@@ -208,6 +218,7 @@ async def create_service(request: Request, pid: str):
 
 @router.get("/v1/{pid}/services")
 async def list_services(request: Request, pid: str):
+    """List inference services with their endpoints."""
     s = request.app.state.sim
     services = [x for x in getattr(s, "ma_services", {}).values()
                 if x["project_id"] == pid]
@@ -216,6 +227,7 @@ async def list_services(request: Request, pid: str):
 
 @router.get("/v1/{pid}/services/{service_id}")
 async def show_service(request: Request, pid: str, service_id: str):
+    """Show one service: its model, replicas, and invocation URL."""
     s = request.app.state.sim
     svc = getattr(s, "ma_services", {}).get(service_id)
     if not svc or svc["project_id"] != pid:
@@ -226,6 +238,7 @@ async def show_service(request: Request, pid: str, service_id: str):
 
 @router.delete("/v1/{pid}/services/{service_id}")
 async def delete_service(request: Request, pid: str, service_id: str):
+    """Delete an inference service."""
     s = request.app.state.sim
     svc = getattr(s, "ma_services", {}).get(service_id)
     if not svc or svc["project_id"] != pid:
@@ -241,6 +254,7 @@ async def delete_service(request: Request, pid: str, service_id: str):
 
 @router.post("/v1/{pid}/fine-tuning-jobs")
 async def create_fine_tuning_job(request: Request, pid: str):
+    """Create a fine-tuning job: adapt a foundation model to your data (async)."""
     s = request.app.state.sim
     if not hasattr(s, "ma_finetune_jobs"):
         s.ma_finetune_jobs = {}
@@ -272,6 +286,7 @@ async def create_fine_tuning_job(request: Request, pid: str):
 
 @router.get("/v1/{pid}/fine-tuning-jobs")
 async def list_fine_tuning_jobs(request: Request, pid: str):
+    """List fine-tuning jobs."""
     s = request.app.state.sim
     jobs = [j for j in getattr(s, "ma_finetune_jobs", {}).values()
             if j["project_id"] == pid]
@@ -360,6 +375,7 @@ async def maas_embeddings(request: Request):
 
 @router.post("/v1/{pid}/maas/keys")
 async def create_api_key(request: Request, pid: str):
+    """Create a MaaS API key: the credential for calling model inference APIs."""
     s = request.app.state.sim
     if not hasattr(s, "maas_keys"):
         s.maas_keys = {}
@@ -380,6 +396,7 @@ async def create_api_key(request: Request, pid: str):
 
 @router.get("/v1/{pid}/maas/keys")
 async def list_api_keys(request: Request, pid: str):
+    """List MaaS API keys with their usage."""
     s = request.app.state.sim
     keys = [{"key_id": k["key_id"], "name": k["name"], "status": k["status"],
              "created_at": k["created_at"]}
@@ -389,6 +406,7 @@ async def list_api_keys(request: Request, pid: str):
 
 @router.delete("/v1/{pid}/maas/keys/{key_id}")
 async def delete_api_key(request: Request, pid: str, key_id: str):
+    """Delete a MaaS API key."""
     s = request.app.state.sim
     k = getattr(s, "maas_keys", {}).get(key_id)
     if not k or k["project_id"] != pid:
@@ -404,6 +422,7 @@ async def delete_api_key(request: Request, pid: str, key_id: str):
 
 @router.post("/v2/{pid}/datasets")
 async def create_dataset(request: Request, pid: str):
+    """Create a ModelArts dataset: the labeled data for training."""
     s = request.app.state.sim
     if not hasattr(s, "ma_datasets"):
         s.ma_datasets = {}
@@ -425,6 +444,7 @@ async def create_dataset(request: Request, pid: str):
 
 @router.get("/v2/{pid}/datasets")
 async def list_datasets(request: Request, pid: str):
+    """List datasets."""
     s = request.app.state.sim
     ds = [d for d in getattr(s, "ma_datasets", {}).values() if d["project_id"] == pid]
     return {"datasets": ds, "total": len(ds)}
@@ -432,6 +452,7 @@ async def list_datasets(request: Request, pid: str):
 
 @router.delete("/v2/{pid}/datasets/{dataset_id}")
 async def delete_dataset(request: Request, pid: str, dataset_id: str):
+    """Delete a dataset."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -443,6 +464,7 @@ async def delete_dataset(request: Request, pid: str, dataset_id: str):
 
 @router.post("/v2/{pid}/datasets/{dataset_id}/versions")
 async def create_dataset_version(request: Request, pid: str, dataset_id: str):
+    """Publish a dataset version: the immutable snapshot for training."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -467,6 +489,7 @@ async def create_dataset_version(request: Request, pid: str, dataset_id: str):
 
 @router.get("/v2/{pid}/datasets/{dataset_id}/versions")
 async def list_dataset_versions(request: Request, pid: str, dataset_id: str):
+    """List a dataset's versions."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -477,6 +500,7 @@ async def list_dataset_versions(request: Request, pid: str, dataset_id: str):
 
 @router.get("/v2/{pid}/datasets/{dataset_id}")
 async def show_dataset(request: Request, pid: str, dataset_id: str):
+    """Show one dataset: its type, source, and label stats."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -487,6 +511,7 @@ async def show_dataset(request: Request, pid: str, dataset_id: str):
 
 @router.get("/v2/{pid}/datasets/{dataset_id}/labels")
 async def list_labels(request: Request, pid: str, dataset_id: str):
+    """List a dataset's labels."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -497,6 +522,7 @@ async def list_labels(request: Request, pid: str, dataset_id: str):
 
 @router.post("/v2/{pid}/datasets/{dataset_id}/labels")
 async def create_label(request: Request, pid: str, dataset_id: str):
+    """Create a label: the category samples are marked with."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -518,6 +544,7 @@ async def create_label(request: Request, pid: str, dataset_id: str):
 
 @router.put("/v2/{pid}/datasets/{dataset_id}/labels/{label_name}")
 async def update_label(request: Request, pid: str, dataset_id: str, label_name: str):
+    """Update a label's name or color."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -537,6 +564,7 @@ async def update_label(request: Request, pid: str, dataset_id: str, label_name: 
 
 @router.delete("/v2/{pid}/datasets/{dataset_id}/labels/{label_name}")
 async def delete_label(request: Request, pid: str, dataset_id: str, label_name: str):
+    """Delete a label."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -552,6 +580,7 @@ async def delete_label(request: Request, pid: str, dataset_id: str, label_name: 
 
 @router.post("/v2/{pid}/datasets/{dataset_id}/samples")
 async def add_samples(request: Request, pid: str, dataset_id: str):
+    """Add samples to a dataset: the data files to label."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -575,6 +604,7 @@ async def add_samples(request: Request, pid: str, dataset_id: str):
 
 @router.get("/v2/{pid}/datasets/{dataset_id}/samples")
 async def list_samples(request: Request, pid: str, dataset_id: str):
+    """List a dataset's samples with their labels."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -586,6 +616,7 @@ async def list_samples(request: Request, pid: str, dataset_id: str):
 
 @router.post("/v2/{pid}/datasets/{dataset_id}/import-tasks")
 async def create_import_task(request: Request, pid: str, dataset_id: str):
+    """Start an import task: pull data from OBS into the dataset (async)."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -612,6 +643,7 @@ async def create_import_task(request: Request, pid: str, dataset_id: str):
 
 @router.get("/v2/{pid}/datasets/{dataset_id}/import-tasks")
 async def list_import_tasks(request: Request, pid: str, dataset_id: str):
+    """List a dataset's import tasks with progress."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -623,6 +655,7 @@ async def list_import_tasks(request: Request, pid: str, dataset_id: str):
 
 @router.delete("/v2/{pid}/datasets/{dataset_id}/versions/{version_id}")
 async def delete_dataset_version(request: Request, pid: str, dataset_id: str, version_id: str):
+    """Delete a dataset version."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -638,6 +671,7 @@ async def delete_dataset_version(request: Request, pid: str, dataset_id: str, ve
 
 @router.post("/v2/{pid}/datasets/{dataset_id}/export-tasks")
 async def create_export_task(request: Request, pid: str, dataset_id: str):
+    """Start an export task: write the dataset to OBS (async)."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -664,6 +698,7 @@ async def create_export_task(request: Request, pid: str, dataset_id: str):
 
 @router.get("/v2/{pid}/datasets/{dataset_id}/export-tasks")
 async def list_export_tasks(request: Request, pid: str, dataset_id: str):
+    """List a dataset's export tasks with progress."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:
@@ -675,6 +710,7 @@ async def list_export_tasks(request: Request, pid: str, dataset_id: str):
 
 @router.put("/v2/{pid}/datasets/{dataset_id}")
 async def update_dataset(request: Request, pid: str, dataset_id: str):
+    """Update a dataset's description or source."""
     s = request.app.state.sim
     d = getattr(s, "ma_datasets", {}).get(dataset_id)
     if not d or d["project_id"] != pid:

@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/instances")
 async def create_dms_instance(request: Request, pid: str):
+    """Create a DMS Kafka/RabbitMQ instance (async: takes minutes)."""
     s = request.app.state.sim
     if not hasattr(s, "dms_instances"): s.dms_instances = {}
     body = await request.json()
@@ -22,12 +23,14 @@ async def create_dms_instance(request: Request, pid: str):
 
 @router.get("/v2/{pid}/instances")
 async def list_dms_instances(request: Request, pid: str):
+    """List DMS instances."""
     s = request.app.state.sim
     instances = [i for i in getattr(s, "dms_instances", {}).values() if i["project_id"] == pid]
     return {"instances": instances, "total": len(instances)}
 
 @router.get("/v2/{pid}/instances/{instance_id}")
 async def show_dms_instance(request: Request, pid: str, instance_id: str):
+    """Show one instance: its engine, brokers, and endpoints."""
     s = request.app.state.sim
     i = getattr(s, "dms_instances", {}).get(instance_id)
     if not i or i["project_id"] != pid:
@@ -36,6 +39,7 @@ async def show_dms_instance(request: Request, pid: str, instance_id: str):
 
 @router.delete("/v2/{pid}/instances/{instance_id}")
 async def delete_dms_instance(request: Request, pid: str, instance_id: str):
+    """Delete a DMS instance (async)."""
     s = request.app.state.sim
     if instance_id not in getattr(s, "dms_instances", {}):
         return JSONResponse({"error_msg": "Instance not found", "error_code": "DMS.0001"}, status_code=404)
@@ -44,6 +48,7 @@ async def delete_dms_instance(request: Request, pid: str, instance_id: str):
 
 @router.post("/v2/{pid}/instances/{instance_id}/topics")
 async def create_topic(request: Request, pid: str, instance_id: str):
+    """Create a topic on a Kafka instance: partitions and replicas."""
     s = request.app.state.sim
     inst = getattr(s, "dms_instances", {}).get(instance_id)
     if not inst or inst.get("project_id") != pid:
@@ -57,6 +62,7 @@ async def create_topic(request: Request, pid: str, instance_id: str):
 
 @router.get("/v2/{pid}/instances/{instance_id}/topics")
 async def list_dms_topics(request: Request, pid: str, instance_id: str):
+    """List the topics of a Kafka instance."""
     s = request.app.state.sim
     inst = getattr(s, "dms_instances", {}).get(instance_id)
     if not inst or inst.get("project_id") != pid:

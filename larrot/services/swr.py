@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.post("/v2/{pid}/namespaces")
 async def create_namespace(request: Request, pid: str):
+    """Create an SWR namespace: the organization for container images."""
     s = request.app.state.sim
     if not hasattr(s, "swr_namespaces"): s.swr_namespaces = {}
     body = await request.json()
@@ -18,12 +19,14 @@ async def create_namespace(request: Request, pid: str):
 
 @router.get("/v2/{pid}/namespaces")
 async def list_namespaces(request: Request, pid: str):
+    """List namespaces."""
     s = request.app.state.sim
     namespaces = [n for n in getattr(s, "swr_namespaces", {}).values() if n["project_id"] == pid]
     return {"namespaces": [n["name"] for n in namespaces], "total": len(namespaces)}
 
 @router.get("/v2/{pid}/namespaces/{namespace}/repos")
 async def list_repos(request: Request, pid: str, namespace: str):
+    """List an organization's image repositories."""
     s = request.app.state.sim
     repos = [r for r in getattr(s, "swr_repos", {}).values()
              if r["project_id"] == pid and r["namespace"] == namespace]
@@ -31,6 +34,7 @@ async def list_repos(request: Request, pid: str, namespace: str):
 
 @router.post("/v2/{pid}/namespaces/{namespace}/repos")
 async def create_repo(request: Request, pid: str, namespace: str):
+    """Create an image repository inside a namespace."""
     s = request.app.state.sim
     if not hasattr(s, "swr_repos"):
         s.swr_repos = {}
@@ -54,6 +58,7 @@ async def create_repo(request: Request, pid: str, namespace: str):
 
 @router.get("/v2/{pid}/namespaces/{namespace}/repos/{repo}")
 async def show_repo(request: Request, pid: str, namespace: str, repo: str):
+    """Show one repository: its size, and pull count."""
     s = request.app.state.sim
     r = next((x for x in getattr(s, "swr_repos", {}).values()
               if x["project_id"] == pid and x["namespace"] == namespace
@@ -66,6 +71,7 @@ async def show_repo(request: Request, pid: str, namespace: str, repo: str):
 
 @router.get("/v2/{pid}/namespaces/{namespace}/repos/{repo}/tags")
 async def list_image_tags(request: Request, pid: str, namespace: str, repo: str):
+    """List an image's tags with their digests and sizes."""
     s = request.app.state.sim
     repo_obj = next((r for r in getattr(s, "swr_repos", {}).values()
                      if r["project_id"] == pid and r["namespace"] == namespace
@@ -77,6 +83,7 @@ async def list_image_tags(request: Request, pid: str, namespace: str, repo: str)
 
 @router.delete("/v2/{pid}/namespaces/{namespace}/repos/{repo}")
 async def delete_repo(request: Request, pid: str, namespace: str, repo: str):
+    """Delete an image repository."""
     s = request.app.state.sim
     rid = next((k for k, r in getattr(s, "swr_repos", {}).items()
                 if r["project_id"] == pid and r["namespace"] == namespace

@@ -33,6 +33,7 @@ def _host_json(s, server, pid):
 
 @router.get("/v5/{pid}/hosts")
 async def list_hosts(request: Request, pid: str):
+    """List HSS hosts: every ECS appears with its agent and protection status."""
     s = request.app.state.sim
     servers = [x for x in s.servers.values() if x["project_id"] == pid]
     hosts = [_host_json(s, x, pid) for x in servers]
@@ -41,6 +42,7 @@ async def list_hosts(request: Request, pid: str):
 
 @router.get("/v5/{pid}/hosts/{host_id}")
 async def show_host(request: Request, pid: str, host_id: str):
+    """Show one host: agent status, protection version, and asset value."""
     s = request.app.state.sim
     server = s.servers.get(host_id)
     if not server or server["project_id"] != pid:
@@ -70,6 +72,7 @@ async def set_protection(request: Request, pid: str, host_id: str):
 
 @router.get("/v5/{pid}/policy")
 async def list_policies(request: Request, pid: str):
+    """List protection policies: ransomware and baseline check configurations."""
     s = request.app.state.sim
     policies = [p for p in getattr(s, "hss_policies", {}).values()
                 if p["project_id"] == pid]
@@ -78,6 +81,7 @@ async def list_policies(request: Request, pid: str):
 
 @router.post("/v5/{pid}/policy")
 async def create_policy(request: Request, pid: str):
+    """Create a protection policy: which hosts get which protection."""
     s = request.app.state.sim
     if not hasattr(s, "hss_policies"):
         s.hss_policies = {}
@@ -95,6 +99,7 @@ async def create_policy(request: Request, pid: str):
 
 @router.get("/v5/{pid}/alarm-events")
 async def list_alarms(request: Request, pid: str):
+    """List HSS alarm events: intrusion and anomaly detections."""
     s = request.app.state.sim
     alarms = [a for a in getattr(s, "hss_alarms", {}).values()
               if a["project_id"] == pid]
@@ -122,6 +127,7 @@ async def create_alarm_event(request: Request, pid: str):
 
 @router.get("/v5/{pid}/vulnerabilities")
 async def list_vulnerabilities(request: Request, pid: str):
+    """List the vulnerabilities found on hosts with severities."""
     s = request.app.state.sim
     vulns = [v for v in getattr(s, "hss_vulns", {}).values() if v["project_id"] == pid]
     return {"total": len(vulns), "data_list": vulns}
@@ -148,6 +154,7 @@ async def scan_vulnerabilities(request: Request, pid: str):
 
 @router.get("/v5/{pid}/quotas")
 async def hss_quotas(request: Request, pid: str):
+    """Show HSS quotas: how many hosts can be protected."""
     s = request.app.state.sim
     hosts = len([x for x in s.servers.values() if x["project_id"] == pid])
     return {"total": 1000, "used": hosts, "version": "hsp"}
