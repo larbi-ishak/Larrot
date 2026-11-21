@@ -4,7 +4,7 @@ Every operation Larrot serves, grouped by service. This page is
 generated from the OpenAPI spec by `tools/gen_coverage.py` and
 enforced by a test - it cannot drift from the code.
 
-**66 services - 738 operations**
+**66 services - 741 operations**
 
 ## AOM (5)
 
@@ -57,12 +57,15 @@ enforced by a test - it cannot drift from the code.
 - `POST` `/v1/{pid}/scaling_policy/{policy_id}/execute`
 - `POST` `/v1/{pid}/scaling_policy`
 
-## Anti-DDoS (4)
+## Anti-DDoS (7)
 
+- `DELETE` `/v1/{pid}/antiddos/{floating_ip_id}`
 - `GET` `/v1/{pid}/antiddos/default`
 - `GET` `/v1/{pid}/antiddos/status`
+- `GET` `/v1/{pid}/antiddos/{floating_ip_id}`
 - `POST` `/v1/{pid}/antiddos/default`
 - `POST` `/v1/{pid}/antiddos/enable`
+- `POST` `/v1/{pid}/antiddos/{floating_ip_id}`
 
 ## BMS (8)
 
