@@ -90,10 +90,11 @@ logger = logging.getLogger("larrot")
 
 def create_app() -> FastAPI:
     """Create the REST app (port 8200)."""
+    from . import __version__
     app = FastAPI(
         title="Larrot",
         description="Larrot repeats Huawei Cloud. A local Huawei Cloud API simulator: LocalStack, but for Huawei Cloud",
-        version="1.0.0",
+        version=__version__,
         # Custom branded docs: /docs wraps /docs/swagger with the shared navbar
         docs_url=None,
         redoc_url="/redoc",
@@ -203,14 +204,17 @@ def create_app() -> FastAPI:
     # Middleware (outermost first: rate limit → signature → logging)
     app.middleware("http")(gateway_middleware)
 
-    # Fallback: unknown paths → APIGW.0101
+    # Fallback: unknown paths → APIGW.0101 + near-miss route hints
     @app.exception_handler(404)
     async def not_found_handler(request, exc):
-        return JSONResponse(
-            apigw_error("APIGW.0101",
-                        "The API does not exist or has not been published in the environment."),
-            status_code=404,
-        )
+        from .core.nearmiss import near_misses
+        hints = near_misses(app, request.method, request.url.path)
+        request.state.near_misses = hints
+        body = apigw_error(
+            "APIGW.0101",
+            "The API does not exist or has not been published in the environment.")
+        body["near_matches"] = hints
+        return JSONResponse(body, status_code=404)
 
     # Web dashboard + console
     from fastapi.responses import FileResponse, HTMLResponse
@@ -292,6 +296,88 @@ def create_app() -> FastAPI:
             return JSONResponse({"error": "no saved state"}, status_code=404)
         load_state(state, path)
         return {"loaded": path}
+
+    # ------------------------------------------------------------------
+    # Admin platform: reset, request journal, determinism, state forcing
+    # ------------------------------------------------------------------
+    @app.post("/admin/reset", include_in_schema=False)
+    async def admin_reset():
+        """Wipe every store and engine while the server keeps running."""
+        from .core.chaos import ChaosEngine
+        from .core import determinism
+        fresh = SimState()
+        fresh.chaos = ChaosEngine()
+        fresh.jobs.chaos = fresh.chaos
+        old_journal = state.journal
+        fresh.journal = old_journal
+        for key, val in vars(fresh).items():
+            setattr(state, key, val)
+        determinism.unseed()
+        old_journal.clear()
+        return {"reset": True, "stores": len(vars(fresh))}
+
+    @app.get("/admin/requests", include_in_schema=False)
+    async def admin_requests(request: Request):
+        """Query the request journal (newest first)."""
+        p = request.query_params
+        status = int(p["status"]) if p.get("status") else None
+        matched = None
+        if p.get("matched") is not None:
+            matched = p.get("matched").lower() == "true"
+        return {
+            "total": state.journal.total,
+            "entries": state.journal.query(
+                method=p.get("method"), path=p.get("path"), status=status,
+                limit=int(p.get("limit", 100)), matched=matched),
+        }
+
+    @app.delete("/admin/requests", include_in_schema=False)
+    async def admin_requests_clear():
+        return {"cleared": state.journal.clear()}
+
+    @app.post("/admin/seed", include_in_schema=False)
+    async def admin_seed(request: Request):
+        """Seed the ID generator: POST /admin/seed?a=42 -> deterministic IDs."""
+        from .core import determinism
+        raw = request.query_params.get("a")
+        if raw is None:
+            try:
+                body = await request.json()
+                raw = body.get("a")
+            except Exception:
+                raw = None
+        if raw is None:
+            return JSONResponse(
+                {"error": "missing seed: use ?a=<int>"},
+                status_code=400)
+        determinism.seed(int(raw))
+        return {"seeded": int(raw)}
+
+    @app.get("/admin/seed", include_in_schema=False)
+    async def admin_seed_show():
+        from .core import determinism
+        return {"seed": determinism.current_seed()}
+
+    @app.put("/admin/state/{rid}", include_in_schema=False)
+    async def admin_force_state(rid: str, request: Request):
+        """Force a resource into any state without waiting for side effects."""
+        from .core import explorer
+        hit = explorer.find(state, rid)
+        if not hit:
+            return JSONResponse({"error": "resource not found"}, status_code=404)
+        attr, rtype, raw = explorer._raw(state, rid)
+        status_key = "status"
+        for row_attr, _t, _idk, _nk, _pk, statk in explorer.RESOURCE_TYPES:
+            if row_attr == attr and statk:
+                status_key = statk
+                break
+        body = await request.json()
+        if "status" in body:
+            raw[status_key] = body["status"]
+        for k, v in (body.get("set") or {}).items():
+            raw[k] = v
+        return {"id": rid, "type": rtype, "status": raw.get(status_key),
+                "raw": raw}
 
     # ------------------------------------------------------------------
     # Chaos fault injection (ROADMAP 1.2)
