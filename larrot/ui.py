@@ -36,7 +36,8 @@ def navbar(active: str = "") -> str:
     for key, href, label in links:
         cls = ' class="active"' if key == active else ""
         tgt = ' target="_blank"' if href.startswith("http") else ""
-        nav_html += f'<a href="{href}"{cls}{tgt}>{label}</a>'
+        ext = ' <span class="ext">&#8599;</span>' if href.startswith("http") else ""
+        nav_html += f'<a href="{href}"{cls}{tgt}>{label}{ext}</a>'
     return f"""
 <header class="topbar">
   <div class="logo">
@@ -64,8 +65,8 @@ def api_docs_html() -> str:
 <style>
 {SHARED_CSS}
   html, body {{ height: 100%; overflow: hidden; }}
-  .docs-frame {{ position: fixed; top: 48px; left: 0; right: 0; bottom: 0;
-                  width: 100%; height: calc(100vh - 48px); border: none; }}
+  .docs-frame {{ position: fixed; top: var(--topbar-h); left: 0; right: 0; bottom: 0;
+                  width: 100%; height: calc(100vh - var(--topbar-h)); border: none; }}
 </style>
 </head>
 <body>
@@ -107,6 +108,7 @@ SHARED_CSS = """
     --warn: #d97706; --warn-bg: #fffbeb;
     --err: #dc2626; --err-bg: #fef2f2;
     --blue: #2563eb; --blue-bg: #eff6ff;
+    --topbar-h: 52px;
   }
   * { margin: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -115,27 +117,49 @@ SHARED_CSS = """
 
   /* ===== topbar ===== */
   .topbar { background: #fff; border-bottom: 1px solid var(--card-border);
-            padding: 0 24px; height: 48px; display: flex; align-items: center;
-            gap: 12px; position: sticky; top: 0; z-index: 50; }
-  .topbar .logo { display: flex; align-items: center; gap: 8px; }
-  .topbar .logo img { width: 28px; height: 28px; }
+            box-shadow: 0 1px 2px rgba(16,18,20,.04);
+            padding: 0 28px; height: var(--topbar-h); display: flex; align-items: center;
+            gap: 12px; position: sticky; top: 0; z-index: 50;
+            animation: topbarIn .35s ease-out both; }
+  @keyframes topbarIn { from { opacity: 0; transform: translateY(-6px); }
+                        to { opacity: 1; transform: translateY(0); } }
+  .topbar .logo { display: flex; align-items: center; gap: 9px; }
+  .topbar .logo img { width: 28px; height: 28px;
+                      transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+  .topbar .logo:hover img { transform: scale(1.12) rotate(-6deg); }
   .topbar .logo .name { font-size: 15px; font-weight: 700; line-height: 1.1;
+                          letter-spacing: -.2px;
                           background: linear-gradient(135deg, #ff4757, #e60012);
                           -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .topbar .logo .sub { font-size: 9px; color: var(--text-faint); line-height: 1.2;
-                        letter-spacing: .3px; }
+  .topbar .logo .sub { font-size: 9.5px; color: var(--text-dim); line-height: 1.2;
+                        letter-spacing: .8px; text-transform: uppercase; }
   .topbar .spacer { flex: 1; }
   .topbar .region { background: var(--accent-bg); color: var(--accent);
-                    padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+                    padding: 4px 12px; border-radius: 999px; font-size: 10.5px;
+                    font-weight: 600; letter-spacing: .3px; }
   .topbar nav { display: flex; gap: 2px; }
-  .topbar nav a { color: var(--text-dim); text-decoration: none; font-size: 12px;
-                  padding: 5px 10px; border-radius: 4px; }
-  .topbar nav a:hover { background: var(--bg); color: var(--text); }
-  .topbar nav a.active { color: var(--accent); background: var(--accent-bg); }
+  .topbar nav a { position: relative; color: var(--text-dim); text-decoration: none;
+                  font-size: 12.5px; font-weight: 500; letter-spacing: .2px;
+                  padding: 6px 12px; border-radius: 6px;
+                  transition: color .18s ease; }
+  .topbar nav a::after { content: ''; position: absolute; left: 12px; right: 12px;
+                          bottom: 3px; height: 2px; border-radius: 2px;
+                          background: var(--accent); opacity: 1;
+                          transform: scaleX(0); transform-origin: center;
+                          transition: transform .22s cubic-bezier(.4,0,.2,1), opacity .18s ease; }
+  .topbar nav a:hover { color: var(--text); }
+  .topbar nav a:hover::after { transform: scaleX(1); opacity: .55; }
+  .topbar nav a.active { color: var(--accent); }
+  .topbar nav a.active::after { transform: scaleX(1); opacity: 1; }
+  .topbar nav a .ext { font-size: 9.5px; opacity: .7; }
+  @media (prefers-reduced-motion: reduce) {
+    .topbar, .topbar .logo img, .topbar nav a, .topbar nav a::after {
+      animation: none; transition: none; }
+  }
 
   /* ===== sidebar ===== */
   .sidebar { width: 230px; background: var(--sidebar-bg); color: var(--sidebar-text);
-              display: flex; flex-direction: column; position: fixed; top: 48px; bottom: 0;
+              display: flex; flex-direction: column; position: fixed; top: var(--topbar-h); bottom: 0;
               left: 0; overflow-y: auto; z-index: 100; }
   .sidebar-nav { padding: 10px 0 6px; flex: 1; }
   .nav-group { margin-bottom: 2px; }
@@ -155,8 +179,8 @@ SHARED_CSS = """
   .sidebar-footer a:hover { color: #fff; }
 
   /* ===== main content area (with sidebar offset) ===== */
-  .main-with-sidebar { margin-left: 230px; padding-top: 48px; }
-  .main-no-sidebar { padding-top: 48px; }
+  .main-with-sidebar { margin-left: 230px; padding-top: var(--topbar-h); }
+  .main-no-sidebar { padding-top: var(--topbar-h); }
 
   /* ===== panels ===== */
   .panel { background: var(--card-bg); border: 1px solid var(--card-border);
