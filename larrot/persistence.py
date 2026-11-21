@@ -18,7 +18,7 @@ logger = logging.getLogger("larrot")
 STATE_VERSION = 1
 
 # Engine objects are rebuilt on start; only resource stores survive.
-SKIP_ATTRS = {"jobs", "limiter", "chaos", "profile_default"}
+SKIP_ATTRS = {"jobs", "limiter", "chaos", "profile_default", "journal"}
 
 DEFAULT_PATH = os.path.join("~", ".larrot", "state.json")
 

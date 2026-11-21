@@ -34,6 +34,7 @@ jobs:
           cp ARCHITECTURE.md  docs/architecture.md
           cp COVERAGE.md      docs/coverage.md
           cp CONFORMANCE_REPORT.md docs/conformance.md
+          cp SDK_COVERAGE.md  docs/sdk-coverage.md
           cp CONTRIBUTING.md  docs/contributing.md
           cp docs/ARCHITECTURES.md      docs/architectures.md
           cp docs/EXAMPLES.md           docs/examples.md

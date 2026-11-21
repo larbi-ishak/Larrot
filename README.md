@@ -148,6 +148,39 @@ One line starts Larrot for the rest of the job, with
 `HUAWEICLOUD_SDK_AK/SK`, `HW_REGION_NAME`, and `HW_PROJECT_ID` exported
 for the SDKs and Terraform.
 
+### Admin platform (for tests and agents)
+
+| Endpoint | What it does |
+|---|---|
+| `POST /admin/reset` | Wipe every resource and engine; the server keeps running |
+| `POST /admin/seed?a=42` | Deterministic resource IDs for reproducible tests |
+| `GET /admin/requests` | Request journal: verify what your client actually sent |
+| `PUT /admin/state/{rid}` | Force any resource into any state instantly |
+| `GET /admin/requests?status=404` | 404s include `near_matches`: the closest real routes |
+
+Every response carries `x-larrot` (the simulator version) and a
+generated `X-Request-Id`.
+
+### For coding agents
+
+- **`larrot mcp`** - the whole admin platform as MCP tools
+  (`pip install larrot[agent]`): status, reset, seed, presets, resources,
+  chaos, journal, state forcing
+- **`AGENTS.md`** - the repo guide for agents (architecture, tasks, rules)
+- **`docs/llms.txt`** - machine-readable docs index
+- **`larrot new-service <name>`** - scaffold a new service: module,
+  tests, and router registration in one command
+
+### Testcontainers
+
+```python
+from larrot.testcontainers import LarrotContainer
+
+with LarrotContainer() as c:      # pip install larrot[testcontainers]
+    endpoint = c.get_endpoint()  # http://172.17.0.2:8200
+    ak, sk = c.access_key, c.secret_key
+```
+
 ## End-to-end with the official SDKs
 
 This example runs **unmodified** against Larrot using the official

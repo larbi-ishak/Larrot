@@ -98,6 +98,21 @@ jobs:
           curl -fsS "$LARROT_ENDPOINT/health" | grep -q '"ok"'
           curl -fsS "$LARROT_ENDPOINT/v3/projects" | grep -q "ap-southeast-1"
 
+  testcontainers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install .[testcontainers] .[dev] fastapi uvicorn pydantic httpx
+      - name: Build the Docker image
+        run: docker build -t larrot:latest .
+      - name: Run LarrotContainer tests
+        run: |
+          PYTHONPATH=. python -m pytest tests/test_testcontainers.py -v --tb=short
+
   docker:
     runs-on: ubuntu-latest
     steps:

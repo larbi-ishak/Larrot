@@ -144,6 +144,14 @@ def main():
     proxy_p.add_argument("--obs-port", type=int, default=8201)
     proxy_p.add_argument("--host", default="127.0.0.1")
 
+    # mcp (optional: pip install larrot[agent])
+    mcp_p = sub.add_parser("mcp", help="run the MCP server for coding agents (needs larrot[agent])")
+    mcp_p.add_argument("--endpoint", default=None, help="Larrot endpoint to control")
+
+    # scaffolder
+    ns_p = sub.add_parser("new-service", help="scaffold a new service module + tests")
+    ns_p.add_argument("name", help="service name, e.g. geminidb")
+
     # ecs
     ecs_p = sub.add_parser("ecs")
     ecs_sub = ecs_p.add_subparsers(dest="action", required=True)
@@ -227,6 +235,26 @@ def _dispatch(c, args):
         from .proxy import run_proxy
         run_proxy(listen_port=args.port, rest_port=args.rest_port,
                   obs_port=args.obs_port, listen_host=args.host)
+        return
+
+    if args.cmd == "mcp":
+        from .mcp_server import main as mcp_main
+        mcp_main(endpoint=args.endpoint)
+        return
+
+    if args.cmd == "new-service":
+        from .scaffold import scaffold_service
+        report = scaffold_service(args.name, root=".")
+        print(f"created {report['module']}")
+        print(f"created {report['tests']}")
+        if report["registered"]:
+            print("registered in larrot/app.py")
+        else:
+            print("registration needs manual steps:")
+            for step in report["instructions"]:
+                print(f"  - {step}")
+        print("next: replace scaffold paths/shapes with the real API, "
+              "then regenerate docs/coverage.py (tools/gen_coverage.py)")
         return
 
     if args.cmd == "projects":

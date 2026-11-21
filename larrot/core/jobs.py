@@ -11,12 +11,18 @@ from typing import Any
 
 
 def new_id() -> str:
-    """Hyphenated UUID v4: resource IDs."""
+    """Hyphenated UUID v4: resource IDs (deterministic when seeded)."""
+    from . import determinism
+    if determinism.current_seed() is not None:
+        return determinism.seeded_id()
     return str(uuid.uuid4())
 
 
 def new_job_id() -> str:
     """32-char hex: job IDs (real ones look like ff80808288d41e1b018990260955686a)."""
+    from . import determinism
+    if determinism.current_seed() is not None:
+        return determinism.seeded_job_id()
     return uuid.uuid4().hex
 
 

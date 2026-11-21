@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from larrot.app import create_app  # noqa: E402
 
-OUT = os.path.join(os.path.dirname(__file__), "..", "docs", "coverage.md")
+OUT = os.path.join(os.path.dirname(__file__), "..", "COVERAGE.md")
 
 
 def generate() -> str:

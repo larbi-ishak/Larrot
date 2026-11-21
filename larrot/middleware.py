@@ -1,7 +1,8 @@
-"""Gateway middleware: rate limit, chaos injection, signature verify, logging."""
+"""Gateway middleware: rate limit, chaos injection, signature verify, logging, journal."""
 
 import asyncio
 import logging
+import time
 
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
@@ -47,6 +48,7 @@ def _iam_error(check) -> JSONResponse:
 async def gateway_middleware(request: Request, call_next) -> Response:
     """Applied to all REST routes. OBS has its own middleware."""
     state = request.app.state.sim
+    _t0 = time.perf_counter()
 
     # Flatten headers for the verifier
     headers = [(k.lower(), v) for k, v in request.headers.items()]
@@ -110,7 +112,25 @@ async def gateway_middleware(request: Request, call_next) -> Response:
         return _iam_error(check)
 
     response = await call_next(request)
-    response.headers["X-Request-Id"] = request.headers.get("X-Request-Id", "")
+
+    # --- Response identity + request journal ---
+    duration_ms = (time.perf_counter() - _t0) * 1000
+    from .core.jobs import new_request_id
+    rid = request.headers.get("X-Request-Id") or new_request_id()
+    response.headers["X-Request-Id"] = rid
+    response.headers["x-larrot"] = request.app.version
+
+    journal = getattr(state, "journal", None)
+    if journal is not None and not request.url.path.startswith(
+            ("/admin", "/health", "/metrics", "/docs", "/console",
+             "/openapi", "/redoc", "/favicon")):
+        journal.record(
+            method=request.method, path=request.url.path,
+            status=response.status_code, duration_ms=round(duration_ms, 1),
+            request_id=rid,
+            matched=response.status_code != 404,
+            near_misses=getattr(request.state, "near_misses", []),
+        )
     return response
 
 

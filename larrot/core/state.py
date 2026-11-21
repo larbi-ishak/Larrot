@@ -17,6 +17,10 @@ class SimState:
         # accept: log signature mismatches, never reject (default).
         # enforce: reject with Huawei's APIGW auth errors (SIM_IAM=enforce).
         self.iam_mode = os.environ.get("SIM_IAM", "accept").lower()
+        # Request journal: bounded, in-memory, queryable via /admin/requests
+        from .journal import RequestJournal
+        self.journal = RequestJournal(
+            int(os.environ.get("SIM_JOURNAL_SIZE", "1000")))
 
         # Account
         self.account = {

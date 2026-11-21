@@ -1,0 +1,48 @@
+# Larrot
+
+> Larrot repeats Huawei Cloud. A local Huawei Cloud API simulator:
+> LocalStack, but for Huawei Cloud. 66 services, 738 operations,
+> Apache-2.0, no account required.
+
+Larrot runs the Huawei Cloud REST and OBS APIs on localhost so you can
+develop and test cloud clients, IaC, and coding agents without an
+account, latency, or a bill. Official SDKs and the Terraform provider
+work unchanged.
+
+## Quickstart
+
+```bash
+pip install larrot
+larrot-server          # REST on :8200, OBS on :8201
+```
+
+Point any Huawei SDK at `http://127.0.0.1:8200` with AK
+`HWYSIMAK00000001` / SK `HWYSIMSK00000001`, or use the GitHub Action
+(`larbi-ishak/Larrot@v1`), or `larrot proxy` for zero client config.
+
+## Docs
+
+- [Home](https://larbi-ishak.github.io/Larrot/): overview and quickstart
+- [Catalog](https://larbi-ishak.github.io/Larrot/catalog/): the 66 simulated services
+- [Coverage](https://larbi-ishak.github.io/Larrot/coverage/): every operation, generated from the OpenAPI spec
+- [Conformance](https://larbi-ishak.github.io/Larrot/conformance/): per-service compatibility scorecard
+- [Architecture](https://larbi-ishak.github.io/Larrot/architecture/): how the simulator is built
+- [Examples](https://larbi-ishak.github.io/Larrot/examples/): end-to-end SDK walkthroughs
+- [Contributing](https://larbi-ishak.github.io/Larrot/contributing/): adding services and operations
+
+## Admin platform
+
+- `POST /admin/reset` — wipe all state, server keeps running
+- `POST /admin/seed?a=42` — deterministic resource IDs
+- `GET /admin/requests` — request journal (what the client actually sent)
+- `PUT /admin/state/{rid}` — force any resource state instantly
+- `POST /admin/chaos` — inject failures per service
+- `larrot mcp` — all of the above as MCP tools for coding agents
+- `SIM_IAM=enforce` — reject unsigned requests with real APIGW errors
+- `SIM_PERSIST=1` — keep state across restarts
+
+## Repo
+
+- Source: https://github.com/larbi-ishak/Larrot
+- PyPI: https://pypi.org/project/larrot/
+- License: Apache 2.0. Not affiliated with Huawei.

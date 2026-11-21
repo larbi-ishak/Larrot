@@ -40,6 +40,7 @@ nav:
   - Examples: examples.md
   - Coverage: coverage.md
   - Conformance: conformance.md
+  - SDK coverage: sdk-coverage.md
   - Progress: progress.md
   - Empirical spec: empirical-spec.md
   - API research: api-docs-research.md
